@@ -6,6 +6,7 @@
 #include <otawa/prog/WorkSpace.h>
 #include <otawa/proc/DynProcessor.h>  
 #include <otawa/cfg/Dominance.h>
+#include <otawa/proc/DynFeature.h>   
 
 //includes pour l'affichage du CFG
 #include <otawa/display/CFGDrawer.h>
@@ -13,11 +14,28 @@
 
 using namespace otawa; //comme import
 
+
+
 int main(void) {
+	WorkSpace *ws = NULL;
+	PropList conf;
+	Manager manager;
+	NO_SYSTEM(conf) = true;
+	TASK_ENTRY(conf) = "_start";
+	VERBOSE(conf) = true;
+
+	ws = manager.load("./binaire", conf);
+	ws->require(DynFeature("otawa::cftree::EXTRACTED_CFT_FEATURE"), conf);
+}
+
+
+
+int old_main(void) {
 	/* otawa:: */ WorkSpace *ws = NULL;
 	PropList conf;
 	Manager manager;
 
+	// set certaines options dans PropList
 	NO_SYSTEM(conf) = true;
 	TASK_ENTRY(conf) = "_start";
 	VERBOSE(conf) = true;
