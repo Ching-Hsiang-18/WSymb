@@ -1,0 +1,64 @@
+digraph main {
+	graph [bb="0,0,772,948",
+		label="_start CFG\l",
+		lheight=0.21,
+		lp="386,11.5",
+		lwidth=1.10
+	];
+	node [label="\N"];
+	Node0	 [height=0.51389,
+		label="{ entry}",
+		pos="385.5,929.5",
+		shape=Mrecord,
+		width=0.76389];
+	Node1	 [height=3.0972,
+		label="{ BB 1 (00008000)\l|\l_start:\l0x00008000:  str fp, [sp, #-4]!\l0x00008004:  add fp, sp, #0\l0x00008008:  sub sp, sp, #12\l0x0000800c:  \
+ldr r3, [fp, #-8]\l0x00008010:  cmp r3, #0\l0x00008014:  ble 8028\l|\lotawa::cftree:DAG_BNODE = 0000000002163da0\lotawa::REVERSE_\
+DOM = \{0, 1\}\l\l}",
+		pos="385.5,731.5",
+		shape=Mrecord,
+		width=5.2361];
+	Node0 -> Node1	 [label="\l\l",
+		lp="385.5,877",
+		pos="e,385.5,842.77 385.5,911.45 385.5,897.35 385.5,875.95 385.5,852.79",
+		style=dashed];
+	Node2	 [height=2.2639,
+		label="{ BB 2 (00008028)\l|\l0x00008028:  ldr r3, [fp, #-8]\l0x0000802c:  sub r3, r3, #1\l0x00008030:  str r3, [fp, #-8]\l|\lotawa::cftree:\
+DAG_BNODE = 0000000002163e50\lotawa::REVERSE_DOM = \{0, 1, 2\}\l\l}",
+		pos="188.5,463",
+		shape=Mrecord,
+		width=5.2361];
+	Node1 -> Node2	 [label="taken\l\l",
+		lp="308,586",
+		pos="e,247.74,544.14 303.95,620.18 287.24,597.58 269.87,574.07 253.82,552.36"];
+	Node3	 [height=2.4722,
+		label="{ BB 3 (00008018)\l|\l0x00008018:  ldr r3, [fp, #-8]\l0x0000801c:  add r3, r3, #1\l0x00008020:  str r3, [fp, #-8]\l0x00008024:  \
+b 8034\l|\lotawa::cftree:DAG_BNODE = 0000000002163ed0\lotawa::REVERSE_DOM = \{0, 1, 3\}\l\l}",
+		pos="583.5,463",
+		shape=Mrecord,
+		width=5.2361];
+	Node1 -> Node3	 [label="\l\l",
+		lp="501.5,586",
+		pos="e,518.21,551.88 467.46,620.18 482.26,600.26 497.59,579.63 512.06,560.15"];
+	Node4	 [height=2.4722,
+		label="{ BB 4 (00008034)\l|\l0x00008034:  mov r0, r3\l0x00008038:  add sp, fp, #0\l0x0000803c:  ldmia sp!, \{fp\}\l0x00008040:  bx lr\l|\lotawa::\
+cftree:DAG_BNODE = 0000000002163fa0\lotawa::REVERSE_DOM = \{0, 1, 4\}\l\l}",
+		pos="432.5,217",
+		shape=Mrecord,
+		width=5.1806];
+	Node2 -> Node4	 [label="\l\l",
+		lp="325.5,340",
+		pos="e,344.64,305.86 268.73,381.77 290.67,359.83 314.65,335.85 337.33,313.17"];
+	Node3 -> Node4	 [label="taken\l\l",
+		lp="537,340",
+		pos="e,486.83,305.79 529.2,374.26 517.19,354.86 504.41,334.2 492.2,314.47"];
+	Node5	 [height=0.51389,
+		label="{ exit}",
+		pos="432.5,41.5",
+		shape=Mrecord,
+		width=0.75];
+	Node4 -> Node5	 [label="\l\l",
+		lp="432.5,94",
+		pos="e,432.5,59.583 432.5,128.49 432.5,107.14 432.5,85.851 432.5,69.797",
+		style=dashed];
+}

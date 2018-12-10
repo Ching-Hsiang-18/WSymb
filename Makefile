@@ -2,13 +2,13 @@ CXXFLAGS=`otawa-config otawa/display --cflags`
 LDLIBS=`otawa-config otawa/display --libs`
 LDLIBS2=`otawa-config otawa/display otawa/cftree --libs`
 
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++11 -O0 -g
 
-all: demo binaire cftree.so
+all: clean demo binaire cftree.so install
 
 test: demo binaire
 	./demo
-	
+
 demo: demo.o
 	$(CXX) -o demo demo.o $(LDLIBS2)
 
@@ -31,6 +31,6 @@ install: cftree.so
 	mkdir -p $(HOME)/.otawa/proc/otawa
 	cp cftree.eld $(HOME)/.otawa/proc/otawa/
 	cp cftree.so $(HOME)/.otawa/proc/otawa/
-        
+
 
 .PHONY: all test clean graph

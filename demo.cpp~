@@ -26,9 +26,6 @@ int main(void) {
 
 	ws = manager.load("./binaire", conf);
 	ws->require(DynFeature("otawa::cftree::EXTRACTED_CFT_FEATURE"), conf);
- 	display::CFGOutput output; // CFGOutput est un processor
- 	output.process(ws, conf);
-
 }
 
 //
