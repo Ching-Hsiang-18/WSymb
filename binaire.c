@@ -4,27 +4,32 @@ void foo() {
 }
 */
 
-int _start(void) {
+void _start(void) {
   int i;
+  int j;
   int k;
-  
-  /*
+
+  k++;
+
   for (i = 0; i < 10; i++) {
-    if (i > 5) {
-      k++;
-      } else { k--; }
-    if (k) return;
+      if (k > 5){
+        k++;
+      }
+      else{
+        k++;
+      }
   }
-  */
-  
-  int y;
-  
-  if (y > 0) {
-    y++;
-    return;
-  } else {
-    y--;
-  }
+  k++;
+
+  // return k;
+
+  // int y;
+
+  // if (y > 0) {
+  //   y++;
+  //   return;
+  // } else {
+  //   y--;
+  // }
 //  foo();
 }
-

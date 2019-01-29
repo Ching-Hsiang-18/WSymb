@@ -40,6 +40,9 @@ class CFTreeLeaf : public CFTree{
 
 };
 
+
+
+
 class CFTreeAlt : public CFTree{
 
 	std::vector<CFTree*> alts;
@@ -103,9 +106,9 @@ class CFTreeSeq : public CFTree{
 class CFTreeLoop : public CFTree{
 
 	BasicBlock *header;
-	CFTree* t1;
+	CFTree* t1; // body
 	int n;
-	CFTree* t2;
+	CFTree* t2; // exit
 
 	virtual CFTreeLoop *toLoop() {
 		return (CFTreeLoop*) this;
@@ -137,6 +140,49 @@ class CFTreeLoop : public CFTree{
 };
 
 
+template <class T>
+class CFTSemantic {
+	virtual T evalAlt(std::vector<T*> *list) = 0;
+	virtual T evalSeq(std::vector<T*> *list) = 0;
+	virtual T evalLoop(T *body, T *exit, BasicBlock *header, int n) = 0;
+	virtual T evalLeaf(BasicBlock *bb) = 0;
+};
+
+template <class T>
+class EvaluateCFT {
+  public:
+	static T evaluate(CFTree *cft, CFTSemantic<T> *sem) {
+	}
+};
+
+
+class NodeCount: public CFTSemantic<int> {
+	virtual int evalAlt(std::vector<int*> *list) {
+		int sum = 0;
+		for (int i = 0; i < list->size(); i++) {
+			sum += *(list->at(i));
+		}
+	}
+	virtual int evalSeq(std::vector<int*> *list) {
+		int sum = 0;
+		for (int i = 0; i < list->size(); i++) {
+			sum += *(list->at(i));
+		}
+	}
+	virtual int evalLoop(int *body, int *exit, BasicBlock *header, int n) {
+		return *body + *exit;
+	}
+	virtual int evalLeaf(BasicBlock *bb) {
+		return 1;
+	}
+};
+
+int countNodes(CFTree *cft) {
+	NodeCount nc;
+	return EvaluateCFT<int>::evaluate(cft, &nc);
+}
+
+
 class DAG {
 	std::vector<DAGNode*> all; // ensemble des noeuds du dag
 	DAGNode *n_start; // le point d'entrée du dag
@@ -164,6 +210,10 @@ class DAG {
 
 	DAGNode *getStart(){
 		return n_start;
+	}
+
+	DAGNode *getElement(unsigned i){
+		return all[i];
 	}
 
 	std::vector<DAGNode*>::const_iterator iter_e(){
@@ -194,16 +244,25 @@ class DAGNode {
 	std::vector<DAGNode*> pred; // les noeuds précédents du sommet
 	std::vector<DAGNode*> succ; // les noeuds suivants du sommet
 
+	DAGNode* dom_start;
+	DAGNode* dom_end;
+	std::vector<DAGNode*> dominators; // les noeuds qui dominent ces noeuds (change selon le start/ end donné en argument au moment de la construction)
+
   public:
 	virtual DAGVNode *toVNode() = 0; /* abstract */
 	virtual DAGHNode *toHNode() = 0;/* abstract */
 	virtual DAGBNode *toBNode() = 0;/* abstract */
+
 	void addSucc(DAGNode *s) {
 		succ.push_back(s);
 	}
 
 	void addPred(DAGNode *s) {
 		pred.push_back(s);
+	}
+
+	void addDomin(DAGNode *s) {
+		dominators.push_back(s);
 	}
 
 	std::vector<DAGNode*>::const_iterator succIter() {
@@ -222,8 +281,20 @@ class DAGNode {
 		return pred.end();
 	}
 
+	std::vector<DAGNode*>::const_iterator dominIter() {
+		return dominators.begin();
+	}
+
+	std::vector<DAGNode*>::const_iterator dominEnd() {
+		return dominators.end();
+	}
+
 	std::vector<DAGNode*> getSucc(){
 		return succ;
+	}
+
+	std::vector<DAGNode*> getPred(){
+		return pred;
 	}
 };
 	// DAGNode *end;
@@ -571,7 +642,7 @@ DAG *toDAG(CFG *cfg, BasicBlock *l_h){
 		}
 	}
 
-	if (l_h != NULL){
+	if (l_h != NULL){ // noeud d'entrée du dag (donc l_h ou null)
 		cout << "J'ajoute start " << endl;
 		DAGBNode *n = DAG_BNODE(l_h);
 		if (n == NULL){
@@ -579,10 +650,9 @@ DAG *toDAG(CFG *cfg, BasicBlock *l_h){
 		}
 		dag->setStar(n);
 		// dag->addNode(n);
+	} else {
+
 	}
-
-
-	cout << "DAG: " << *dag;
 	// for (auto it = dag->iter(); it != dag->end(); it++) {
 	// 	DAGNode *n = (*it);
 	// 	cout << "Blup " << *n << endl;
@@ -604,41 +674,167 @@ int DAGNodeDominate(DAGNode *b1, DAGNode *b2){
 	return 0;
 }
 
+int isNotVisited(DAGNode *x, std::vector<DAGNode*> *path){
+    int size = path->size();
+    for (int i = 0; i < size; i++)
+        // if (path[i] == x) // comparer avec les blocs
+        //     return 0;
+    return 42;
+}
+
+// void findpaths(DAG *dag, DAGNode *start, DAGNode *end){
+//     // create a queue which stores
+//     // the paths
+//     std::queue<std::vector<DAGNode* > q;
+//
+//     // path vector to store the current path
+//     std::vector<DAGNode *> path;
+//     path.push_back(start);
+//
+//     q.push(path);
+//     while (!q.empty()) {
+//         path = q.front();
+//         q.pop();
+//         int last = path[path.size() - 1];
+//
+//         // if last vertex is the desired destination
+//         // then print the path
+//         if (last == dst)
+//             printpath(path);
+//
+//         // traverse to all the nodes connected to
+//         // current vertex and push new path to queue
+//         for (int i = 0; i < g[last].size(); i++) {
+//             if (isNotVisited(g[last][i], path)) {
+//                 vector newpath(path);
+//                 newpath.push_back(g[last][i]);
+//                 q.push(newpath);
+//             }
+//         }
+//     }
+// }
+
+
+// void getAllPaths(DAG *dag, DAGNode *start, DAGNode *end){
+// 	bool *visited =
+// }
+
 /*
-Retourne les blocks qui sont présents dans tous les chemins
+Retourne les blocks qui sont présents dans tous les chemins entre start et end
+/!\ à vérifier en changeant les starts et ends
 */
 void forcedPassedNodes(DAG *dag, DAGNode *start, DAGNode *end, std::vector<DAGNode*> *fpn){
 	cout << "Je rentre dans la fonction pour avoir les noeuds de passages forcés" << endl;
+	// std::vector<DAGNode*> *fpn;
+
+	// pour tous les noeuds du dag
 	for (auto it = dag->iter(); it != dag->end(); it++) {
 		DAGNode *n = (*it);
-		cout << "Je vais regarder pour le noeud " << *n << endl;
-
 		if (n->toVNode()){
+
 		}
 		else {
-			if ( (DAGNodeDominate(start, n)) && (DAGNodeDominate(n, end))){
-				cout << *n << " est un noeud dominant" << endl;
+			cout << "Je vais regarder pour le noeud " << *n << endl;
+			if ( (DAGNodeDominate(start, n)) && DAGNodeDominate(n, end))
 				fpn->push_back(n);
-			}
 		}
 	}
 }
 
-void makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
-	std::vector<CFTree*> ch;
+/*
+Retourne le noeud qui est dominé par tous les autres
+*/
+DAGNode* getDominated(std::vector<DAGNode*> fpn){
+	auto first = fpn.begin();
+	unsigned int ind = 0;
+	while (fpn.size() > 1){ // On va supprimer tous les blocs qui dominent un autre bloc
+		unsigned i = 0;
+		while (i < fpn.size()){
+			if (DAGNodeDominate(fpn[i], *first)){ // Si fpn[i] domine first
+				fpn.erase(fpn.begin()+i); // On peut le supprimer
+			}
+			else if (DAGNodeDominate(*first, fpn[i])){ // Si first domine fpn
+				fpn.erase(first); // on supprime first
+				first = fpn.begin(); // nouveau first
+				i = 0; // on recommence
+			}
+			i++;
+		}
+		first++;
+	}
+	return *first;
+}
+
+// DAGNode* getImmDominator(std::vector<DAGNode*> fpn, DAGNode *c){
+// 	auto imm_dominator = fpn[0];
+// 	while (fpn.size() > 1){
+// 		unsigned i = 0;
+// 		while (i < fpn.size()){
+// 			if (DAGNodeDominate(fpn[i], *imm_dominator)){ // Si fpn[i] domine first
+// 				fpn.erase(fpn.begin()+i); // On peut le supprimer
+// 			}
+// 			else if (DAGNodeDominate(*imm_dominator, fpn[i])){ // Si first domine fpn
+// 				fpn.erase(imm_dominator); // on supprime first
+// 				imm_dominator = fpn.begin(); // nouveau first
+// 				i = 0; // on recommence
+// 			}
+// 			i++;
+// 		}
+// 		imm_dominator++;
+// 	}
+// 	return *imm_dominator;
+// }
+
+CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
+	CFTree* ch;
 	std::vector<DAGNode*> fpn;
 
 	cout << "Noeud de départ " << *start << endl;
 	cout << "Noeud de fin " << *end << endl;
 	forcedPassedNodes(dag, start, end, &fpn);
-	return;
+	cout << "Nombre de noeuds de passage forcé " << fpn.size() << endl;
+
+	// DEBUG VÉRIFIER LES NOEUDS DE PASSAGE FORCÉ
+	for (auto it = fpn.begin(); it != fpn.end(); it++){
+		DAGNode *n = (*it);
+		cout << "Noeud de passage forcé " << *n << endl;
+	}
+	while (fpn.size() > 0){
+		DAGNode *c = getDominated(fpn); // l'element dominé
+		std::vector<DAGNode*>::iterator it = std::find(fpn.begin(), fpn.end(), c); // retrouver l'index de l'élement dominé
+		cout << "Noeud dominé " << *c << endl; // c tel que n >> c
+		cout << "Taille de fpn " << fpn.size() << endl;
+		fpn.erase(it); // N <- N \ c
+		if (c->getPred().size() > 1){
+			DAGNode *ncd = getDominated(fpn);
+			std::vector<CFTree*> br;
+			for (auto pred = c->predIter(); pred != c->predEnd(); pred++){
+				br.push_back(makeCFT (dag, ncd, *pred));
+			}
+		}
+	}
+	return ch;
 }
 
 void CFTreeExtractor::processCFG(CFG *cfg) {
 	cout << "Je traite le CFG de la fonction: " << cfg->name() << endl;
 
 	cout << "Traiter la partie hors de toute boucle: " << endl;
-	toDAG(cfg, NULL);
+	DAG *dag = toDAG(cfg, NULL);
+	cout << "DAG: " << *dag;
+	makeCFT(dag, dag->getElement(2), dag->getElement(4));
+
+	for (auto it = dag->iter(); it != dag->end(); it++) {
+		DAGNode *n = (*it);
+		if (n->toHNode()){
+			DAGHNode *hn = n->toHNode();
+			DAG *sub_dag = hn->getDag();
+			// cout << "DAG: " << *sub_dag;
+			// makeCFT(sub_dag, sub_dag->getStart(), sub_dag->getiEnd(0));
+		}
+
+	}
+	//makeCFT(dag, dag->getStart(), dag->getiEnd(0));
 	cout << "-------------------------------------------------------" << endl;
 
 	// for (CFG::BlockIter iter(cfg->blocks()); iter; iter++) {
