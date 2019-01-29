@@ -25,6 +25,8 @@ class CFTreeLeaf : public CFTree{
 
 	BasicBlock *block;
 
+	public:
+
 	virtual CFTreeLeaf *toLeaf() {
 		return (CFTreeLeaf*) this;
 	}
@@ -41,11 +43,11 @@ class CFTreeLeaf : public CFTree{
 };
 
 
-
-
 class CFTreeAlt : public CFTree{
 
 	std::vector<CFTree*> alts;
+
+	public:
 
 	virtual CFTreeAlt *toAlt() {
 		return (CFTreeAlt*) this;
@@ -76,6 +78,8 @@ class CFTreeAlt : public CFTree{
 class CFTreeSeq : public CFTree{
 
 	std::vector<CFTree*> childs;
+
+	public:
 
 	virtual CFTreeSeq *toSeq() {
 		return (CFTreeSeq*) this;
@@ -109,6 +113,8 @@ class CFTreeLoop : public CFTree{
 	CFTree* t1; // body
 	int n;
 	CFTree* t2; // exit
+
+	public:
 
 	virtual CFTreeLoop *toLoop() {
 		return (CFTreeLoop*) this;
@@ -653,10 +659,6 @@ DAG *toDAG(CFG *cfg, BasicBlock *l_h){
 	} else {
 
 	}
-	// for (auto it = dag->iter(); it != dag->end(); it++) {
-	// 	DAGNode *n = (*it);
-	// 	cout << "Blup " << *n << endl;
-	// }
 
 	return dag;
 }
@@ -681,43 +683,6 @@ int isNotVisited(DAGNode *x, std::vector<DAGNode*> *path){
         //     return 0;
     return 42;
 }
-
-// void findpaths(DAG *dag, DAGNode *start, DAGNode *end){
-//     // create a queue which stores
-//     // the paths
-//     std::queue<std::vector<DAGNode* > q;
-//
-//     // path vector to store the current path
-//     std::vector<DAGNode *> path;
-//     path.push_back(start);
-//
-//     q.push(path);
-//     while (!q.empty()) {
-//         path = q.front();
-//         q.pop();
-//         int last = path[path.size() - 1];
-//
-//         // if last vertex is the desired destination
-//         // then print the path
-//         if (last == dst)
-//             printpath(path);
-//
-//         // traverse to all the nodes connected to
-//         // current vertex and push new path to queue
-//         for (int i = 0; i < g[last].size(); i++) {
-//             if (isNotVisited(g[last][i], path)) {
-//                 vector newpath(path);
-//                 newpath.push_back(g[last][i]);
-//                 q.push(newpath);
-//             }
-//         }
-//     }
-// }
-
-
-// void getAllPaths(DAG *dag, DAGNode *start, DAGNode *end){
-// 	bool *visited =
-// }
 
 /*
 Retourne les blocks qui sont présents dans tous les chemins entre start et end
@@ -786,7 +751,7 @@ DAGNode* getDominated(std::vector<DAGNode*> fpn){
 // }
 
 CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
-	CFTree* ch;
+	std::vector<CFTree*> ch;
 	std::vector<DAGNode*> fpn;
 
 	cout << "Noeud de départ " << *start << endl;
@@ -807,11 +772,13 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 		fpn.erase(it); // N <- N \ c
 		if (c->getPred().size() > 1){
 			DAGNode *ncd = getDominated(fpn);
-			std::vector<CFTree*> br;
+			CFTreeAlt *br;
 			for (auto pred = c->predIter(); pred != c->predEnd(); pred++){
-				br.push_back(makeCFT (dag, ncd, *pred));
+				br->addAlt(makeCFT (dag, ncd, *pred));
 			}
+			ch.push_back(br);
 		}
+		ch.push_back(new CFTreeLeaf(c->getBlock()));
 	}
 	return ch;
 }
