@@ -37,6 +37,7 @@ class CFTreeLeaf : public CFTree{
 	CFTreeLeaf(BasicBlock *b) {
 		block = b;
 	}
+
 	BasicBlock *getBlock() { return block; }
 	int getBlockId() const { return block->id(); }
 
@@ -88,6 +89,10 @@ class CFTreeSeq : public CFTree{
 	virtual CFTreeLoop *toLoop() {return NULL;}/* abstract */
 	virtual CFTreeAlt *toAlt() {return NULL;}/* abstract */
 
+	CFTreeSeq(std::vector<CFTree*> new_childs) {
+		childs = new_childs;
+	}
+
 	void addChild(CFTree *s) {
 		childs.push_back(s);
 	}
@@ -110,9 +115,9 @@ class CFTreeSeq : public CFTree{
 class CFTreeLoop : public CFTree{
 
 	BasicBlock *header;
-	CFTree* t1; // body
+	CFTree* bd; // body
 	int n;
-	CFTree* t2; // exit
+	CFTree* ex; // exit
 
 	public:
 
@@ -123,20 +128,30 @@ class CFTreeLoop : public CFTree{
 	virtual CFTreeSeq *toSeq() {return NULL;}/* abstract */
 	virtual CFTreeAlt *toAlt() {return NULL;}/* abstract */
 
-	CFTreeLoop(BasicBlock *h, int bound) {
+	CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, CFTree* n_ex) {
 		header = h;
 		n = bound;
+		bd = n_bd;
+		ex = n_ex;
 	}
 
 	BasicBlock *getHeader() { return header; }
 	int getHeaderId() const { return header->id(); }
 
+	CFTree *getBody(){
+		return bd;
+	}
+
+	CFTree *getExit(){
+		return ex;
+	}
+
 	void addT1(CFTree *t){
-		t1 = t;
+		bd = t;
 	}
 
 	void addT2(CFTree *t){
-		t2 = t;
+		ex = t;
 	}
 
 	void changeBound(int bound){
@@ -193,6 +208,7 @@ class DAG {
 	std::vector<DAGNode*> all; // ensemble des noeuds du dag
 	DAGNode *n_start; // le point d'entrée du dag
 	std::vector<DAGNode*> n_ends; // les sorties du dag
+	DAGNode *n_next;
 
   public:
 	std::vector<DAGNode*>::const_iterator iter() {
@@ -214,9 +230,18 @@ class DAG {
 		n_ends.push_back(s);
 	}
 
+	void setNext(DAGNode *s){
+		n_next = s;
+	}
+
 	DAGNode *getStart(){
 		return n_start;
 	}
+
+	DAGNode *getNext(){
+		return n_next;
+	}
+
 
 	DAGNode *getElement(unsigned i){
 		return all[i];
@@ -250,10 +275,6 @@ class DAGNode {
 	std::vector<DAGNode*> pred; // les noeuds précédents du sommet
 	std::vector<DAGNode*> succ; // les noeuds suivants du sommet
 
-	DAGNode* dom_start;
-	DAGNode* dom_end;
-	std::vector<DAGNode*> dominators; // les noeuds qui dominent ces noeuds (change selon le start/ end donné en argument au moment de la construction)
-
   public:
 	virtual DAGVNode *toVNode() = 0; /* abstract */
 	virtual DAGHNode *toHNode() = 0;/* abstract */
@@ -265,10 +286,6 @@ class DAGNode {
 
 	void addPred(DAGNode *s) {
 		pred.push_back(s);
-	}
-
-	void addDomin(DAGNode *s) {
-		dominators.push_back(s);
 	}
 
 	std::vector<DAGNode*>::const_iterator succIter() {
@@ -285,14 +302,6 @@ class DAGNode {
 
 	std::vector<DAGNode*>::const_iterator predEnd() {
 		return pred.end();
-	}
-
-	std::vector<DAGNode*>::const_iterator dominIter() {
-		return dominators.begin();
-	}
-
-	std::vector<DAGNode*>::const_iterator dominEnd() {
-		return dominators.end();
 	}
 
 	std::vector<DAGNode*> getSucc(){
@@ -402,7 +411,9 @@ void CFTreeExtractor::configure(const PropList &props) {
 	Processor::configure(props);
 }
 
-
+//---------------------------------------
+//				PRETTYPRINTER POUR LE DAG
+//---------------------------------------
 
 io::Output &operator<<(io::Output &o, const DAGVNode &n) {
 	if (n.getType() == VNODE_EXIT) {
@@ -442,6 +453,76 @@ io::Output &operator<<(io::Output &o, DAG &n) { // POUR DEBUG
 		o << "\n";
 	}
 	return o;
+}
+
+io::Output &operator<<(io::Output &o, CFTreeLeaf &n) {
+	return (o << "CFTreeLeaf(B_" << n.getBlockId()) << ")";
+}
+
+io::Output &operator<<(io::Output &o, CFTreeAlt &n) {
+		o << "\n";
+		o << "CFTreeAlt( \n";
+		for (auto it = n.childIter(); it != n.childEnd(); it++) {
+			CFTree *n = (*it);
+			o << "\t" << *n << "\n";
+		}
+		o << ") \n";
+		return o;
+}
+
+io::Output &operator<<(io::Output &o, CFTreeLoop &n) {
+		o << "\n";
+		o << "CFTreeLoop(B_" <<   (n.getHeaderId()) << " \n";
+		o << "CFTreeLoop.body : " << *(n.getBody()) << "\n";
+		o << "CFTreeLoop.exit : " << *(n.getExit()) << "\n";
+		o << ") \n";
+		return o;
+}
+
+io::Output &operator<<(io::Output &o, CFTreeSeq &n) { // POUR DEBUG
+	o << "\n";
+	// o << "start "<< *n.getStart() << "\n";
+	o << "CFTreeSeq( \n";
+	for (auto it = n.childIter(); it != n.childEnd(); it++) {
+		CFTree *n = (*it);
+		o << "\t" << *n << "\n";
+	}
+	o << ") \n";
+	return o;
+}
+
+io::Output &operator<<(io::Output &o, CFTree &n) {
+	if (n.toLeaf())
+		o << *n.toLeaf();
+	if (n.toAlt())
+		o << *n.toAlt();
+	if (n.toLoop())
+		o << *n.toLoop();
+	if (n.toSeq())
+		o << *n.toSeq();
+	return o;
+}
+
+// std::string write_tree(CFTreeLeaf &n, unsigned int lab){
+// 	return "l" << lab << " [label = \"B_"<<*n.getBlockId()"\"]; \n"
+// }
+
+std::string write_tree(CFTreeLeaf &n, unsigned int lab){
+	std::stringstream ss;
+	ss << "l" << lab << " [label = \"B_"<< n.getBlockId() << "\"]; \n";
+	return ss.str();
+}
+
+std::string write_tree(CFTree &n, unsigned int lab) {
+	if (n.toLeaf())
+		return write_tree(*n.toLeaf(), lab);
+	if (n.toAlt())
+		return write_tree(*n.toAlt(), lab);
+	if (n.toLoop())
+		return write_tree(*n.toLoop(), lab);
+	if (n.toSeq())
+		return write_tree(*n.toSeq(), lab);
+	return "";
 }
 
 /*
@@ -509,6 +590,7 @@ void addEdgesNext(DAG *dag, DAGBNode *n, BasicBlock *l_h, DAGVNode *next) {
 			if (b2 == l_h) {
 				n->addSucc(next);
 				next->addPred(n);
+				dag->setNext(n);
 				//Edge::Edge next_edge;
 				// add (Block *v, Block *w, Edge *e)
 			}
@@ -699,9 +781,11 @@ void forcedPassedNodes(DAG *dag, DAGNode *start, DAGNode *end, std::vector<DAGNo
 
 		}
 		else {
-			cout << "Je vais regarder pour le noeud " << *n << endl;
-			if ( (DAGNodeDominate(start, n)) && DAGNodeDominate(n, end))
-				fpn->push_back(n);
+			if (start != n){
+				cout << "Je vais regarder pour le noeud " << *n << endl;
+				if ( (DAGNodeDominate(start, n)) && DAGNodeDominate(n, end))
+					fpn->push_back(n);
+			}
 		}
 	}
 }
@@ -715,13 +799,15 @@ DAGNode* getDominated(std::vector<DAGNode*> fpn){
 	while (fpn.size() > 1){ // On va supprimer tous les blocs qui dominent un autre bloc
 		unsigned i = 0;
 		while (i < fpn.size()){
-			if (DAGNodeDominate(fpn[i], *first)){ // Si fpn[i] domine first
-				fpn.erase(fpn.begin()+i); // On peut le supprimer
-			}
-			else if (DAGNodeDominate(*first, fpn[i])){ // Si first domine fpn
-				fpn.erase(first); // on supprime first
-				first = fpn.begin(); // nouveau first
-				i = 0; // on recommence
+			if (*first != fpn[i]){
+				if (DAGNodeDominate(fpn[i], *first)){ // Si fpn[i] domine first
+					fpn.erase(fpn.begin()+i); // On peut le supprimer
+				}
+				else if (DAGNodeDominate(*first, fpn[i])){ // Si first domine fpn
+					fpn.erase(first); // on supprime first
+					first = fpn.begin(); // nouveau first
+					i = 0; // on recommence
+				}
 			}
 			i++;
 		}
@@ -754,6 +840,8 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 	std::vector<CFTree*> ch;
 	std::vector<DAGNode*> fpn;
 
+	cout << "Nouvel appel à makeCFT" << endl;
+
 	cout << "Noeud de départ " << *start << endl;
 	cout << "Noeud de fin " << *end << endl;
 	forcedPassedNodes(dag, start, end, &fpn);
@@ -764,6 +852,7 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 		DAGNode *n = (*it);
 		cout << "Noeud de passage forcé " << *n << endl;
 	}
+
 	while (fpn.size() > 0){
 		DAGNode *c = getDominated(fpn); // l'element dominé
 		std::vector<DAGNode*>::iterator it = std::find(fpn.begin(), fpn.end(), c); // retrouver l'index de l'élement dominé
@@ -771,16 +860,51 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 		cout << "Taille de fpn " << fpn.size() << endl;
 		fpn.erase(it); // N <- N \ c
 		if (c->getPred().size() > 1){
+			cout << "PLUS DE 1 PREDECESSEUR" << endl;
 			DAGNode *ncd = getDominated(fpn);
-			CFTreeAlt *br;
+			CFTreeAlt *br = new CFTreeAlt();
+			cout << "Liste des Prédecesseur de "<< *c << endl;
 			for (auto pred = c->predIter(); pred != c->predEnd(); pred++){
+				cout << "On regarde pour le "<< **pred << endl;
 				br->addAlt(makeCFT (dag, ncd, *pred));
 			}
 			ch.push_back(br);
+			if (c->toBNode()){
+				BasicBlock *bb =  c->toBNode()->getBlock();
+				ch.push_back(new CFTreeLeaf(bb));
+			}
 		}
-		ch.push_back(new CFTreeLeaf(c->getBlock()));
+		else {
+			if (c->toBNode()){
+				cout << "Je push le Bnode " << *c << endl;
+				BasicBlock *bb =  c->toBNode()->getBlock();
+				ch.insert(ch.begin(),new CFTreeLeaf(bb));
+			}
+			else if ( c->toHNode()){
+				DAGHNode *lh = c->toHNode();
+				DAG * sub_dag = lh->getDag();
+				CFTree *bd = makeCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getNext());
+				CFTree *ex = makeCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getiEnd(0));
+
+				if ((sub_dag->getStart()) -> toBNode()){
+					BasicBlock *bb = ((sub_dag->getStart())->toBNode())->getBlock();
+					ch.insert(ch.begin(), new CFTreeLoop(bb, 5, bd, ex));
+				}
+			}
+		}
 	}
-	return ch;
+	if (ch.size() == 1){
+		cout << "Je return "<< *ch[0] << endl;
+		return ch[0];
+	}
+	if (start-> getPred().size() == 0){
+		cout << "Même start et end " << endl;
+		BasicBlock *bb =  start->toBNode()->getBlock();
+		ch.insert(ch.begin(),new CFTreeLeaf(bb));
+	}
+	CFTreeSeq* t_ch = new CFTreeSeq(ch);
+	cout << "Je return "<< *t_ch << endl;
+	return t_ch;
 }
 
 void CFTreeExtractor::processCFG(CFG *cfg) {
@@ -789,33 +913,28 @@ void CFTreeExtractor::processCFG(CFG *cfg) {
 	cout << "Traiter la partie hors de toute boucle: " << endl;
 	DAG *dag = toDAG(cfg, NULL);
 	cout << "DAG: " << *dag;
-	makeCFT(dag, dag->getElement(2), dag->getElement(4));
+	CFTree *tree = makeCFT(dag, dag->getElement(2), dag->getElement(4));
 
-	for (auto it = dag->iter(); it != dag->end(); it++) {
-		DAGNode *n = (*it);
-		if (n->toHNode()){
-			DAGHNode *hn = n->toHNode();
-			DAG *sub_dag = hn->getDag();
-			// cout << "DAG: " << *sub_dag;
-			// makeCFT(sub_dag, sub_dag->getStart(), sub_dag->getiEnd(0));
-		}
+	// std::ofstream myfile;
+	// myfile.open("CFTree.txt");
+	// myfile << *tree ;
+	// myfile.close();
 
-	}
-	//makeCFT(dag, dag->getStart(), dag->getiEnd(0));
-	cout << "-------------------------------------------------------" << endl;
+	// cout << "TREE : " << *tree;
 
-	// for (CFG::BlockIter iter(cfg->blocks()); iter; iter++) {
-	// 	Block *bb = *iter;
-	// 	if (LOOP_HEADER(bb)) {
-	// 		// cout << "Je traite la boucle: " << bb->id() << endl;
-	// 		DAG *dag = toDAG(cfg, bb->toBasic());
-	// 		cout << "DAG: " << *dag;
-	// 		makeCFT(dag, dag->getStart(), dag->getiEnd(0));
-	// 		cout << "-------------------------------------------------------" << endl;
-	// 		// cout << "dsq " << *(dag->getiEnd(0)) << endl;
-	//
+
+	// for (auto it = dag->iter(); it != dag->end(); it++) {
+	// 	DAGNode *n = (*it);
+	// 	if (n->toHNode()){
+	// 		DAGHNode *hn = n->toHNode();
+	// 		DAG *sub_dag = hn->getDag();
+	// 		// cout << "DAG: " << *sub_dag;
+	// 		// CFTree *tree = makeCFT(sub_dag, sub_dag->getStart(), sub_dag->getiEnd(0));
+	// 		CFTree *tree = makeCFT(sub_dag, sub_dag->getStart(), sub_dag->getNext());
+	// 		// cout << "TREE : " << *tree;
 	// 	}
-	// }
+
+	cout << "-------------------------------------------------------" << endl;
 
 }
 

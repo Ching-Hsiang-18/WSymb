@@ -4,6 +4,9 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+#include <iostream>
+#include <fstream>
+#include <sstream> 
 
 #include <otawa/cfg.h>
 #include <otawa/cfg/features.h>
@@ -33,6 +36,9 @@ namespace otawa { namespace cftree {
 	io::Output &operator<<(io::Output &o, const DAGBNode &n);
 	io::Output &operator<<(io::Output &o, const DAGHNode &n);
 	io::Output &operator<<(io::Output &o, DAG &n);
+
+	io::Output &operator<<(io::Output &o, CFTree &n);
+	io::Output &operator<<(io::Output &o, CFTreeSeq &n);
 
 class CFTreeExtractor : public Processor {
 public:
