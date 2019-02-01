@@ -13,7 +13,7 @@ void _start(void) {
 
   for (i = 0; i < 10; i++) {
       if (k > 5){
-        k++;
+        k--;
       }
       else{
         k++;

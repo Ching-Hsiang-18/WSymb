@@ -503,17 +503,60 @@ io::Output &operator<<(io::Output &o, CFTree &n) {
 	return o;
 }
 
-// std::string write_tree(CFTreeLeaf &n, unsigned int lab){
-// 	return "l" << lab << " [label = \"B_"<<*n.getBlockId()"\"]; \n"
-// }
 
-std::string write_tree(CFTreeLeaf &n, unsigned int lab){
+std::string write_tree(CFTreeLoop &n, unsigned int *lab){
 	std::stringstream ss;
-	ss << "l" << lab << " [label = \"B_"<< n.getBlockId() << "\"]; \n";
+	unsigned int loop_lab = *lab;
+	ss << "l" << loop_lab << " [label = \"Loop(b"<< n.getHeaderId() << ")\"]; \n";
+
+	// body
+	CFTree *ch = n.getBody();
+	unsigned int old_lab = ++(*lab);
+	ss << write_tree(*ch, lab);
+	ss << "l"<< loop_lab << " -> { l"<< old_lab <<" }; \n";
+	// exit
+	ch = n.getExit();
+	old_lab = ++(*lab);
+	ss << write_tree(*ch, lab);
+	ss << "l"<< loop_lab << " -> { l"<< old_lab <<" }; \n";
 	return ss.str();
 }
 
-std::string write_tree(CFTree &n, unsigned int lab) {
+
+std::string write_tree(CFTreeAlt &n, unsigned int *lab){
+	std::stringstream ss;
+	unsigned int alt_lab = *lab;
+	ss << "l" << alt_lab << " [label = \" Alt\"]; \n";
+	for (auto it = n.childIter(); it != n.childEnd(); it++) {
+		CFTree *ch = (*it);
+		unsigned int old_lab = ++(*lab);
+		ss << write_tree(*ch, lab);
+		ss << "l"<< alt_lab << " -> { l"<< old_lab <<" }; \n";
+	}
+	return ss.str();
+}
+
+std::string write_tree(CFTreeSeq &n, unsigned int *lab){
+	std::stringstream ss;
+	unsigned int seq_lab = *lab;
+	ss << "l" << seq_lab << " [label = \" Seq\"]; \n";
+	// o << "start "<< *n.getStart() << "\n";
+	for (auto it = n.childIter(); it != n.childEnd(); it++) {
+		CFTree *ch = (*it);
+		unsigned int old_lab = ++(*lab);
+		ss << write_tree(*ch, lab);
+		ss << "l"<< seq_lab << " -> { l"<< old_lab <<" }; \n";
+	}
+	return ss.str();
+}
+
+std::string write_tree(CFTreeLeaf &n, unsigned int *lab){
+	std::stringstream ss;
+	ss << "l" << *lab << " [label = \"B_"<< n.getBlockId() << "\"]; \n";
+	return ss.str();
+}
+
+std::string write_tree(CFTree &n, unsigned int *lab) {
 	if (n.toLeaf())
 		return write_tree(*n.toLeaf(), lab);
 	if (n.toAlt())
@@ -816,26 +859,6 @@ DAGNode* getDominated(std::vector<DAGNode*> fpn){
 	return *first;
 }
 
-// DAGNode* getImmDominator(std::vector<DAGNode*> fpn, DAGNode *c){
-// 	auto imm_dominator = fpn[0];
-// 	while (fpn.size() > 1){
-// 		unsigned i = 0;
-// 		while (i < fpn.size()){
-// 			if (DAGNodeDominate(fpn[i], *imm_dominator)){ // Si fpn[i] domine first
-// 				fpn.erase(fpn.begin()+i); // On peut le supprimer
-// 			}
-// 			else if (DAGNodeDominate(*imm_dominator, fpn[i])){ // Si first domine fpn
-// 				fpn.erase(imm_dominator); // on supprime first
-// 				imm_dominator = fpn.begin(); // nouveau first
-// 				i = 0; // on recommence
-// 			}
-// 			i++;
-// 		}
-// 		imm_dominator++;
-// 	}
-// 	return *imm_dominator;
-// }
-
 CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 	std::vector<CFTree*> ch;
 	std::vector<DAGNode*> fpn;
@@ -847,7 +870,14 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 	forcedPassedNodes(dag, start, end, &fpn);
 	cout << "Nombre de noeuds de passage forcé " << fpn.size() << endl;
 
-	// DEBUG VÉRIFIER LES NOEUDS DE PASSAGE FORCÉ
+	if (start == end){
+		if (start->toBNode()){
+			BasicBlock *bb =  start->toBNode()->getBlock();
+			return (new CFTreeLeaf(bb));
+		}
+	}
+
+	// Cherche les noeuds de passage forcé
 	for (auto it = fpn.begin(); it != fpn.end(); it++){
 		DAGNode *n = (*it);
 		cout << "Noeud de passage forcé " << *n << endl;
@@ -880,6 +910,7 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 				BasicBlock *bb =  c->toBNode()->getBlock();
 				ch.insert(ch.begin(),new CFTreeLeaf(bb));
 			}
+
 			else if ( c->toHNode()){
 				DAGHNode *lh = c->toHNode();
 				DAG * sub_dag = lh->getDag();
@@ -915,12 +946,15 @@ void CFTreeExtractor::processCFG(CFG *cfg) {
 	cout << "DAG: " << *dag;
 	CFTree *tree = makeCFT(dag, dag->getElement(2), dag->getElement(4));
 
-	// std::ofstream myfile;
-	// myfile.open("CFTree.txt");
-	// myfile << *tree ;
-	// myfile.close();
+	std::ofstream myfile;
+	myfile.open("CFTree.dot");
+	unsigned int lab = 0;
+	std::stringstream ss;
+	ss << "digraph BST { \n" << write_tree(*tree, &lab) << "}";
+	myfile << ss.str() ;
+	myfile.close();
 
-	// cout << "TREE : " << *tree;
+	cout << "TREE : " << *tree;
 
 
 	// for (auto it = dag->iter(); it != dag->end(); it++) {

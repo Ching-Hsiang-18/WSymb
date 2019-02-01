@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <iostream>
 #include <fstream>
-#include <sstream> 
+#include <sstream>
 
 #include <otawa/cfg.h>
 #include <otawa/cfg/features.h>
@@ -39,6 +39,16 @@ namespace otawa { namespace cftree {
 
 	io::Output &operator<<(io::Output &o, CFTree &n);
 	io::Output &operator<<(io::Output &o, CFTreeSeq &n);
+	io::Output &operator<<(io::Output &o, CFTreeLeaf &n);
+	io::Output &operator<<(io::Output &o, CFTreeAlt &n);
+	io::Output &operator<<(io::Output &o, CFTreeLoop &n);
+
+	std::string write_tree(CFTree &n, unsigned int *lab);
+	std::string write_tree(CFTreeSeq &n, unsigned int *lab);
+	std::string write_tree(CFTreeLeaf &n, unsigned int *lab);
+	std::string write_tree(CFTreeAlt &n, unsigned int *lab);
+	std::string write_tree(CFTreeLoop &n, unsigned int *lab);
+
 
 class CFTreeExtractor : public Processor {
 public:
