@@ -205,71 +205,64 @@ int countNodes(CFTree *cft) {
 	return EvaluateCFT<int>::evaluate(cft, &nc);
 }
 
+//--------------------
+//				CLASS DAG
+//--------------------
 
-class DAG {
-	std::vector<DAGNode*> all; // ensemble des noeuds du dag
-	DAGNode *n_start; // le point d'entrée du dag
-	std::vector<DAGNode*> n_ends; // les sorties du dag
-	DAGNode *n_next;
+std::vector<DAGNode*>::const_iterator DAG::iter() {
+	return all.begin();
+}
 
-  public:
-	std::vector<DAGNode*>::const_iterator iter() {
-		return all.begin();
-	}
+std::vector<DAGNode*>::const_iterator DAG::end() {
+	return all.end();
+}
+void DAG::addNode(DAGNode *s) {
+	all.push_back(s);
+}
 
-	std::vector<DAGNode*>::const_iterator end() {
-		return all.end();
-	}
-	void addNode(DAGNode *s) {
-		all.push_back(s);
-	}
+void DAG::setStar(DAGNode *s) {
+	n_start = s;
+}
 
-	void setStar(DAGNode *s) {
-		n_start = s;
-	}
+void DAG::addEnd(DAGNode *s) {
+	n_ends.push_back(s);
+}
 
-	void addEnd(DAGNode *s) {
-		n_ends.push_back(s);
-	}
+void DAG::setNext(DAGNode *s){
+	n_next = s;
+}
 
-	void setNext(DAGNode *s){
-		n_next = s;
-	}
+DAGNode* DAG::getStart(){
+	return n_start;
+}
 
-	DAGNode *getStart(){
-		return n_start;
-	}
-
-	DAGNode *getNext(){
-		return n_next;
-	}
+DAGNode* DAG::getNext(){
+	return n_next;
+}
 
 
-	DAGNode *getElement(unsigned i){
-		return all[i];
-	}
+DAGNode* DAG::getElement(unsigned i){
+	return all[i];
+}
 
-	std::vector<DAGNode*>::const_iterator iter_e(){
-		return n_ends.begin();
-	}
+std::vector<DAGNode*>::const_iterator DAG::iter_e(){
+	return n_ends.begin();
+}
 
-	std::vector<DAGNode*>::const_iterator end_e(){
-		return n_ends.end();
-	}
+std::vector<DAGNode*>::const_iterator DAG::end_e(){
+	return n_ends.end();
+}
 
-	DAGNode *getiEnd(int i){
-		assert(i < n_ends.size());
-		return n_ends[i];
-	}
+DAGNode* DAG::getiEnd(int i){
+	assert(i < n_ends.size());
+	return n_ends[i];
+}
 
-	bool find_node(DAGNode *elem){ // cherche si un bloc est présent dans le dag
-		std::vector<DAGNode*>::const_iterator it;
-		it = find (iter(), end(), elem);
-		return (it != end());
-	}
-
-  ~DAG();
-};
+bool DAG::find_node(DAGNode *elem){ // cherche si un bloc est présent dans le dag
+	std::vector<DAGNode*>::const_iterator it;
+	it = find (iter(), end(), elem);
+	return (it != end());
+}
 
 
 class DAGNode {
@@ -314,8 +307,6 @@ class DAGNode {
 		return pred;
 	}
 };
-	// DAGNode *end;
-
 
 class DAGVNode : public DAGNode {
 #define VNODE_EXIT 0
@@ -378,18 +369,6 @@ DAG::~DAG()
 	  delete n;
   }
 }
-
-
-/*
- * DAGNode *v = new DAGVNode();
-
-  DAGVnode *v2 = v->toVNode();
- */
-
-
-
-
-
 
 class Plugin : public ProcessorPlugin { // plugin qui va transformer le CFG
 public:
@@ -961,18 +940,6 @@ void CFTreeExtractor::processCFG(CFG *cfg) {
 
 	cout << "TREE : " << *tree;
 
-
-	// for (auto it = dag->iter(); it != dag->end(); it++) {
-	// 	DAGNode *n = (*it);
-	// 	if (n->toHNode()){
-	// 		DAGHNode *hn = n->toHNode();
-	// 		DAG *sub_dag = hn->getDag();
-	// 		// cout << "DAG: " << *sub_dag;
-	// 		// CFTree *tree = makeCFT(sub_dag, sub_dag->getStart(), sub_dag->getiEnd(0));
-	// 		CFTree *tree = makeCFT(sub_dag, sub_dag->getStart(), sub_dag->getNext());
-	// 		// cout << "TREE : " << *tree;
-	// 	}
-
 	cout << "-------------------------------------------------------" << endl;
 
 }
@@ -985,7 +952,6 @@ void CFTreeExtractor::processWorkSpace(WorkSpace *ws) {
 	for (CFGCollection::Iter iter(*coll); iter; iter ++) {
 		CFG *currentCFG = *iter;
 		processCFG(currentCFG);
-
 	}
 }
 

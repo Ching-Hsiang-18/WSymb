@@ -1,0 +1,25 @@
+digraph BST { 
+l0 [label = " Seq"]; 
+l1 [label = "B_1"]; 
+l0 -> { l1 }; 
+l2 [label = "Loop(b2)"]; 
+l3 [label = " Seq"]; 
+l4 [label = "B_2"]; 
+l3 -> { l4 }; 
+l5 [label = "B_3"]; 
+l3 -> { l5 }; 
+l6 [label = " Alt"]; 
+l7 [label = "B_4"]; 
+l6 -> { l7 }; 
+l8 [label = "B_5"]; 
+l6 -> { l8 }; 
+l3 -> { l6 }; 
+l9 [label = "B_6"]; 
+l3 -> { l9 }; 
+l2 -> { l3 }; 
+l10 [label = "B_2"]; 
+l2 -> { l10 }; 
+l0 -> { l2 }; 
+l11 [label = "B_7"]; 
+l0 -> { l11 }; 
+}
