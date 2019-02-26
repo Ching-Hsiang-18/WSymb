@@ -67,6 +67,66 @@ namespace otawa { namespace cftree {
 
 	};
 
+	class CFTreeAlt : public CFTree{
+
+		std::vector<CFTree*> alts;
+
+		public:
+			// implements abstrat
+			CFTreeLeaf *toLeaf();
+			CFTreeAlt *toAlt();
+			CFTreeLoop *toLoop();
+			CFTreeSeq *toSeq();
+
+			void addAlt(CFTree *s);
+			std::vector<CFTree *>::const_iterator childIter();
+			std::vector<CFTree *>::const_iterator childEnd();
+			CFTree* getI(int ind);
+
+	};
+
+	class CFTreeSeq : public CFTree{
+
+		std::vector<CFTree*> childs;
+
+		public:
+			// implements abstrat
+			CFTreeLeaf *toLeaf();
+			CFTreeAlt *toAlt();
+			CFTreeLoop *toLoop();
+			CFTreeSeq *toSeq();
+
+			CFTreeSeq(std::vector<CFTree*> new_childs);
+			void addChild(CFTree *s);
+			std::vector<CFTree *>::const_iterator childIter();
+			std::vector<CFTree *>::const_iterator childEnd();
+			CFTree* getI(int ind);
+	};
+
+	class CFTreeLoop : public CFTree{
+
+			BasicBlock *header;
+			CFTree* bd; // body
+			int n;
+			CFTree* ex; // exit
+
+		public:
+			// implements abstrat
+			CFTreeLeaf *toLeaf();
+			CFTreeAlt *toAlt();
+			CFTreeLoop *toLoop();
+			CFTreeSeq *toSeq();
+
+			CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, CFTree* n_ex);
+
+			BasicBlock *getHeader();
+			int getHeaderId() const;
+			CFTree *getBody();
+			CFTree *getExit();
+			void addT1(CFTree *t);
+			void addT2(CFTree *t);
+			void changeBound(int bound);
+	};
 
 	class DAGNode
 	{

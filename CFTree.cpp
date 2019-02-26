@@ -6,14 +6,6 @@ using namespace otawa;
 // definition propriete cftree
 //Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
 
-/*
-	Un CFTree Node
-	-> Leaf(b) : représente un basic bloc
-	-> Alt(t1..tn) : représente alternative sur plusieurs sous-arbre
-	-> Loop(h,t1,n,t2) : Loop avec h en header, répète n fois le sous-arbre t1, et execute l'arbre t2
-	-> Seq(t1..tn) : Séquence de tree
-*/
-
 //--------------------
 //	CLASS CFTREELEAF
 //--------------------
@@ -36,122 +28,102 @@ int CFTreeLeaf::getBlockId() const { return block->id(); }
 //	CLASS CFTREEALT
 //--------------------
 
-class CFTreeAlt : public CFTree{
+CFTreeAlt* CFTreeAlt::toAlt() {
+	return (CFTreeAlt*) this;
+}
+CFTreeLeaf* CFTreeAlt::toLeaf() {return NULL;}/* abstract */
+CFTreeLoop* CFTreeAlt::toLoop() {return NULL;}/* abstract */
+CFTreeSeq* CFTreeAlt::toSeq() {return NULL;}/* abstract */
 
-	std::vector<CFTree*> alts;
+void CFTreeAlt::addAlt(CFTree *s) {
+	alts.push_back(s);
+}
 
-	public:
+std::vector<CFTree *>::const_iterator CFTreeAlt::childIter() {
+	return alts.begin();
+}
 
-	virtual CFTreeAlt *toAlt() {
-		return (CFTreeAlt*) this;
-	}
-	virtual CFTreeLeaf *toLeaf() {return NULL;}/* abstract */
-	virtual CFTreeLoop *toLoop() {return NULL;}/* abstract */
-	virtual CFTreeSeq *toSeq() {return NULL;}/* abstract */
+std::vector<CFTree *>::const_iterator CFTreeAlt::childEnd() {
+	return alts.end();
+}
 
-	void addAlt(CFTree *s) {
-		alts.push_back(s);
-	}
+CFTree* CFTreeAlt::getI(int ind) {
+	assert(ind < alts.size());
+	return alts[ind];
+}
 
-	std::vector<CFTree *>::const_iterator childIter() {
-		return alts.begin();
-	}
+//--------------------
+//	CLASS CFTREESEQ
+//--------------------
 
-	std::vector<CFTree *>::const_iterator childEnd() {
-		return alts.end();
-	}
+CFTreeSeq* CFTreeSeq::toSeq() {
+	return (CFTreeSeq*) this;
+}
+CFTreeLeaf* CFTreeSeq::toLeaf() {return NULL;}/* abstract */
+CFTreeLoop* CFTreeSeq::toLoop() {return NULL;}/* abstract */
+CFTreeAlt* CFTreeSeq::toAlt() {return NULL;}/* abstract */
 
-	CFTree* getI(int ind) {
-		assert(ind < alts.size());
-		return alts[ind];
-	}
+CFTreeSeq::CFTreeSeq(std::vector<CFTree*> new_childs) {
+	childs = new_childs;
+}
 
-};
+void CFTreeSeq::addChild(CFTree *s) {
+	childs.push_back(s);
+}
 
-class CFTreeSeq : public CFTree{
+std::vector<CFTree *>::const_iterator CFTreeSeq::childIter() {
+	return childs.begin();
+}
 
-	std::vector<CFTree*> childs;
+std::vector<CFTree *>::const_iterator CFTreeSeq::childEnd() {
+	return childs.end();
+}
 
-	public:
+CFTree* CFTreeSeq::getI(int ind) {
+	assert(ind < childs.size());
+	return childs[ind];
+}
 
-	virtual CFTreeSeq *toSeq() {
-		return (CFTreeSeq*) this;
-	}
-	virtual CFTreeLeaf *toLeaf() {return NULL;}/* abstract */
-	virtual CFTreeLoop *toLoop() {return NULL;}/* abstract */
-	virtual CFTreeAlt *toAlt() {return NULL;}/* abstract */
+//--------------------
+//	CLASS CFTREELOOP
+//--------------------
 
-	CFTreeSeq(std::vector<CFTree*> new_childs) {
-		childs = new_childs;
-	}
+CFTreeLoop* CFTreeLoop::toLoop() {
+	return (CFTreeLoop*) this;
+}
+CFTreeLeaf* CFTreeLoop::toLeaf() {return NULL;}/* abstract */
+CFTreeSeq* CFTreeLoop::toSeq() {return NULL;}/* abstract */
+CFTreeAlt* CFTreeLoop::toAlt() {return NULL;}/* abstract */
 
-	void addChild(CFTree *s) {
-		childs.push_back(s);
-	}
+CFTreeLoop::CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, CFTree* n_ex) {
+	header = h;
+	n = bound;
+	bd = n_bd;
+	ex = n_ex;
+}
 
-	std::vector<CFTree *>::const_iterator childIter() {
-		return childs.begin();
-	}
+BasicBlock* CFTreeLoop::getHeader() { return header; }
+int CFTreeLoop::getHeaderId() const { return header->id(); }
 
-	std::vector<CFTree *>::const_iterator childEnd() {
-		return childs.end();
-	}
+CFTree* CFTreeLoop::getBody(){
+	return bd;
+}
 
-	CFTree* getI(int ind) {
-		assert(ind < childs.size());
-		return childs[ind];
-	}
+CFTree* CFTreeLoop::getExit(){
+	return ex;
+}
 
-};
+void CFTreeLoop::addT1(CFTree *t){
+	bd = t;
+}
 
-class CFTreeLoop : public CFTree{
+void CFTreeLoop::addT2(CFTree *t){
+	ex = t;
+}
 
-	BasicBlock *header;
-	CFTree* bd; // body
-	int n;
-	CFTree* ex; // exit
-
-	public:
-
-	virtual CFTreeLoop *toLoop() {
-		return (CFTreeLoop*) this;
-	}
-	virtual CFTreeLeaf *toLeaf() {return NULL;}/* abstract */
-	virtual CFTreeSeq *toSeq() {return NULL;}/* abstract */
-	virtual CFTreeAlt *toAlt() {return NULL;}/* abstract */
-
-	CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, CFTree* n_ex) {
-		header = h;
-		n = bound;
-		bd = n_bd;
-		ex = n_ex;
-	}
-
-	BasicBlock *getHeader() { return header; }
-	int getHeaderId() const { return header->id(); }
-
-	CFTree *getBody(){
-		return bd;
-	}
-
-	CFTree *getExit(){
-		return ex;
-	}
-
-	void addT1(CFTree *t){
-		bd = t;
-	}
-
-	void addT2(CFTree *t){
-		ex = t;
-	}
-
-	void changeBound(int bound){
-		n = bound;
-	}
-
-};
-
+void CFTreeLoop::changeBound(int bound){
+	n = bound;
+}
 
 /*
 TODO : add semantics in CFT
@@ -544,6 +516,12 @@ std::string write_tree(CFTree &n, unsigned int *lab) {
 		return write_tree(*n.toSeq(), lab);
 	return "";
 }
+
+//-----------------------------------------------------------------------------------------------
+
+//-------------------------------
+//	METHODS TO CONSTRUCT DAG
+//-------------------------------
 
 /*
 	Returns the list of blocks contained in the loop that has b as header
