@@ -1,7 +1,7 @@
 #include "include/CFTree.h"
 
 namespace otawa { namespace cftree {
-using namespace otawa;
+// using namespace otawa;
 
 // definition propriete cftree
 //Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
@@ -517,7 +517,8 @@ std::string write_tree(CFTree &n, unsigned int *lab) {
 	return "";
 }
 
-//-----------------------------------------------------------------------------------------------
+//=================================================
+
 
 //-------------------------------
 //	METHODS TO CONSTRUCT DAG
@@ -672,7 +673,7 @@ void addLHEdgesExit(DAG *dag, DAGNode *n, DAGHNode *l_hp) {
 	}
 }
 
-DAG *toDAG(CFG *cfg, BasicBlock *l_h){
+DAG* CFTreeExtractor::toDAG(CFG *cfg, BasicBlock *l_h){
 	int i;
 	int j;
 	DAG *dag = new DAG();
