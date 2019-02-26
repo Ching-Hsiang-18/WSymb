@@ -20,8 +20,88 @@ namespace otawa { namespace cftree {
 	class DAGVNode;
 	class DAGHNode;
 	class DAGNode;
+	class DAG;
+
+	Identifier<DAGHNode*> DAG_HNODE("otawa::cftree:DAG_HNODE");
+	Identifier<DAGBNode*> DAG_BNODE("otawa::cftree:DAG_BNODE");
+
+	class DAGNode
+	{
+		private:
+			std::vector<DAGNode*> pred; // les noeuds précédents du sommet
+			std::vector<DAGNode*> succ; // les noeuds suivants du sommet
+
+		public:
+			// abstract
+			virtual DAGVNode *toVNode() = 0;
+			virtual DAGHNode *toHNode() = 0;
+			virtual DAGBNode *toBNode() = 0;
+
+			// Add directed edge between two nodes
+			void addSucc(DAGNode *s);
+			void addPred(DAGNode *s);
+
+			// Iterator for successor and predecessor
+			std::vector<DAGNode*>::const_iterator succIter();
+			std::vector<DAGNode*>::const_iterator predIter();
+			std::vector<DAGNode*>::const_iterator succEnd();
+			std::vector<DAGNode*>::const_iterator predEnd();
+
+			// Getter for successor and predecessor
+			std::vector<DAGNode*> getSucc();
+			std::vector<DAGNode*> getPred();
+	};
+
+	class DAGHNode : public DAGNode
+	{
+		/*
+		Hierarchical node represent inner loop in DAG.
+		*/
+		private:
+			BasicBlock *header;
+			DAG* sub_dag;
+
+		public:
+
+			// implements abstrat
+			DAGHNode *toHNode();
+			DAGVNode *toVNode();
+			DAGBNode *toBNode();
+
+			// Constructor
+			DAGHNode(BasicBlock *b);
+
+
+			void setDAG(DAG *dag);
+			BasicBlock *getHeader();
+			DAG *getDag();
+			int getLoopId() const;
+	};
+
+	class DAGVNode : public DAGNode {
+		private:
+			#define VNODE_EXIT 0
+			#define VNODE_NEXT 1
+
+			int type;
+
+		public:
+			// implements abstrat
+			DAGHNode *toHNode();
+			DAGVNode *toVNode();
+			DAGBNode *toBNode();
+
+			DAGVNode(int _type);
+			int getType() const;
+	};
+
 	class DAG
 	{
+		/*
+		a Directed Acyclic Graph (DAG) represents the loop body. In this
+		DAG, inner loops are replaced by hierarchical nodes, which
+		themselves correspond to separate DAGs.
+		*/
 		private:
 			// Set of DAG nodes
 			std::vector<DAGNode*> all;
@@ -61,14 +141,13 @@ namespace otawa { namespace cftree {
 			~DAG();
 	};
 
+
 	class CFTreeLeaf;
 	class CFTreeAlt;
 	class CFTreeLoop;
 	class CFTreeSeq;
 	class CFTree;
 
-	Identifier<DAGHNode*> DAG_HNODE("otawa::cftree:DAG_HNODE");
-	Identifier<DAGBNode*> DAG_BNODE("otawa::cftree:DAG_BNODE");
 
 // method to print the dag
 	io::Output &operator<<(io::Output &o, const DAGVNode &n);

@@ -240,7 +240,6 @@ DAGNode* DAG::getNext(){
 	return n_next;
 }
 
-
 DAGNode* DAG::getElement(unsigned i){
 	return all[i];
 }
@@ -264,87 +263,81 @@ bool DAG::find_node(DAGNode *elem){ // cherche si un bloc est présent dans le d
 	return (it != end());
 }
 
+//----------------------
+//		CLASS DAGNODE
+//----------------------
 
-class DAGNode {
+void DAGNode::addSucc(DAGNode *s) {
+	succ.push_back(s);
+}
 
-	std::vector<DAGNode*> pred; // les noeuds précédents du sommet
-	std::vector<DAGNode*> succ; // les noeuds suivants du sommet
+void DAGNode::addPred(DAGNode *s) {
+	pred.push_back(s);
+}
 
-  public:
-	virtual DAGVNode *toVNode() = 0; /* abstract */
-	virtual DAGHNode *toHNode() = 0;/* abstract */
-	virtual DAGBNode *toBNode() = 0;/* abstract */
+std::vector<DAGNode*>::const_iterator DAGNode::succIter() {
+	return succ.begin();
+}
 
-	void addSucc(DAGNode *s) {
-		succ.push_back(s);
-	}
+std::vector<DAGNode*>::const_iterator DAGNode::predIter() {
+	return pred.begin();
+}
 
-	void addPred(DAGNode *s) {
-		pred.push_back(s);
-	}
+std::vector<DAGNode*>::const_iterator DAGNode::succEnd() {
+	return succ.end();
+}
 
-	std::vector<DAGNode*>::const_iterator succIter() {
-		return succ.begin();
-	}
+std::vector<DAGNode*>::const_iterator DAGNode::predEnd() {
+	return pred.end();
+}
 
-	std::vector<DAGNode*>::const_iterator predIter() {
-		return pred.begin();
-	}
+std::vector<DAGNode*> DAGNode::getSucc(){
+	return succ;
+}
 
-	std::vector<DAGNode*>::const_iterator succEnd() {
-		return succ.end();
-	}
+std::vector<DAGNode*> DAGNode::getPred(){
+	return pred;
+}
 
-	std::vector<DAGNode*>::const_iterator predEnd() {
-		return pred.end();
-	}
+//----------------------
+//		CLASS DAGHNODE
+//----------------------
 
-	std::vector<DAGNode*> getSucc(){
-		return succ;
-	}
+DAGHNode* DAGHNode::toHNode() {
+	return (DAGHNode*) this;
+}
+DAGVNode* DAGHNode::toVNode() { return NULL; }
+DAGBNode* DAGHNode::toBNode() { return NULL; }
 
-	std::vector<DAGNode*> getPred(){
-		return pred;
-	}
-};
+DAGHNode::DAGHNode(BasicBlock *b) {
+	header = b;
+	DAG_HNODE(header) = this;
+}
 
-class DAGVNode : public DAGNode {
-#define VNODE_EXIT 0
-#define VNODE_NEXT 1
-	int type;
+void DAGHNode::setDAG(DAG *dag){
+	sub_dag = dag;
+}
 
-  public:
-	virtual DAGVNode *toVNode() {
+BasicBlock* DAGHNode::getHeader() { return header; }
+DAG* DAGHNode::getDag() {return sub_dag;}
+int DAGHNode::getLoopId() const { return header->id(); }
+
+// class DAGVNode : public DAGNode {
+// #define VNODE_EXIT 0
+// #define VNODE_NEXT 1
+// 	int type;
+//
+//   public:
+	DAGVNode* DAGVNode::toVNode() {
 		return (DAGVNode*) this;
 	}
-	virtual DAGHNode *toHNode() { return NULL; }
-	virtual DAGBNode *toBNode() { return NULL; }
+	DAGHNode* DAGVNode::toHNode() { return NULL; }
+	DAGBNode* DAGVNode::toBNode() { return NULL; }
 
-	DAGVNode(int _type) { type = _type; }
-	int getType() const { return type;}
+	DAGVNode::DAGVNode(int _type) { type = _type; }
+	int DAGVNode::getType() const { return type;}
 
-};
-
-class DAGHNode : public DAGNode {
-	BasicBlock *header;
-	DAG* sub_dag;
-  public:
-	virtual DAGHNode *toHNode() {
-		return (DAGHNode*) this;
-	}
-	virtual DAGVNode *toVNode() { return NULL; }
-	virtual DAGBNode *toBNode() { return NULL; }
-	DAGHNode(BasicBlock *b) {
-		header = b;
-		DAG_HNODE(header) = this;
-	}
-	void setDAG(DAG *dag){
-		sub_dag = dag;
-	}
-	BasicBlock *getHeader() { return header; }
-	DAG *getDag() {return sub_dag;}
-	int getLoopId() const { return header->id(); }
-};
+// };
 
 class DAGBNode : public DAGNode {
 	BasicBlock *block;
@@ -783,7 +776,7 @@ int DAGNodeDominate(DAGNode *b1, DAGNode *b2){
 	BasicBlock *bb1 = b1->toBNode() ? b1->toBNode()->getBlock() : b1->toHNode()->getHeader();
 	BasicBlock *bb2 = b2->toBNode() ? b2->toBNode()->getBlock() : b2->toHNode()->getHeader();
 	if (Dominance::dominates(bb1, bb2)){
-		return 42;
+		return 1;
 	}
 	return 0;
 }
