@@ -25,6 +25,49 @@ namespace otawa { namespace cftree {
 	Identifier<DAGHNode*> DAG_HNODE("otawa::cftree:DAG_HNODE");
 	Identifier<DAGBNode*> DAG_BNODE("otawa::cftree:DAG_BNODE");
 
+	class CFTreeLeaf;
+	class CFTreeAlt;
+	class CFTreeLoop;
+	class CFTreeSeq;
+	class CFTree;
+
+
+	class CFTree
+	{
+		/*
+		a Control-Flow Tree, which also represents the possible ex-
+		ecution paths of a program but, thanks to its tree structure, is more prone to recursive WCET
+		analysis than a CFG. A Control-flow Tree is similar to Abstract Syntax Trees used in program-
+		ming languages compilation, except that it represents the structure of binary code. As such, it will
+		be quite natural to represent the WCET of a CFT as an arithmetic expression
+		*/
+
+		public:
+			virtual CFTreeLeaf *toLeaf() = 0; /* abstract */
+			virtual CFTreeAlt *toAlt() = 0;/* abstract */
+			virtual CFTreeLoop *toLoop() = 0;/* abstract */
+			virtual CFTreeSeq *toSeq() = 0;/* abstract */
+	};
+
+	class CFTreeLeaf : public CFTree
+	{
+
+			BasicBlock *block;
+
+		public:
+			// implements abstrat
+			CFTreeLeaf *toLeaf();
+			CFTreeAlt *toAlt();
+			CFTreeLoop *toLoop();
+			CFTreeSeq *toSeq();
+
+			CFTreeLeaf(BasicBlock *b);
+			BasicBlock *getBlock();
+			int getBlockId() const;
+
+	};
+
+
 	class DAGNode
 	{
 		private:
@@ -95,6 +138,22 @@ namespace otawa { namespace cftree {
 			int getType() const;
 	};
 
+	class DAGBNode : public DAGNode {
+		private:
+			BasicBlock *block;
+
+	  public:
+			// implements abstrat
+			DAGHNode *toHNode();
+			DAGVNode *toVNode();
+			DAGBNode *toBNode();
+
+			DAGBNode(BasicBlock *b);
+			BasicBlock *getBlock();
+			int getBlockId() const;
+	};
+
+
 	class DAG
 	{
 		/*
@@ -141,14 +200,6 @@ namespace otawa { namespace cftree {
 			~DAG();
 	};
 
-
-	class CFTreeLeaf;
-	class CFTreeAlt;
-	class CFTreeLoop;
-	class CFTreeSeq;
-	class CFTree;
-
-
 // method to print the dag
 	io::Output &operator<<(io::Output &o, const DAGVNode &n);
 	io::Output &operator<<(io::Output &o, DAGNode &n);
@@ -184,10 +235,6 @@ private:
 };
 
 extern p::feature EXTRACTED_CFTREE_FEATURE;
-
-class DAGNode;
-class DAGBNode;
-class DAGHNode;
 
 extern Identifier<DAGBNode*> DAG_BNODE;
 extern Identifier<DAGHNode*> DAG_HNODE;

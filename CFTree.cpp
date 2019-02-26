@@ -13,38 +13,28 @@ using namespace otawa;
 	-> Loop(h,t1,n,t2) : Loop avec h en header, répète n fois le sous-arbre t1, et execute l'arbre t2
 	-> Seq(t1..tn) : Séquence de tree
 */
-class CFTree {
 
-public:
-	virtual CFTreeLeaf *toLeaf() = 0; /* abstract */
-	virtual CFTreeAlt *toAlt() = 0;/* abstract */
-	virtual CFTreeLoop *toLoop() = 0;/* abstract */
-	virtual CFTreeSeq *toSeq() = 0;/* abstract */
+//--------------------
+//	CLASS CFTREELEAF
+//--------------------
 
-};
+CFTreeLeaf* CFTreeLeaf::toLeaf() {
+	return (CFTreeLeaf*) this;
+}
+CFTreeAlt* CFTreeLeaf::toAlt() {return NULL;}/* abstract */
+CFTreeLoop* CFTreeLeaf::toLoop() {return NULL;}/* abstract */
+CFTreeSeq* CFTreeLeaf::toSeq() {return NULL;}/* abstract */
 
-class CFTreeLeaf : public CFTree{
+CFTreeLeaf::CFTreeLeaf(BasicBlock *b) {
+	block = b;
+}
 
-	BasicBlock *block;
+BasicBlock* CFTreeLeaf::getBlock() { return block; }
+int CFTreeLeaf::getBlockId() const { return block->id(); }
 
-	public:
-
-	virtual CFTreeLeaf *toLeaf() {
-		return (CFTreeLeaf*) this;
-	}
-	virtual CFTreeAlt *toAlt() {return NULL;}/* abstract */
-	virtual CFTreeLoop *toLoop() {return NULL;}/* abstract */
-	virtual CFTreeSeq *toSeq() {return NULL;}/* abstract */
-
-	CFTreeLeaf(BasicBlock *b) {
-		block = b;
-	}
-
-	BasicBlock *getBlock() { return block; }
-	int getBlockId() const { return block->id(); }
-
-};
-
+//--------------------
+//	CLASS CFTREEALT
+//--------------------
 
 class CFTreeAlt : public CFTree{
 
@@ -163,47 +153,50 @@ class CFTreeLoop : public CFTree{
 };
 
 
-template <class T>
-class CFTSemantic {
-	virtual T evalAlt(std::vector<T*> *list) = 0;
-	virtual T evalSeq(std::vector<T*> *list) = 0;
-	virtual T evalLoop(T *body, T *exit, BasicBlock *header, int n) = 0;
-	virtual T evalLeaf(BasicBlock *bb) = 0;
-};
-
-template <class T>
-class EvaluateCFT {
-  public:
-	static T evaluate(CFTree *cft, CFTSemantic<T> *sem) {
-	}
-};
-
-
-class NodeCount: public CFTSemantic<int> {
-	virtual int evalAlt(std::vector<int*> *list) {
-		int sum = 0;
-		for (int i = 0; i < list->size(); i++) {
-			sum += *(list->at(i));
-		}
-	}
-	virtual int evalSeq(std::vector<int*> *list) {
-		int sum = 0;
-		for (int i = 0; i < list->size(); i++) {
-			sum += *(list->at(i));
-		}
-	}
-	virtual int evalLoop(int *body, int *exit, BasicBlock *header, int n) {
-		return *body + *exit;
-	}
-	virtual int evalLeaf(BasicBlock *bb) {
-		return 1;
-	}
-};
-
-int countNodes(CFTree *cft) {
-	NodeCount nc;
-	return EvaluateCFT<int>::evaluate(cft, &nc);
-}
+/*
+TODO : add semantics in CFT
+*/
+// template <class T>
+// class CFTSemantic {
+// 	virtual T evalAlt(std::vector<T*> *list) = 0;
+// 	virtual T evalSeq(std::vector<T*> *list) = 0;
+// 	virtual T evalLoop(T *body, T *exit, BasicBlock *header, int n) = 0;
+// 	virtual T evalLeaf(BasicBlock *bb) = 0;
+// };
+//
+// template <class T>
+// class EvaluateCFT {
+//   public:
+// 	static T evaluate(CFTree *cft, CFTSemantic<T> *sem) {
+// 	}
+// };
+//
+//
+// class NodeCount: public CFTSemantic<int> {
+// 	virtual int evalAlt(std::vector<int*> *list) {
+// 		int sum = 0;
+// 		for (int i = 0; i < list->size(); i++) {
+// 			sum += *(list->at(i));
+// 		}
+// 	}
+// 	virtual int evalSeq(std::vector<int*> *list) {
+// 		int sum = 0;
+// 		for (int i = 0; i < list->size(); i++) {
+// 			sum += *(list->at(i));
+// 		}
+// 	}
+// 	virtual int evalLoop(int *body, int *exit, BasicBlock *header, int n) {
+// 		return *body + *exit;
+// 	}
+// 	virtual int evalLeaf(BasicBlock *bb) {
+// 		return 1;
+// 	}
+// };
+//
+// int countNodes(CFTree *cft) {
+// 	NodeCount nc;
+// 	return EvaluateCFT<int>::evaluate(cft, &nc);
+// }
 
 //--------------------
 //				CLASS DAG
@@ -322,38 +315,36 @@ BasicBlock* DAGHNode::getHeader() { return header; }
 DAG* DAGHNode::getDag() {return sub_dag;}
 int DAGHNode::getLoopId() const { return header->id(); }
 
-// class DAGVNode : public DAGNode {
-// #define VNODE_EXIT 0
-// #define VNODE_NEXT 1
-// 	int type;
-//
-//   public:
-	DAGVNode* DAGVNode::toVNode() {
-		return (DAGVNode*) this;
-	}
-	DAGHNode* DAGVNode::toHNode() { return NULL; }
-	DAGBNode* DAGVNode::toBNode() { return NULL; }
+//----------------------
+//		CLASS DAGVNODE
+//----------------------
 
-	DAGVNode::DAGVNode(int _type) { type = _type; }
-	int DAGVNode::getType() const { return type;}
+DAGVNode* DAGVNode::toVNode() {
+	return (DAGVNode*) this;
+}
+DAGHNode* DAGVNode::toHNode() { return NULL; }
+DAGBNode* DAGVNode::toBNode() { return NULL; }
 
-// };
+DAGVNode::DAGVNode(int _type) { type = _type; }
+int DAGVNode::getType() const { return type;}
 
-class DAGBNode : public DAGNode {
-	BasicBlock *block;
-  public:
-	virtual DAGBNode *toBNode() {
-		return (DAGBNode*) this;
-	}
-	virtual DAGHNode *toHNode() { return NULL; }
-	virtual DAGVNode *toVNode() { return NULL; }
-	DAGBNode(BasicBlock *b) {
-		block = b;
-		DAG_BNODE(block) = this;
-	}
-	BasicBlock *getBlock() { return block; }
-	int getBlockId() const { return block->id(); }
-};
+//----------------------
+//		CLASS DAGBNODE
+//----------------------
+
+DAGBNode* DAGBNode::toBNode() {
+	return (DAGBNode*) this;
+}
+DAGHNode* DAGBNode::toHNode() { return NULL; }
+DAGVNode* DAGBNode::toVNode() { return NULL; }
+
+DAGBNode::DAGBNode(BasicBlock *b) {
+	block = b;
+	DAG_BNODE(block) = this;
+}
+
+BasicBlock* DAGBNode::getBlock() { return block; }
+int DAGBNode::getBlockId() const { return block->id(); }
 
 DAG::~DAG()
 {
@@ -362,6 +353,10 @@ DAG::~DAG()
 	  delete n;
   }
 }
+
+//----------------------
+//		CLASS PLUGIN
+//----------------------
 
 class Plugin : public ProcessorPlugin { // plugin qui va transformer le CFG
 public:
@@ -483,6 +478,9 @@ io::Output &operator<<(io::Output &o, CFTree &n) {
 	return o;
 }
 
+//---------------------------
+//				DOT FOR CFG
+//---------------------------
 
 std::string write_tree(CFTreeLoop &n, unsigned int *lab){
 	std::stringstream ss;
@@ -520,7 +518,6 @@ std::string write_tree(CFTreeSeq &n, unsigned int *lab){
 	std::stringstream ss;
 	unsigned int seq_lab = *lab;
 	ss << "l" << seq_lab << " [label = \" Seq\"]; \n";
-	// o << "start "<< *n.getStart() << "\n";
 	for (auto it = n.childIter(); it != n.childEnd(); it++) {
 		CFTree *ch = (*it);
 		unsigned int old_lab = ++(*lab);
