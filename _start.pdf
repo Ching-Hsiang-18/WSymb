@@ -1,5 +1,5 @@
 %!PS-Adobe-3.0
-%%Creator: graphviz version 2.38.0 (20140413.2041)
+%%Creator: graphviz version 2.40.1 (20161225.0304)
 %%Title: main
 %%Pages: (atend)
 %%BoundingBox: (atend)
@@ -163,7 +163,6 @@ def
 %%EndProlog
 %%BeginSetup
 14 default-font-family set_font
-1 setmiterlimit
 % /arrowlength 10 def
 % /arrowwidth 5 def
 
@@ -179,337 +178,337 @@ def
 %%EndSetup
 setupLatin1
 %%Page: 1 1
-%%PageBoundingBox: 36 36 1273 1534
+%%PageBoundingBox: 36 36 1234 1534
 %%PageOrientation: Portrait
 0 0 1 beginpage
 gsave
-36 36 1237 1498 boxprim clip newpath
+36 36 1198 1498 boxprim clip newpath
 1 1 set_scale 0 rotate 40 40 translate
 0 0 0 graphcolor
 14 /Times-Roman set_font
-575 7.8 moveto 79 (_start CFG) alignedtext
+564.5 7.8 moveto 61 (_start CFG) alignedtext
 % Node0
 gsave
 1 setlinewidth
 0 0 0 nodecolor
-newpath 692.5 1452.5 moveto
-692.5 1452.5 723.5 1452.5 723.5 1452.5 curveto
-729.5 1452.5 735.5 1458.5 735.5 1464.5 curveto
-735.5 1464.5 735.5 1477.5 735.5 1477.5 curveto
-735.5 1483.5 729.5 1489.5 723.5 1489.5 curveto
-723.5 1489.5 692.5 1489.5 692.5 1489.5 curveto
-686.5 1489.5 680.5 1483.5 680.5 1477.5 curveto
-680.5 1477.5 680.5 1464.5 680.5 1464.5 curveto
-680.5 1458.5 686.5 1452.5 692.5 1452.5 curveto
+newpath 757.5 1452.5 moveto
+757.5 1452.5 788.5 1452.5 788.5 1452.5 curveto
+794.5 1452.5 800.5 1458.5 800.5 1464.5 curveto
+800.5 1464.5 800.5 1477.5 800.5 1477.5 curveto
+800.5 1483.5 794.5 1489.5 788.5 1489.5 curveto
+788.5 1489.5 757.5 1489.5 757.5 1489.5 curveto
+751.5 1489.5 745.5 1483.5 745.5 1477.5 curveto
+745.5 1477.5 745.5 1464.5 745.5 1464.5 curveto
+745.5 1458.5 751.5 1452.5 757.5 1452.5 curveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-688.5 1467.3 moveto 39 (entry) alignedtext
+759 1467.3 moveto 28 (entry) alignedtext
 grestore
 % Node1
 gsave
 1 setlinewidth
 0 0 0 nodecolor
-newpath 532.5 1115.5 moveto
-532.5 1115.5 883.5 1115.5 883.5 1115.5 curveto
-889.5 1115.5 895.5 1121.5 895.5 1127.5 curveto
-895.5 1127.5 895.5 1371.5 895.5 1371.5 curveto
-895.5 1377.5 889.5 1383.5 883.5 1383.5 curveto
-883.5 1383.5 532.5 1383.5 532.5 1383.5 curveto
-526.5 1383.5 520.5 1377.5 520.5 1371.5 curveto
-520.5 1371.5 520.5 1127.5 520.5 1127.5 curveto
-520.5 1121.5 526.5 1115.5 532.5 1115.5 curveto
+newpath 596.5 1115.5 moveto
+596.5 1115.5 949.5 1115.5 949.5 1115.5 curveto
+955.5 1115.5 961.5 1121.5 961.5 1127.5 curveto
+961.5 1127.5 961.5 1371.5 961.5 1371.5 curveto
+961.5 1377.5 955.5 1383.5 949.5 1383.5 curveto
+949.5 1383.5 596.5 1383.5 596.5 1383.5 curveto
+590.5 1383.5 584.5 1377.5 584.5 1371.5 curveto
+584.5 1371.5 584.5 1127.5 584.5 1127.5 curveto
+584.5 1121.5 590.5 1115.5 596.5 1115.5 curveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1368.3 moveto 122 (BB 1 \(00008000\)) alignedtext
+592.5 1368.3 moveto 96 (BB 1 \(00008000\)) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
-newpath 520.5 1360.5 moveto
-895.5 1360.5 lineto
+newpath 584.5 1360.5 moveto
+961.5 1360.5 lineto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1329.3 moveto 47 (_start:) alignedtext
+592.5 1329.3 moveto 34 (_start:) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1314.3 moveto 214 (0x00008000: str fp, [sp, #-4]!) alignedtext
+592.5 1314.3 moveto 163 (0x00008000: str fp, [sp, #-4]!) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1299.3 moveto 199 (0x00008004: add fp, sp, #0) alignedtext
+592.5 1299.3 moveto 151 (0x00008004: add fp, sp, #0) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1284.3 moveto 210 (0x00008008: sub sp, sp, #12) alignedtext
+592.5 1284.3 moveto 157 (0x00008008: sub sp, sp, #12) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1269.3 moveto 216 (0x0000800c: ldr r3, [fp, #-12]) alignedtext
+592.5 1269.3 moveto 165 (0x0000800c: ldr r3, [fp, #-12]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1254.3 moveto 200 (0x00008010: add r3, r3, #1) alignedtext
+592.5 1254.3 moveto 150 (0x00008010: add r3, r3, #1) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1239.3 moveto 217 (0x00008014: str r3, [fp, #-12]) alignedtext
+592.5 1239.3 moveto 164 (0x00008014: str r3, [fp, #-12]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1224.3 moveto 179 (0x00008018: mov r3, #0) alignedtext
+592.5 1224.3 moveto 136 (0x00008018: mov r3, #0) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1209.3 moveto 207 (0x0000801c: str r3, [fp, #-8]) alignedtext
+592.5 1209.3 moveto 157 (0x0000801c: str r3, [fp, #-8]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1194.3 moveto 148 (0x00008020: b 8058) alignedtext
+592.5 1194.3 moveto 113 (0x00008020: b 8058) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
-newpath 520.5 1186.5 moveto
-895.5 1186.5 lineto
+newpath 584.5 1186.5 moveto
+961.5 1186.5 lineto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1154.8 moveto 235 (otawa::REVERSE_DOM = {0, 1}) alignedtext
+592.5 1154.8 moveto 190 (otawa::REVERSE_DOM = {0, 1}) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-528.5 1139.8 moveto 359 (otawa::cftree:DAG_BNODE = 0000000000ace1d0) alignedtext
+592.5 1139.8 moveto 280 (otawa::cftree:DAG_BNODE = 0000000001d8b7e0) alignedtext
 grestore
 % Node0->Node1
 gsave
 1 setlinewidth
 dashed
 0 0 0 edgecolor
-newpath 708 1452.41 moveto
-708 1438.34 708 1417.15 708 1393.71 curveto
+newpath 773 1452.496 moveto
+773 1438.2579 773 1417.1151 773 1393.7794 curveto
 stroke
 0 0 0 edgecolor
-newpath 711.5 1393.54 moveto
-708 1383.54 lineto
-704.5 1393.54 lineto
+newpath 776.5001 1393.6579 moveto
+773 1383.6579 lineto
+769.5001 1393.658 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 711.5 1393.54 moveto
-708 1383.54 lineto
-704.5 1393.54 lineto
+newpath 776.5001 1393.6579 moveto
+773 1383.6579 lineto
+769.5001 1393.658 lineto
 closepath stroke
 grestore
 % Node2
 gsave
 1 setlinewidth
 0 0 0 nodecolor
-newpath 531.5 839.5 moveto
-531.5 839.5 884.5 839.5 884.5 839.5 curveto
-890.5 839.5 896.5 845.5 896.5 851.5 curveto
-896.5 851.5 896.5 1035.5 896.5 1035.5 curveto
-896.5 1041.5 890.5 1047.5 884.5 1047.5 curveto
-884.5 1047.5 531.5 1047.5 531.5 1047.5 curveto
-525.5 1047.5 519.5 1041.5 519.5 1035.5 curveto
-519.5 1035.5 519.5 851.5 519.5 851.5 curveto
-519.5 845.5 525.5 839.5 531.5 839.5 curveto
+newpath 595 839.5 moveto
+595 839.5 951 839.5 951 839.5 curveto
+957 839.5 963 845.5 963 851.5 curveto
+963 851.5 963 1035.5 963 1035.5 curveto
+963 1041.5 957 1047.5 951 1047.5 curveto
+951 1047.5 595 1047.5 595 1047.5 curveto
+589 1047.5 583 1041.5 583 1035.5 curveto
+583 1035.5 583 851.5 583 851.5 curveto
+583 845.5 589 839.5 595 839.5 curveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 1032.3 moveto 122 (BB 2 \(00008058\)) alignedtext
+591 1032.3 moveto 96 (BB 2 \(00008058\)) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
-newpath 519.5 1024.5 moveto
-896.5 1024.5 lineto
+newpath 583 1024.5 moveto
+963 1024.5 lineto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 993.3 moveto 208 (0x00008058: ldr r3, [fp, #-8]) alignedtext
+591 993.3 moveto 159 (0x00008058: ldr r3, [fp, #-8]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 978.3 moveto 179 (0x0000805c: cmp r3, #9) alignedtext
+591 978.3 moveto 135 (0x0000805c: cmp r3, #9) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 963.3 moveto 206 (0x00008060: ble 100008024) alignedtext
+591 963.3 moveto 157 (0x00008060: ble 100008024) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
-newpath 519.5 955.5 moveto
-896.5 955.5 lineto
+newpath 583 955.5 moveto
+963 955.5 lineto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 923.8 moveto 253 (otawa::REVERSE_DOM = {0, 1, 2}) alignedtext
+591 923.8 moveto 204 (otawa::REVERSE_DOM = {0, 1, 2}) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 908.8 moveto 359 (otawa::cftree:DAG_BNODE = 0000000000ace510) alignedtext
+591 908.8 moveto 281 (otawa::cftree:DAG_BNODE = 0000000001d932b0) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 893.8 moveto 219 (otawa::LOOP_HEADER = true) alignedtext
+591 893.8 moveto 174 (otawa::LOOP_HEADER = true) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 878.8 moveto 361 (otawa::cftree:DAG_HNODE = 0000000000ace2a0) alignedtext
+591 878.8 moveto 282 (otawa::cftree:DAG_HNODE = 0000000001d8b830) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-527.5 863.8 moveto 289 (otawa::EXIT_LIST = 0000000000acdf20) alignedtext
+591 863.8 moveto 228 (otawa::EXIT_LIST = 0000000001d92f20) alignedtext
 grestore
 % Node1->Node2
 gsave
 1 setlinewidth
 0 0 0 edgecolor
-newpath 708 1115.16 moveto
-708 1095.96 708 1076.35 708 1057.59 curveto
+newpath 773 1115.2839 moveto
+773 1096.0912 773 1076.498 773 1057.7373 curveto
 stroke
 0 0 0 edgecolor
-newpath 711.5 1057.57 moveto
-708 1047.57 lineto
-704.5 1057.57 lineto
+newpath 776.5001 1057.7098 moveto
+773 1047.7099 lineto
+769.5001 1057.7099 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 711.5 1057.57 moveto
-708 1047.57 lineto
-704.5 1057.57 lineto
+newpath 776.5001 1057.7098 moveto
+773 1047.7099 lineto
+769.5001 1057.7099 lineto
 closepath stroke
 0 0 0 edgecolor
 14 /Times-Roman set_font
-708 1085.8 moveto 41 (taken) alignedtext
+773 1085.8 moveto 30 (taken) alignedtext
 grestore
 % Node3
 gsave
 1 setlinewidth
 0 0 0 nodecolor
-newpath 216 562.5 moveto
-216 562.5 620 562.5 620 562.5 curveto
-626 562.5 632 568.5 632 574.5 curveto
-632 574.5 632 728.5 632 728.5 curveto
-632 734.5 626 740.5 620 740.5 curveto
-620 740.5 216 740.5 216 740.5 curveto
-210 740.5 204 734.5 204 728.5 curveto
-204 728.5 204 574.5 204 574.5 curveto
-204 568.5 210 562.5 216 562.5 curveto
+newpath 215 562.5 moveto
+215 562.5 619 562.5 619 562.5 curveto
+625 562.5 631 568.5 631 574.5 curveto
+631 574.5 631 728.5 631 728.5 curveto
+631 734.5 625 740.5 619 740.5 curveto
+619 740.5 215 740.5 215 740.5 curveto
+209 740.5 203 734.5 203 728.5 curveto
+203 728.5 203 574.5 203 574.5 curveto
+203 568.5 209 562.5 215 562.5 curveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-212 725.3 moveto 122 (BB 3 \(00008024\)) alignedtext
+211 725.3 moveto 96 (BB 3 \(00008024\)) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
-newpath 204 717.5 moveto
-632 717.5 lineto
+newpath 203 717.5 moveto
+631 717.5 lineto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-212 686.3 moveto 217 (0x00008024: ldr r3, [fp, #-12]) alignedtext
+211 686.3 moveto 166 (0x00008024: ldr r3, [fp, #-12]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-212 671.3 moveto 180 (0x00008028: cmp r3, #5) alignedtext
+211 671.3 moveto 136 (0x00008028: cmp r3, #5) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-212 656.3 moveto 160 (0x0000802c: ble 8040) alignedtext
+211 656.3 moveto 122 (0x0000802c: ble 8040) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
-newpath 204 648.5 moveto
-632 648.5 lineto
+newpath 203 648.5 moveto
+631 648.5 lineto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-212 616.8 moveto 359 (otawa::cftree:DAG_BNODE = 0000000000ace5b0) alignedtext
+211 616.8 moveto 218 (otawa::REVERSE_DOM = {0, 1, 2, 3}) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-212 601.8 moveto 412 (otawa::ENCLOSING_LOOP_HEADER = BB 2 \(00008058\)) alignedtext
+211 601.8 moveto 281 (otawa::cftree:DAG_BNODE = 0000000001d93330) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-212 586.8 moveto 271 (otawa::REVERSE_DOM = {0, 1, 2, 3}) alignedtext
+211 586.8 moveto 331 (otawa::ENCLOSING_LOOP_HEADER = BB 2 \(00008058\)) alignedtext
 grestore
 % Node2->Node3
 gsave
 1 setlinewidth
 0 0 0 edgecolor
-newpath 604.94 839.44 moveto
-575.22 809.72 542.94 777.44 513.69 748.19 curveto
+newpath 645.9835 839.318 moveto
+609.4118 809.3209 569.7041 776.7517 533.7837 747.2889 curveto
 stroke
 0 0 0 edgecolor
-newpath 515.87 745.42 moveto
-506.32 740.82 lineto
-510.92 750.37 lineto
+newpath 535.6531 744.2955 moveto
+525.7016 740.6598 lineto
+531.2138 749.7078 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 515.87 745.42 moveto
-506.32 740.82 lineto
-510.92 750.37 lineto
+newpath 535.6531 744.2955 moveto
+525.7016 740.6598 lineto
+531.2138 749.7078 lineto
 closepath stroke
 0 0 0 edgecolor
 14 /Times-Roman set_font
-581 801.8 moveto 41 (taken) alignedtext
+617 801.8 moveto 30 (taken) alignedtext
 grestore
 % Node7
 gsave
 1 setlinewidth
 0 0 0 nodecolor
-newpath 662.5 547.5 moveto
-662.5 547.5 1013.5 547.5 1013.5 547.5 curveto
-1019.5 547.5 1025.5 553.5 1025.5 559.5 curveto
-1025.5 559.5 1025.5 743.5 1025.5 743.5 curveto
-1025.5 749.5 1019.5 755.5 1013.5 755.5 curveto
-1013.5 755.5 662.5 755.5 662.5 755.5 curveto
-656.5 755.5 650.5 749.5 650.5 743.5 curveto
-650.5 743.5 650.5 559.5 650.5 559.5 curveto
-650.5 553.5 656.5 547.5 662.5 547.5 curveto
+newpath 661.5 547.5 moveto
+661.5 547.5 1014.5 547.5 1014.5 547.5 curveto
+1020.5 547.5 1026.5 553.5 1026.5 559.5 curveto
+1026.5 559.5 1026.5 743.5 1026.5 743.5 curveto
+1026.5 749.5 1020.5 755.5 1014.5 755.5 curveto
+1014.5 755.5 661.5 755.5 661.5 755.5 curveto
+655.5 755.5 649.5 749.5 649.5 743.5 curveto
+649.5 743.5 649.5 559.5 649.5 559.5 curveto
+649.5 553.5 655.5 547.5 661.5 547.5 curveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 740.3 moveto 122 (BB 7 \(00008064\)) alignedtext
+657.5 740.3 moveto 96 (BB 7 \(00008064\)) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
-newpath 650.5 732.5 moveto
-1025.5 732.5 lineto
+newpath 649.5 732.5 moveto
+1026.5 732.5 lineto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 701.3 moveto 217 (0x00008064: ldr r3, [fp, #-12]) alignedtext
+657.5 701.3 moveto 166 (0x00008064: ldr r3, [fp, #-12]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 686.3 moveto 200 (0x00008068: add r3, r3, #1) alignedtext
+657.5 686.3 moveto 150 (0x00008068: add r3, r3, #1) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 671.3 moveto 216 (0x0000806c: str r3, [fp, #-12]) alignedtext
+657.5 671.3 moveto 163 (0x0000806c: str r3, [fp, #-12]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 656.3 moveto 199 (0x00008070: add sp, fp, #0) alignedtext
+657.5 656.3 moveto 151 (0x00008070: add sp, fp, #0) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 641.3 moveto 207 (0x00008074: ldmia sp!, {fp}) alignedtext
+657.5 641.3 moveto 160 (0x00008074: ldmia sp!, {fp}) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 626.3 moveto 132 (0x00008078: bx lr) alignedtext
+657.5 626.3 moveto 101 (0x00008078: bx lr) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
-newpath 650.5 618.5 moveto
-1025.5 618.5 lineto
+newpath 649.5 618.5 moveto
+1026.5 618.5 lineto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 586.8 moveto 271 (otawa::REVERSE_DOM = {0, 1, 2, 7}) alignedtext
+657.5 586.8 moveto 218 (otawa::REVERSE_DOM = {0, 1, 2, 7}) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-658.5 571.8 moveto 359 (otawa::cftree:DAG_BNODE = 0000000000ace350) alignedtext
+657.5 571.8 moveto 281 (otawa::cftree:DAG_BNODE = 0000000001d8b880) alignedtext
 grestore
 % Node2->Node7
 gsave
 1 setlinewidth
 0 0 0 edgecolor
-newpath 695.66 839.08 moveto
-696.53 816.91 700.24 794.12 709 774 curveto
-710.42 770.73 711.99 767.5 713.67 764.33 curveto
+newpath 765.8569 839.4471 moveto
+766.5087 817.5882 768.817 794.8475 774 774 curveto
+774.7056 771.162 775.489 768.3166 776.3413 765.4709 curveto
 stroke
 0 0 0 edgecolor
-newpath 716.78 765.93 moveto
-718.71 755.51 lineto
-710.71 762.45 lineto
+newpath 779.7205 766.3972 moveto
+779.4913 755.8048 lineto
+773.065 764.2282 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 716.78 765.93 moveto
-718.71 755.51 lineto
-710.71 762.45 lineto
+newpath 779.7205 766.3972 moveto
+779.4913 755.8048 lineto
+773.065 764.2282 lineto
 closepath stroke
 0 0 0 edgecolor
 14 /Times-Roman set_font
-709 793.8 moveto 331 (otawa::LOOP_EXIT_EDGE = BB 2 \(00008058\)) alignedtext
+774 793.8 moveto 267 (otawa::LOOP_EXIT_EDGE = BB 2 \(00008058\)) alignedtext
 grestore
 % Node4
 gsave
@@ -527,7 +526,7 @@ newpath 12 278 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-8 440.8 moveto 122 (BB 4 \(00008040\)) alignedtext
+8 440.8 moveto 96 (BB 4 \(00008040\)) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
 newpath 0 433 moveto
@@ -535,13 +534,13 @@ newpath 0 433 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-8 401.8 moveto 217 (0x00008040: ldr r3, [fp, #-12]) alignedtext
+8 401.8 moveto 166 (0x00008040: ldr r3, [fp, #-12]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-8 386.8 moveto 200 (0x00008044: add r3, r3, #1) alignedtext
+8 386.8 moveto 150 (0x00008044: add r3, r3, #1) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-8 371.8 moveto 217 (0x00008048: str r3, [fp, #-12]) alignedtext
+8 371.8 moveto 164 (0x00008048: str r3, [fp, #-12]) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
 newpath 0 364 moveto
@@ -549,36 +548,36 @@ newpath 0 364 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-8 332.3 moveto 359 (otawa::cftree:DAG_BNODE = 0000000000ace650) alignedtext
+8 332.3 moveto 232 (otawa::REVERSE_DOM = {0, 1, 2, 3, 4}) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-8 317.3 moveto 412 (otawa::ENCLOSING_LOOP_HEADER = BB 2 \(00008058\)) alignedtext
+8 317.3 moveto 281 (otawa::cftree:DAG_BNODE = 0000000001d933b0) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-8 302.3 moveto 289 (otawa::REVERSE_DOM = {0, 1, 2, 3, 4}) alignedtext
+8 302.3 moveto 331 (otawa::ENCLOSING_LOOP_HEADER = BB 2 \(00008058\)) alignedtext
 grestore
 % Node3->Node4
 gsave
 1 setlinewidth
 0 0 0 edgecolor
-newpath 354.29 562.28 moveto
-331.86 531.22 306.54 496.16 283.65 464.45 curveto
+newpath 353.3265 562.263 moveto
+331.2318 531.2978 306.3465 496.4216 283.7853 464.8026 curveto
 stroke
 0 0 0 edgecolor
-newpath 286.27 462.1 moveto
-277.58 456.04 lineto
-280.59 466.2 lineto
+newpath 286.4538 462.5165 moveto
+277.7963 456.4091 lineto
+280.7556 466.5823 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 286.27 462.1 moveto
-277.58 456.04 lineto
-280.59 466.2 lineto
+newpath 286.4538 462.5165 moveto
+277.7963 456.4091 lineto
+280.7556 466.5823 lineto
 closepath stroke
 0 0 0 edgecolor
 14 /Times-Roman set_font
-329 509.8 moveto 41 (taken) alignedtext
+328 509.8 moveto 30 (taken) alignedtext
 grestore
 % Node5
 gsave
@@ -596,7 +595,7 @@ newpath 458 270.5 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 448.3 moveto 122 (BB 5 \(00008030\)) alignedtext
+454 448.3 moveto 96 (BB 5 \(00008030\)) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
 newpath 446 440.5 moveto
@@ -604,16 +603,16 @@ newpath 446 440.5 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 409.3 moveto 217 (0x00008030: ldr r3, [fp, #-12]) alignedtext
+454 409.3 moveto 166 (0x00008030: ldr r3, [fp, #-12]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 394.3 moveto 200 (0x00008034: add r3, r3, #1) alignedtext
+454 394.3 moveto 149 (0x00008034: sub r3, r3, #1) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 379.3 moveto 217 (0x00008038: str r3, [fp, #-12]) alignedtext
+454 379.3 moveto 164 (0x00008038: str r3, [fp, #-12]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 364.3 moveto 147 (0x0000803c: b 804c) alignedtext
+454 364.3 moveto 112 (0x0000803c: b 804c) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
 newpath 446 356.5 moveto
@@ -621,32 +620,32 @@ newpath 446 356.5 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 324.8 moveto 355 (otawa::cftree:DAG_BNODE = 0000000000ace6f0) alignedtext
+454 324.8 moveto 232 (otawa::REVERSE_DOM = {0, 1, 2, 3, 5}) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 309.8 moveto 412 (otawa::ENCLOSING_LOOP_HEADER = BB 2 \(00008058\)) alignedtext
+454 309.8 moveto 281 (otawa::cftree:DAG_BNODE = 0000000001d93480) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 294.8 moveto 289 (otawa::REVERSE_DOM = {0, 1, 2, 3, 5}) alignedtext
+454 294.8 moveto 331 (otawa::ENCLOSING_LOOP_HEADER = BB 2 \(00008058\)) alignedtext
 grestore
 % Node3->Node5
 gsave
 1 setlinewidth
 0 0 0 edgecolor
-newpath 493.57 562.28 moveto
-518.15 533.6 545.64 501.5 571.09 471.79 curveto
+newpath 493.22 562.263 moveto
+517.7518 533.5416 545.1574 501.4556 570.5513 471.7249 curveto
 stroke
 0 0 0 edgecolor
-newpath 574.01 473.76 moveto
-577.86 463.89 lineto
-568.7 469.2 lineto
+newpath 573.474 473.6921 moveto
+577.3074 463.815 lineto
+568.1513 469.1457 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 574.01 473.76 moveto
-577.86 463.89 lineto
-568.7 469.2 lineto
+newpath 573.474 473.6921 moveto
+577.3074 463.815 lineto
+568.1513 469.1457 lineto
 closepath stroke
 grestore
 % Node8
@@ -665,27 +664,27 @@ newpath 904 348.5 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-905 363.3 moveto 28 (exit) alignedtext
+908.5 363.3 moveto 21 (exit) alignedtext
 grestore
 % Node7->Node8
 gsave
 1 setlinewidth
 dashed
 0 0 0 edgecolor
-newpath 867.59 547.31 moveto
-883.15 493.03 901.04 430.65 911.08 395.62 curveto
+newpath 867.7015 547.1782 moveto
+883.1276 492.9962 900.8086 430.8944 910.8661 395.569 curveto
 stroke
 0 0 0 edgecolor
-newpath 914.54 396.24 moveto
-913.93 385.67 lineto
-907.81 394.31 lineto
+newpath 914.3596 396.0803 moveto
+913.7317 385.504 lineto
+907.6271 394.1634 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 914.54 396.24 moveto
-913.93 385.67 lineto
-907.81 394.31 lineto
+newpath 914.3596 396.0803 moveto
+913.7317 385.504 lineto
+907.6271 394.1634 lineto
 closepath stroke
 grestore
 % Node6
@@ -704,7 +703,7 @@ newpath 458 23.5 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 186.3 moveto 121 (BB 6 \(0000804c\)) alignedtext
+454 186.3 moveto 95 (BB 6 \(0000804c\)) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
 newpath 446 178.5 moveto
@@ -712,13 +711,13 @@ newpath 446 178.5 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 147.3 moveto 207 (0x0000804c: ldr r3, [fp, #-8]) alignedtext
+454 147.3 moveto 158 (0x0000804c: ldr r3, [fp, #-8]) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 132.3 moveto 200 (0x00008050: add r3, r3, #1) alignedtext
+454 132.3 moveto 150 (0x00008050: add r3, r3, #1) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 117.3 moveto 208 (0x00008054: str r3, [fp, #-8]) alignedtext
+454 117.3 moveto 157 (0x00008054: str r3, [fp, #-8]) alignedtext
 1 setlinewidth
 0 0 0 nodecolor
 newpath 446 109.5 moveto
@@ -726,82 +725,82 @@ newpath 446 109.5 moveto
 stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 77.8 moveto 359 (otawa::cftree:DAG_BNODE = 0000000000ace760) alignedtext
+454 77.8 moveto 232 (otawa::REVERSE_DOM = {0, 1, 2, 3, 6}) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 62.8 moveto 412 (otawa::ENCLOSING_LOOP_HEADER = BB 2 \(00008058\)) alignedtext
+454 62.8 moveto 281 (otawa::cftree:DAG_BNODE = 0000000001d934d0) alignedtext
 0 0 0 nodecolor
 14 /Times-Roman set_font
-454 47.8 moveto 289 (otawa::REVERSE_DOM = {0, 1, 2, 3, 6}) alignedtext
+454 47.8 moveto 331 (otawa::ENCLOSING_LOOP_HEADER = BB 2 \(00008058\)) alignedtext
 grestore
 % Node4->Node6
 gsave
 1 setlinewidth
 0 0 0 edgecolor
-newpath 369.68 277.87 moveto
-410.38 254.82 454.39 229.91 495.53 206.61 curveto
+newpath 369.9892 277.9883 moveto
+410.3587 254.9523 453.9582 230.0732 494.7827 206.7776 curveto
 stroke
 0 0 0 edgecolor
-newpath 497.29 209.64 moveto
-504.27 201.67 lineto
-493.84 203.55 lineto
+newpath 496.7713 209.6726 moveto
+503.7221 201.6765 lineto
+493.302 203.5928 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 497.29 209.64 moveto
-504.27 201.67 lineto
-493.84 203.55 lineto
+newpath 496.7713 209.6726 moveto
+503.7221 201.6765 lineto
+493.302 203.5928 lineto
 closepath stroke
 grestore
 % Node5->Node6
 gsave
 1 setlinewidth
 0 0 0 edgecolor
-newpath 660 270.18 moveto
-660 251.14 660 231.12 660 211.99 curveto
+newpath 660 270.4216 moveto
+660 251.3503 660 231.3017 660 212.1317 curveto
 stroke
 0 0 0 edgecolor
-newpath 663.5 211.78 moveto
-660 201.78 lineto
-656.5 211.78 lineto
+newpath 663.5001 211.8916 moveto
+660 201.8917 lineto
+656.5001 211.8917 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 663.5 211.78 moveto
-660 201.78 lineto
-656.5 211.78 lineto
+newpath 663.5001 211.8916 moveto
+660 201.8917 lineto
+656.5001 211.8917 lineto
 closepath stroke
 0 0 0 edgecolor
 14 /Times-Roman set_font
-660 240.3 moveto 41 (taken) alignedtext
+660 240.3 moveto 30 (taken) alignedtext
 grestore
 % Node6->Node2
 gsave
 1 setlinewidth
 0 0 0 edgecolor
-newpath 874.01 199.73 moveto
-904.35 219.24 932.75 242.51 955 270 curveto
-1035.54 369.51 1014.6 420.46 1034 547 curveto
-1091.16 919.82 1053.6 801.54 1040 821 curveto
-1008.47 866.11 958.3 894.53 906.41 912.41 curveto
+newpath 874.2279 199.8364 moveto
+904.456 219.3796 932.7555 242.6293 955 270 curveto
+1035.8966 369.5393 1016.4193 420.2367 1036 547 curveto
+1092.7342 914.2919 1054.2191 800.4231 1041 821 curveto
+1023.9089 847.6041 999.4474 868.5026 972.171 884.8998 curveto
 stroke
 0 0 0 edgecolor
-newpath 905.09 909.16 moveto
-896.7 915.63 lineto
-907.3 915.8 lineto
+newpath 970.1319 882.0356 moveto
+963.2219 890.0669 lineto
+973.6321 888.0976 lineto
 closepath fill
 1 setlinewidth
 solid
 0 0 0 edgecolor
-newpath 905.09 909.16 moveto
-896.7 915.63 lineto
-907.3 915.8 lineto
+newpath 970.1319 882.0356 moveto
+963.2219 890.0669 lineto
+973.6321 888.0976 lineto
 closepath stroke
 0 0 0 edgecolor
 14 /Times-Roman set_font
-1032 501.8 moveto 197 (otawa::BACK_EDGE = true) alignedtext
+1033 501.8 moveto 157 (otawa::BACK_EDGE = true) alignedtext
 grestore
 endpage
 showpage
@@ -810,7 +809,7 @@ grestore
 %%EndPage: 1
 %%Trailer
 %%Pages: 1
-%%BoundingBox: 36 36 1273 1534
+%%BoundingBox: 36 36 1234 1534
 end
 restore
 %%EOF

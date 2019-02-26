@@ -3,6 +3,8 @@
 namespace otawa { namespace cftree {
 using namespace otawa;
 
+// definition propriete cftree
+//Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
 
 /*
 	Un CFTree Node
@@ -412,7 +414,7 @@ void CFTreeExtractor::configure(const PropList &props) {
 }
 
 //---------------------------------------
-//				PRETTYPRINTER POUR LE DAG
+//				PRETTYPRINTER FOR DAG
 //---------------------------------------
 
 io::Output &operator<<(io::Output &o, const DAGVNode &n) {
@@ -422,6 +424,7 @@ io::Output &operator<<(io::Output &o, const DAGVNode &n) {
 		return o << "NEXT";
 	}
 }
+
 io::Output &operator<<(io::Output &o, const DAGBNode &n) {
 	return (o << "B_" << n.getBlockId());
 }
@@ -454,6 +457,11 @@ io::Output &operator<<(io::Output &o, DAG &n) { // POUR DEBUG
 	}
 	return o;
 }
+
+
+//---------------------------------------
+//				PRETTYPRINTER FOR CFG
+//---------------------------------------
 
 io::Output &operator<<(io::Output &o, CFTreeLeaf &n) {
 	return (o << "CFTreeLeaf(B_" << n.getBlockId()) << ")";
@@ -863,12 +871,8 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 	std::vector<CFTree*> ch;
 	std::vector<DAGNode*> fpn;
 
-	cout << "Nouvel appel à makeCFT" << endl;
 
-	cout << "Noeud de départ " << *start << endl;
-	cout << "Noeud de fin " << *end << endl;
 	forcedPassedNodes(dag, start, end, &fpn);
-	cout << "Nombre de noeuds de passage forcé " << fpn.size() << endl;
 
 	if (start == end){
 		if (start->toBNode()){
@@ -880,37 +884,38 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 	// Cherche les noeuds de passage forcé
 	for (auto it = fpn.begin(); it != fpn.end(); it++){
 		DAGNode *n = (*it);
-		cout << "Noeud de passage forcé " << *n << endl;
 	}
 
 	while (fpn.size() > 0){
 		DAGNode *c = getDominated(fpn); // l'element dominé
 		std::vector<DAGNode*>::iterator it = std::find(fpn.begin(), fpn.end(), c); // retrouver l'index de l'élement dominé
-		cout << "Noeud dominé " << *c << endl; // c tel que n >> c
-		cout << "Taille de fpn " << fpn.size() << endl;
 		fpn.erase(it); // N <- N \ c
+		// Si c a plusieurs prédécesseurs, càd qu'il y a un if avant
 		if (c->getPred().size() > 1){
-			cout << "PLUS DE 1 PREDECESSEUR" << endl;
 			DAGNode *ncd = getDominated(fpn);
 			CFTreeAlt *br = new CFTreeAlt();
-			cout << "Liste des Prédecesseur de "<< *c << endl;
+
+			// On construit le CFTreeAlt
 			for (auto pred = c->predIter(); pred != c->predEnd(); pred++){
-				cout << "On regarde pour le "<< **pred << endl;
 				br->addAlt(makeCFT (dag, ncd, *pred));
 			}
+
+			// On ajoute à la suite le bloc dominé
 			ch.push_back(br);
 			if (c->toBNode()){
 				BasicBlock *bb =  c->toBNode()->getBlock();
 				ch.push_back(new CFTreeLeaf(bb));
 			}
 		}
+
+		// Si c n'a qu'un seul prédécesseur
 		else {
 			if (c->toBNode()){
-				cout << "Je push le Bnode " << *c << endl;
 				BasicBlock *bb =  c->toBNode()->getBlock();
 				ch.insert(ch.begin(),new CFTreeLeaf(bb));
 			}
 
+			// Si on a une loop interne, on construit le CFTree associé
 			else if ( c->toHNode()){
 				DAGHNode *lh = c->toHNode();
 				DAG * sub_dag = lh->getDag();
@@ -925,16 +930,13 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 		}
 	}
 	if (ch.size() == 1){
-		cout << "Je return "<< *ch[0] << endl;
 		return ch[0];
 	}
 	if (start-> getPred().size() == 0){
-		cout << "Même start et end " << endl;
 		BasicBlock *bb =  start->toBNode()->getBlock();
 		ch.insert(ch.begin(),new CFTreeLeaf(bb));
 	}
 	CFTreeSeq* t_ch = new CFTreeSeq(ch);
-	cout << "Je return "<< *t_ch << endl;
 	return t_ch;
 }
 
@@ -945,6 +947,9 @@ void CFTreeExtractor::processCFG(CFG *cfg) {
 	DAG *dag = toDAG(cfg, NULL);
 	cout << "DAG: " << *dag;
 	CFTree *tree = makeCFT(dag, dag->getElement(2), dag->getElement(4));
+
+	//setter la propriete sur le cfg
+	//CFTREE(cfg) = tree;
 
 	std::ofstream myfile;
 	myfile.open("CFTree.dot");
