@@ -488,10 +488,6 @@ std::string write_tree(CFTreeLoop &n, unsigned int *lab){
 		ss << write_tree(*ch, lab);
 		ss << "l"<< exit_lab << " -> { l"<< old_lab <<" }; \n";
 	}
-	// ch = n.getiExit(0);
-	// old_lab = ++(*lab);
-	// ss << write_tree(*ch, lab);
-	// ss << "l"<< loop_lab << " -> { l"<< old_lab <<" }; \n";
 	return ss.str();
 }
 
@@ -875,9 +871,9 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 	}
 
 	// Cherche les noeuds de passage forcé
-	for (auto it = fpn.begin(); it != fpn.end(); it++){
-		DAGNode *n = (*it);
-	}
+	// for (auto it = fpn.begin(); it != fpn.end(); it++){
+	// 	DAGNode *n = (*it);
+	// }
 
 	while (fpn.size() > 0){
 		DAGNode *c = getDominated(fpn); // l'element dominé
@@ -917,6 +913,13 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 
 				for (auto it = sub_dag->iter_e(); it != sub_dag->end_e(); it++) {
 					ex.push_back(makeCFT(lh->getDag(), sub_dag->getStart(), *it));
+
+					// if ( sub_dag->getStart() != it ){
+					// 	CFTree *ex_suc = makeCFT(lh->getDag(), sub_dag->getStart(), *it);
+					// 	// if (ex_suc->toSeq()){
+					// 	//
+					// 	// }
+					// }
 				}
 
 				if ((sub_dag->getStart()) -> toBNode()){
