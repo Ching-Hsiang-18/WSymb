@@ -616,7 +616,7 @@ void setExitDAG(CFG *cfg, DAG *dag){
 		}
 	}
 }
-// DAGBNode *n = DAG_BNODE(b);
+
 /*
 	Returns the Edge(s) that iterated on the l_h block and add edge
 */
@@ -714,12 +714,6 @@ DAG* CFTreeExtractor::toDAG(CFG *cfg, BasicBlock *l_h){
 	int j;
 	DAG *dag = new DAG();
 
-	// if (l_h == NULL)  {
-	// 	cout << " hors de toute boucle" << endl;
-	// } else {
-	// 	cout << " a partir de la boucle avec header: " << l_h->id() << endl;
-	// }
-
 	std::vector<DAGBNode*> blocks; //Bd moins les headers de boucle
 	std::vector<DAGHNode*> lh_blocks; //lh' tous les headers de boucle
 	//std::vector<DAG*> sub_cfg;
@@ -798,7 +792,6 @@ int isNotVisited(DAGNode *x, std::vector<DAGNode*> *path){
 
 /*
 Retourne les blocks qui sont présents dans tous les chemins entre start et end
-/!\ à vérifier en changeant les starts et ends
 */
 void forcedPassedNodes(DAG *dag, DAGNode *start, DAGNode *end, std::vector<DAGNode*> *fpn){
 	// std::vector<DAGNode*> *fpn;
@@ -921,16 +914,6 @@ void CFTreeExtractor::processCFG(CFG *cfg) {
 	DAG *dag = toDAG(cfg, NULL);
 	cout << "DAG: " << *dag;
 	CFTree *tree = makeCFT(dag, dag->getStart(), dag->getiEnd(0));
-	//
-	// cout << "Elem 1: " << *(dag->getElement(2));
-	// cout << "Elem 2: " << *(dag->getElement(4));
-	//
-	// for (CFG::BlockIter iter(cfg->blocks()); iter; iter++){
-	// 		Block *bb = *iter;
-	// 		cout << "Elem id " << bb->isEntry() << endl;
-	// 		cout  << bb->isBasic() << endl;
-	// }
-
 
 	//setter la propriete sur le cfg
 	//CFTREE(cfg) = tree;
