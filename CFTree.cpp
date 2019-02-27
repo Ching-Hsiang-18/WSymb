@@ -95,7 +95,7 @@ CFTreeLeaf* CFTreeLoop::toLeaf() {return NULL;}/* abstract */
 CFTreeSeq* CFTreeLoop::toSeq() {return NULL;}/* abstract */
 CFTreeAlt* CFTreeLoop::toAlt() {return NULL;}/* abstract */
 
-CFTreeLoop::CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, CFTree* n_ex) {
+CFTreeLoop::CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, std::vector<CFTree *> n_ex) {
 	header = h;
 	n = bound;
 	bd = n_bd;
@@ -109,8 +109,8 @@ CFTree* CFTreeLoop::getBody(){
 	return bd;
 }
 
-CFTree* CFTreeLoop::getExit(){
-	return ex;
+CFTree* CFTreeLoop::getiExit(int ind){
+	return ex[ind];
 }
 
 void CFTreeLoop::addT1(CFTree *t){
@@ -118,11 +118,20 @@ void CFTreeLoop::addT1(CFTree *t){
 }
 
 void CFTreeLoop::addT2(CFTree *t){
-	ex = t;
+	ex.push_back(t);
 }
 
 void CFTreeLoop::changeBound(int bound){
 	n = bound;
+}
+
+std::vector<CFTree *>::const_iterator CFTreeLoop::iter_e() {
+	return ex.begin();
+}
+
+
+std::vector<CFTree *>::const_iterator CFTreeLoop::end_e() {
+	return ex.end();
 }
 
 /*
@@ -421,7 +430,11 @@ io::Output &operator<<(io::Output &o, CFTreeLoop &n) {
 		o << "\n";
 		o << "CFTreeLoop(B_" <<   (n.getHeaderId()) << " \n";
 		o << "CFTreeLoop.body : " << *(n.getBody()) << "\n";
-		o << "CFTreeLoop.exit : " << *(n.getExit()) << "\n";
+		o << "CFTreeLoop.exit : " << "\n";
+		for (auto it = n.iter_e(); it != n.end_e(); it++) {
+			CFTree *ex = (*it);
+			o << *ex << "\n";
+		}
 		o << ") \n";
 		return o;
 }
@@ -464,11 +477,21 @@ std::string write_tree(CFTreeLoop &n, unsigned int *lab){
 	unsigned int old_lab = ++(*lab);
 	ss << write_tree(*ch, lab);
 	ss << "l"<< loop_lab << " -> { l"<< old_lab <<" }; \n";
+
+	unsigned int exit_lab = ++(*lab);
+	ss << "l" << exit_lab << " [label = \" Exit\"]; \n";
+	ss << "l"<< loop_lab << " -> { l"<< exit_lab <<" }; \n";
 	// exit
-	ch = n.getExit();
-	old_lab = ++(*lab);
-	ss << write_tree(*ch, lab);
-	ss << "l"<< loop_lab << " -> { l"<< old_lab <<" }; \n";
+	for (auto it = n.iter_e(); it != n.end_e(); it++) {
+		ch = *it;
+		old_lab = ++(*lab);
+		ss << write_tree(*ch, lab);
+		ss << "l"<< exit_lab << " -> { l"<< old_lab <<" }; \n";
+	}
+	// ch = n.getiExit(0);
+	// old_lab = ++(*lab);
+	// ss << write_tree(*ch, lab);
+	// ss << "l"<< loop_lab << " -> { l"<< old_lab <<" }; \n";
 	return ss.str();
 }
 
@@ -890,15 +913,20 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 				DAGHNode *lh = c->toHNode();
 				DAG * sub_dag = lh->getDag();
 				CFTree *bd = makeCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getNext());
-				CFTree *ex = makeCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getiEnd(0));
+				std::vector <CFTree *> ex;
+
+				for (auto it = sub_dag->iter_e(); it != sub_dag->end_e(); it++) {
+					ex.push_back(makeCFT(lh->getDag(), sub_dag->getStart(), *it));
+				}
 
 				if ((sub_dag->getStart()) -> toBNode()){
 					BasicBlock *bb = ((sub_dag->getStart())->toBNode())->getBlock();
-					ch.insert(ch.begin(), new CFTreeLoop(bb, 5, bd, ex));
+					ch.insert(ch.begin(), new CFTreeLoop(bb, 0, bd, ex));
 				}
 			}
 		}
 	}
+
 	if (ch.size() == 1){
 		return ch[0];
 	}

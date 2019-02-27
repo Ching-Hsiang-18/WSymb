@@ -108,7 +108,7 @@ namespace otawa { namespace cftree {
 			BasicBlock *header;
 			CFTree* bd; // body
 			int n;
-			CFTree* ex; // exit
+			std::vector<CFTree *> ex; // exit
 
 		public:
 			// implements abstrat
@@ -117,15 +117,19 @@ namespace otawa { namespace cftree {
 			CFTreeLoop *toLoop();
 			CFTreeSeq *toSeq();
 
-			CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, CFTree* n_ex);
+			CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, std::vector<CFTree *> n_ex);
 
 			BasicBlock *getHeader();
 			int getHeaderId() const;
 			CFTree *getBody();
-			CFTree *getExit();
+			CFTree *getiExit(int ind);
 			void addT1(CFTree *t);
 			void addT2(CFTree *t);
 			void changeBound(int bound);
+
+			// Iterator for nodes with an exit edge
+			std::vector<CFTree *>::const_iterator iter_e();
+			std::vector<CFTree *>::const_iterator end_e();
 	};
 
 	class DAGNode
