@@ -293,7 +293,7 @@ protected:
 private:
 	void processCFG(CFG *cfg);
 	DAG* toDAG(CFG *cfg, BasicBlock *l_h);
-	
+
 };
 
 extern p::feature EXTRACTED_CFTREE_FEATURE;

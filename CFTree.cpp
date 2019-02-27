@@ -577,6 +577,47 @@ void getAllBlocksLoop(DAG *dag, std::vector<DAGBNode*> *blocks, std::vector<DAGH
 }
 
 /*
+
+*/
+void setEntryDAG(CFG *cfg, DAG *dag){
+	for (CFG::BlockIter iter(cfg->blocks()); iter; iter++){
+			Block *bb = *iter;
+			if (bb->isEntry()){
+				for (Block::EdgeIter it(bb->outs()); it; it++){
+					Edge *edge = *it;
+					Block *start = edge->target();
+					BasicBlock *b_start = *start->toBasic();
+					DAGBNode *n = DAG_BNODE(b_start);
+					dag->setStar(n);
+			}
+		}
+	}
+}
+
+/*
+*/
+void setExitDAG(CFG *cfg, DAG *dag){
+	for (CFG::BlockIter iter(cfg->blocks()); iter; iter++){
+			Block *exit = *iter;
+			if (exit->isExit()){
+				for (CFG::BlockIter iter(cfg->blocks()); iter; iter++){
+					Block *bb = *iter;
+					for (Block::EdgeIter it(bb->outs()); it; it++){
+						Edge *edge = *it;
+						Block *exit2 = edge->target();
+						if (exit == exit2){
+							BasicBlock *b_end = *bb->toBasic();
+							DAGBNode *n = DAG_BNODE(b_end);
+							dag->addEnd(n);
+							return;
+						}
+				}
+			}
+		}
+	}
+}
+// DAGBNode *n = DAG_BNODE(b);
+/*
 	Returns the Edge(s) that iterated on the l_h block and add edge
 */
 void addEdgesNext(DAG *dag, DAGBNode *n, BasicBlock *l_h, DAGVNode *next) {
@@ -614,7 +655,6 @@ void addEdgesExit(DAG *dag, DAGBNode *n, BasicBlock *l_h, DAGVNode *exit) {
 			n->addSucc(exit);
 			exit->addPred(n);
 			dag->addEnd(n);
-			cout << "add exit block " << *n << endl;
 		}
 		else if (l_h == NULL){
 			Block *target = edge->target();
@@ -622,7 +662,6 @@ void addEdgesExit(DAG *dag, DAGBNode *n, BasicBlock *l_h, DAGVNode *exit) {
 				 n->addSucc(exit);
 				 exit->addPred(n);
 				 dag->addEnd(n);
-				 cout << "add exit block " << *n << endl;
 			 }
 		}
 	}
@@ -653,8 +692,6 @@ void addLHEdgesEntry(DAG *dag, DAGNode *n, DAGHNode *l_hp) {
 Noeud sortant des LH
 */
 void addLHEdgesExit(DAG *dag, DAGNode *n, DAGHNode *l_hp) {
-	cout << "Ajout des noeuds de sortie" << endl;
-	cout << "On compare l'header " << *l_hp << " aveAGHNodec " << *n << endl;
 	BasicBlock *bb = n->toBNode() ? n->toBNode()->getBlock() : n->toHNode()->getHeader();
 	//BasicBlock *bb_l_hp = l_hp->getHeader();
 	DAG *sub_dag = l_hp->getDag(); // sous_dag du noeud header
@@ -665,7 +702,6 @@ void addLHEdgesExit(DAG *dag, DAGNode *n, DAGHNode *l_hp) {
 			BasicBlock *b2 = *target->toBasic();
 			//if (b2 == bb_l_hp) {
 			if (sub_dag->find_node(DAG_BNODE(b2))) {
-				cout << "OUI" << endl;
 				n->addPred(l_hp);
 				l_hp->addSucc(n);
 			}
@@ -678,12 +714,11 @@ DAG* CFTreeExtractor::toDAG(CFG *cfg, BasicBlock *l_h){
 	int j;
 	DAG *dag = new DAG();
 
-	cout << "Je DAGifie le cfg " << cfg->name();
-	if (l_h == NULL)  {
-		cout << " hors de toute boucle" << endl;
-	} else {
-		cout << " a partir de la boucle avec header: " << l_h->id() << endl;
-	}
+	// if (l_h == NULL)  {
+	// 	cout << " hors de toute boucle" << endl;
+	// } else {
+	// 	cout << " a partir de la boucle avec header: " << l_h->id() << endl;
+	// }
 
 	std::vector<DAGBNode*> blocks; //Bd moins les headers de boucle
 	std::vector<DAGHNode*> lh_blocks; //lh' tous les headers de boucle
@@ -704,10 +739,7 @@ DAG* CFTreeExtractor::toDAG(CFG *cfg, BasicBlock *l_h){
 	}
 
 	for (i = 0; i < blocks.size(); i++){ // ajoute les noeuds Next pour chaque bloc
-		 addEdgesNext(dag, blocks[i], l_h, next);
-	}
-
-	for (i = 0; i < blocks.size(); i++){ // ajoute les noeuds Exit pour chaque bloc
+		addEdgesNext(dag, blocks[i], l_h, next);
 		addEdgesExit(dag, blocks[i], l_h, exit);
 	}
 
@@ -730,15 +762,14 @@ DAG* CFTreeExtractor::toDAG(CFG *cfg, BasicBlock *l_h){
 	}
 
 	if (l_h != NULL){ // noeud d'entrée du dag (donc l_h ou null)
-		cout << "J'ajoute start " << endl;
 		DAGBNode *n = DAG_BNODE(l_h);
 		if (n == NULL){
 			cout << "probleme" << endl;
 		}
 		dag->setStar(n);
-		// dag->addNode(n);
 	} else {
-
+		setEntryDAG(cfg, dag);
+		setExitDAG(cfg, dag);
 	}
 
 	return dag;
@@ -770,18 +801,16 @@ Retourne les blocks qui sont présents dans tous les chemins entre start et end
 /!\ à vérifier en changeant les starts et ends
 */
 void forcedPassedNodes(DAG *dag, DAGNode *start, DAGNode *end, std::vector<DAGNode*> *fpn){
-	cout << "Je rentre dans la fonction pour avoir les noeuds de passages forcés" << endl;
 	// std::vector<DAGNode*> *fpn;
 
 	// pour tous les noeuds du dag
 	for (auto it = dag->iter(); it != dag->end(); it++) {
 		DAGNode *n = (*it);
 		if (n->toVNode()){
-
+			continue;
 		}
 		else {
 			if (start != n){
-				cout << "Je vais regarder pour le noeud " << *n << endl;
 				if ( (DAGNodeDominate(start, n)) && DAGNodeDominate(n, end))
 					fpn->push_back(n);
 			}
@@ -889,12 +918,19 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 }
 
 void CFTreeExtractor::processCFG(CFG *cfg) {
-	cout << "Je traite le CFG de la fonction: " << cfg->name() << endl;
-
-	cout << "Traiter la partie hors de toute boucle: " << endl;
 	DAG *dag = toDAG(cfg, NULL);
 	cout << "DAG: " << *dag;
-	CFTree *tree = makeCFT(dag, dag->getElement(2), dag->getElement(4));
+	CFTree *tree = makeCFT(dag, dag->getStart(), dag->getiEnd(0));
+	//
+	// cout << "Elem 1: " << *(dag->getElement(2));
+	// cout << "Elem 2: " << *(dag->getElement(4));
+	//
+	// for (CFG::BlockIter iter(cfg->blocks()); iter; iter++){
+	// 		Block *bb = *iter;
+	// 		cout << "Elem id " << bb->isEntry() << endl;
+	// 		cout  << bb->isBasic() << endl;
+	// }
+
 
 	//setter la propriete sur le cfg
 	//CFTREE(cfg) = tree;
