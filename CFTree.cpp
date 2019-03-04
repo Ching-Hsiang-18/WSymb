@@ -757,20 +757,17 @@ DAG* CFTreeExtractor::toDAG(CFG *cfg, BasicBlock *l_h){
 	}
 
 	for (i = 0; i < lh_blocks.size(); i++){
-		for (j = 0; j < blocks.size(); j++)
+		for (j = 0; j < blocks.size(); j++) {
 			addLHEdgesEntry(dag, blocks[j], lh_blocks[i]);
-
-		for (j = 0; j < lh_blocks.size(); j++){
-			if (i != j)
-				addLHEdgesEntry(dag, lh_blocks[j], lh_blocks[i]);
+			addLHEdgesExit(dag, blocks[j], lh_blocks[i]);
 		}
 
-		for (j = 0; j < blocks.size(); j++)
-			addLHEdgesExit(dag, blocks[j], lh_blocks[i]);
 
 		for (j = 0; j < lh_blocks.size(); j++){
-			if (i != j)
+			if (i != j) {
+				addLHEdgesEntry(dag, lh_blocks[j], lh_blocks[i]);
 				addLHEdgesExit(dag, lh_blocks[j], lh_blocks[i]);
+			}
 		}
 	}
 

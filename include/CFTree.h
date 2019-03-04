@@ -302,11 +302,11 @@ private:
 
 extern p::feature EXTRACTED_CFTREE_FEATURE;
 
-extern Identifier<DAGBNode*> DAG_BNODE;
-extern Identifier<DAGHNode*> DAG_HNODE;
+// extern Identifier<DAGBNode*> DAG_BNODE;
+// extern Identifier<DAGHNode*> DAG_HNODE;
 
 //declaration propriete CFTRee
-// extern Identifier<CFTree*> CFTREE;
+extern Identifier<CFTree*> CFTREE;
 
 
 // TODO : declarer ici les classes pour manipuler le CFTree
