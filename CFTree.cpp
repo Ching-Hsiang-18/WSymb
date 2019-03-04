@@ -853,7 +853,7 @@ DAGNode* getDominated(std::vector<DAGNode*> fpn){
 	return *first;
 }
 
-CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
+CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 	std::vector<CFTree*> ch;
 	std::vector<DAGNode*> fpn;
 
@@ -867,23 +867,25 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 		}
 	}
 
-	// Cherche les noeuds de passage forcé
-	// for (auto it = fpn.begin(); it != fpn.end(); it++){
-	// 	DAGNode *n = (*it);
-	// }
-
 	while (fpn.size() > 0){
 		DAGNode *c = getDominated(fpn); // l'element dominé
 		std::vector<DAGNode*>::iterator it = std::find(fpn.begin(), fpn.end(), c); // retrouver l'index de l'élement dominé
 		fpn.erase(it); // N <- N \ c
 		// Si c a plusieurs prédécesseurs, càd qu'il y a un if avant
 		if (c->getPred().size() > 1){
-			DAGNode *ncd = getDominated(fpn);
+			DAGNode *ncd;
+			if (fpn.size() > 0)
+				ncd = getDominated(fpn);
+			else
+				ncd = start;
+
 			CFTreeAlt *br = new CFTreeAlt();
 
 			// On construit le CFTreeAlt
+
 			for (auto pred = c->predIter(); pred != c->predEnd(); pred++){
-				br->addAlt(makeCFT (dag, ncd, *pred));
+
+				br->addAlt(makeCFT (dag, ncd, *pred, 0));
 			}
 
 			// On ajoute à la suite le bloc dominé
@@ -892,7 +894,9 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 				BasicBlock *bb =  c->toBNode()->getBlock();
 				ch.push_back(new CFTreeLeaf(bb));
 			}
+
 		}
+
 
 		// Si c n'a qu'un seul prédécesseur
 		else {
@@ -905,18 +909,12 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 			else if ( c->toHNode()){
 				DAGHNode *lh = c->toHNode();
 				DAG * sub_dag = lh->getDag();
-				CFTree *bd = makeCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getNext());
+				CFTree *bd = makeCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getNext(), 0);
 				std::vector <CFTree *> ex;
 
 				for (auto it = sub_dag->iter_e(); it != sub_dag->end_e(); it++) {
-					ex.push_back(makeCFT(lh->getDag(), sub_dag->getStart(), *it));
-
-					// if ( sub_dag->getStart() != it ){
-					// 	CFTree *ex_suc = makeCFT(lh->getDag(), sub_dag->getStart(), *it);
-					// 	// if (ex_suc->toSeq()){
-					// 	//
-					// 	// }
-					// }
+					CFTree *ex_suc = makeCFT(lh->getDag(), sub_dag->getStart(), *it, 0);
+					ex.push_back(ex_suc);
 				}
 
 				if ((sub_dag->getStart()) -> toBNode()){
@@ -927,13 +925,11 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 		}
 	}
 
-	if (ch.size() == 1){
-		return ch[0];
-	}
-	if (start-> getPred().size() == 0){
+	if ( (start-> getPred().size() == 0) && all){
 		BasicBlock *bb =  start->toBNode()->getBlock();
-		ch.insert(ch.begin(),new CFTreeLeaf(bb));
+		ch.insert(ch.begin(), new CFTreeLeaf(bb));
 	}
+
 	CFTreeSeq* t_ch = new CFTreeSeq(ch);
 	return t_ch;
 }
@@ -941,7 +937,8 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end){
 void CFTreeExtractor::processCFG(CFG *cfg) {
 	DAG *dag = toDAG(cfg, NULL);
 	cout << "DAG: " << *dag;
-	CFTree *tree = makeCFT(dag, dag->getStart(), dag->getiEnd(0));
+
+	CFTree *tree = makeCFT(dag, dag->getStart(), dag->getiEnd(0), 1);
 
 	//setter la propriete sur le cfg
 	//CFTREE(cfg) = tree;
@@ -953,11 +950,6 @@ void CFTreeExtractor::processCFG(CFG *cfg) {
 	ss << "digraph BST { \n" << write_tree(*tree, &lab) << "}";
 	myfile << ss.str() ;
 	myfile.close();
-
-	cout << "TREE : " << *tree;
-
-	cout << "-------------------------------------------------------" << endl;
-
 }
 
 void CFTreeExtractor::processWorkSpace(WorkSpace *ws) {
