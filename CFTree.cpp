@@ -853,7 +853,7 @@ DAGNode* getDominated(std::vector<DAGNode*> fpn){
 	return *first;
 }
 
-CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
+CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 	std::vector<CFTree*> ch;
 	std::vector<DAGNode*> fpn;
 
@@ -885,7 +885,7 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 
 			for (auto pred = c->predIter(); pred != c->predEnd(); pred++){
 
-				br->addAlt(makeCFT (dag, ncd, *pred, 0));
+				br->addAlt(toCFT (dag, ncd, *pred, 0));
 			}
 
 			// On ajoute à la suite le bloc dominé
@@ -909,11 +909,11 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 			else if ( c->toHNode()){
 				DAGHNode *lh = c->toHNode();
 				DAG * sub_dag = lh->getDag();
-				CFTree *bd = makeCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getNext(), 0);
+				CFTree *bd = toCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getNext(), 0);
 				std::vector <CFTree *> ex;
 
 				for (auto it = sub_dag->iter_e(); it != sub_dag->end_e(); it++) {
-					CFTree *ex_suc = makeCFT(lh->getDag(), sub_dag->getStart(), *it, 0);
+					CFTree *ex_suc = toCFT(lh->getDag(), sub_dag->getStart(), *it, 0);
 					ex.push_back(ex_suc);
 				}
 
@@ -934,14 +934,10 @@ CFTree* makeCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 	return t_ch;
 }
 
-void CFTreeExtractor::processCFG(CFG *cfg) {
+CFTree* CFTreeExtractor::processCFG(CFG *cfg) {
 	DAG *dag = toDAG(cfg, NULL);
-	cout << "DAG: " << *dag;
 
-	CFTree *tree = makeCFT(dag, dag->getStart(), dag->getiEnd(0), 1);
-
-	//setter la propriete sur le cfg
-	//CFTREE(cfg) = tree;
+	CFTree *tree = toCFT(dag, dag->getStart(), dag->getiEnd(0), 1);
 
 	std::ofstream myfile;
 	myfile.open("CFTree.dot");
@@ -950,17 +946,36 @@ void CFTreeExtractor::processCFG(CFG *cfg) {
 	ss << "digraph BST { \n" << write_tree(*tree, &lab) << "}";
 	myfile << ss.str() ;
 	myfile.close();
+
+	CFTREE(cfg) = tree;
+
+	if (tree->toSeq()){
+		CFTreeSeq *tree_seq = tree->toSeq();
+		return tree_seq;
+	}
+
+	return NULL;
+
+	//setter la propriete sur le cfg
+	//CFTREE(cfg) = tree;
+}
+
+CFTCollection::CFTCollection(std::vector<CFTree*> v){
+	cfts = v;
 }
 
 void CFTreeExtractor::processWorkSpace(WorkSpace *ws) {
-	cout << "Debut du plugin." << endl;
 	const CFGCollection *coll = INVOLVED_CFGS(ws); // l'ensemble des CFG du programme
 	// ws->require(DOMINANCE_FEATURE, conf);
 
+	std::vector<CFTree*> cftrees;
+
 	for (CFGCollection::Iter iter(*coll); iter; iter ++) {
 		CFG *currentCFG = *iter;
-		processCFG(currentCFG);
+		cftrees.push_back(processCFG(currentCFG));
 	}
+
+	CFTCollection *cft_collections = new CFTCollection(cftrees);
 }
 
 

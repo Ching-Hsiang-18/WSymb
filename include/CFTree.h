@@ -31,6 +31,30 @@ namespace otawa { namespace cftree {
 	class CFTreeSeq;
 	class CFTree;
 
+	class CFTCollection;
+
+	class CFTCollection
+	{
+		private :
+			std::vector<CFTree*> cfts;
+
+		public :
+			CFTCollection(std::vector<CFTree*> v);
+
+			using iterator = typename std::vector<CFTree*> ::iterator;
+			using const_iterator = const typename std::vector<CFTree*> ::iterator;
+
+			iterator begin();
+			const_iterator begin() const;
+
+			iterator end();
+			const_iterator end() const;
+
+			bool empty() const;
+
+			void erase(iterator);
+			void clear();
+	};
 
 	class CFTree
 	{
@@ -295,17 +319,15 @@ protected:
 	void processWorkSpace(WorkSpace * /*ws*/) override;
 	void configure(const PropList &props) override;
 private:
-	void processCFG(CFG *cfg);
+	CFTree* processCFG(CFG *cfg);
 	DAG* toDAG(CFG *cfg, BasicBlock *l_h);
 
 };
 
 extern p::feature EXTRACTED_CFTREE_FEATURE;
 
-// extern Identifier<DAGBNode*> DAG_BNODE;
-// extern Identifier<DAGHNode*> DAG_HNODE;
-
 //declaration propriete CFTRee
+Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
 extern Identifier<CFTree*> CFTREE;
 
 
