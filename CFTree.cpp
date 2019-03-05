@@ -4,7 +4,6 @@ namespace otawa { namespace cftree {
 // using namespace otawa;
 
 // definition propriete cftree
-//Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
 
 //--------------------
 //	CLASS CFTREELEAF
@@ -466,8 +465,13 @@ io::Output &operator<<(io::Output &o, CFTree &n) {
 //---------------------------
 //				DOT FOR CFG
 //---------------------------
+static std::string write_tree(CFTreeLoop &n, unsigned int *lab);
+static std::string write_tree(CFTreeAlt &n, unsigned int *lab);
+static std::string write_tree(CFTreeSeq &n, unsigned int *lab);
+static std::string write_tree(CFTreeLeaf &n, unsigned int *lab);
+static std::string write_tree(CFTree &n, unsigned int *lab);
 
-std::string write_tree(CFTreeLoop &n, unsigned int *lab){
+static std::string write_tree(CFTreeLoop &n, unsigned int *lab){
 	std::stringstream ss;
 	unsigned int loop_lab = *lab;
 	ss << "l" << loop_lab << " [label = \"Loop(b"<< n.getHeaderId() << ")\"]; \n";
@@ -492,7 +496,7 @@ std::string write_tree(CFTreeLoop &n, unsigned int *lab){
 }
 
 
-std::string write_tree(CFTreeAlt &n, unsigned int *lab){
+static std::string write_tree(CFTreeAlt &n, unsigned int *lab){
 	std::stringstream ss;
 	unsigned int alt_lab = *lab;
 	ss << "l" << alt_lab << " [label = \" Alt\"]; \n";
@@ -505,7 +509,7 @@ std::string write_tree(CFTreeAlt &n, unsigned int *lab){
 	return ss.str();
 }
 
-std::string write_tree(CFTreeSeq &n, unsigned int *lab){
+static std::string write_tree(CFTreeSeq &n, unsigned int *lab){
 	std::stringstream ss;
 	unsigned int seq_lab = *lab;
 	ss << "l" << seq_lab << " [label = \" Seq\"]; \n";
@@ -518,13 +522,13 @@ std::string write_tree(CFTreeSeq &n, unsigned int *lab){
 	return ss.str();
 }
 
-std::string write_tree(CFTreeLeaf &n, unsigned int *lab){
+static std::string write_tree(CFTreeLeaf &n, unsigned int *lab){
 	std::stringstream ss;
 	ss << "l" << *lab << " [label = \"B_"<< n.getBlockId() << "\"]; \n";
 	return ss.str();
 }
 
-std::string write_tree(CFTree &n, unsigned int *lab) {
+static std::string write_tree(CFTree &n, unsigned int *lab) {
 	if (n.toLeaf())
 		return write_tree(*n.toLeaf(), lab);
 	if (n.toAlt())
@@ -935,30 +939,24 @@ CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 	return t_ch;
 }
 
-CFTree* CFTreeExtractor::processCFG(CFG *cfg) {
-	DAG *dag = toDAG(cfg, NULL);
 
-	CFTree *tree = toCFT(dag, dag->getStart(), dag->getiEnd(0), 1);
-
+void CFTree::exportToDot(const elm::string &str) {
 	std::ofstream myfile;
-	myfile.open("CFTree.dot");
+	myfile.open(str.toCString());
 	unsigned int lab = 0;
 	std::stringstream ss;
-	ss << "digraph BST { \n" << write_tree(*tree, &lab) << "}";
+	ss << "digraph BST { \n" << write_tree(*this, &lab) << "}";
 	myfile << ss.str() ;
 	myfile.close();
+}
+
+CFTree* CFTreeExtractor::processCFG(CFG *cfg) {
+	DAG *dag = toDAG(cfg, NULL);
+	CFTree *tree = toCFT(dag, dag->getStart(), dag->getiEnd(0), 1);
 
 	CFTREE(cfg) = tree;
 
-	if (tree->toSeq()){
-		CFTreeSeq *tree_seq = tree->toSeq();
-		return tree_seq;
-	}
-
-	return NULL;
-
-	//setter la propriete sur le cfg
-	//CFTREE(cfg) = tree;
+	return tree;
 }
 
 CFTCollection::CFTCollection(std::vector<CFTree*> v){
@@ -966,18 +964,16 @@ CFTCollection::CFTCollection(std::vector<CFTree*> v){
 }
 
 void CFTreeExtractor::processWorkSpace(WorkSpace *ws) {
-	const CFGCollection *coll = INVOLVED_CFGS(ws); // l'ensemble des CFG du programme
-	// ws->require(DOMINANCE_FEATURE, conf);
-
-	std::vector<CFTree*> cftrees;
-
+	const CFGCollection *coll = INVOLVED_CFGS(ws);
 	for (CFGCollection::Iter iter(*coll); iter; iter ++) {
 		CFG *currentCFG = *iter;
-		cftrees.push_back(processCFG(currentCFG));
+		processCFG(currentCFG);
 	}
 
-	CFTCollection *cft_collections = new CFTCollection(cftrees);
 }
 
+Identifier<DAGHNode*> DAG_HNODE("otawa::cftree:DAG_HNODE");
+Identifier<DAGBNode*> DAG_BNODE("otawa::cftree:DAG_BNODE");
+Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
 
 } }

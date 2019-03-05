@@ -22,8 +22,6 @@ namespace otawa { namespace cftree {
 	class DAGNode;
 	class DAG;
 
-	Identifier<DAGHNode*> DAG_HNODE("otawa::cftree:DAG_HNODE");
-	Identifier<DAGBNode*> DAG_BNODE("otawa::cftree:DAG_BNODE");
 
 	class CFTreeLeaf;
 	class CFTreeAlt;
@@ -71,6 +69,7 @@ namespace otawa { namespace cftree {
 			virtual CFTreeAlt *toAlt() = 0;/* abstract */
 			virtual CFTreeLoop *toLoop() = 0;/* abstract */
 			virtual CFTreeSeq *toSeq() = 0;/* abstract */
+			void exportToDot(const elm::string &);
 	};
 
 	class CFTreeLeaf : public CFTree
@@ -302,14 +301,6 @@ namespace otawa { namespace cftree {
 	io::Output &operator<<(io::Output &o, CFTreeAlt &n);
 	io::Output &operator<<(io::Output &o, CFTreeLoop &n);
 
-// method to describe a cft in a .dot
-	std::string write_tree(CFTree &n, unsigned int *lab);
-	std::string write_tree(CFTreeSeq &n, unsigned int *lab);
-	std::string write_tree(CFTreeLeaf &n, unsigned int *lab);
-	std::string write_tree(CFTreeAlt &n, unsigned int *lab);
-	std::string write_tree(CFTreeLoop &n, unsigned int *lab);
-
-
 class CFTreeExtractor : public Processor {
 public:
 	static p::declare reg;
@@ -327,8 +318,9 @@ private:
 extern p::feature EXTRACTED_CFTREE_FEATURE;
 
 //declaration propriete CFTRee
-Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
 extern Identifier<CFTree*> CFTREE;
+extern Identifier<DAGHNode*> DAG_HNODE;
+extern Identifier<DAGBNode*> DAG_BNODE;
 
 
 // TODO : declarer ici les classes pour manipuler le CFTree

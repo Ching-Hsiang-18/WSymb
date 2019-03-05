@@ -12,8 +12,10 @@
 #include <otawa/display/CFGDrawer.h>
 #include <otawa/display/CFGOutput.h>
 
-using namespace otawa; //comme import
+#include "include/CFTree.h"
 
+using namespace otawa; //comme import
+using namespace otawa::cftree;
 
 
 int main(void) {
@@ -28,6 +30,15 @@ int main(void) {
 	ws->require(DynFeature("otawa::cftree::EXTRACTED_CFT_FEATURE"), conf);
  	display::CFGOutput output; // CFGOutput est un processor
  	output.process(ws, conf);
+
+	const CFGCollection *coll = INVOLVED_CFGS(ws);
+	for (CFGCollection::Iter iter(*coll); iter; iter ++) {
+		CFG *currentCFG = *iter;
+		StringBuffer buf;
+		buf << currentCFG->label() << "-cftree.dot";
+		CFTREE(currentCFG)->exportToDot(buf.toString());
+	}
+
 
 }
 
