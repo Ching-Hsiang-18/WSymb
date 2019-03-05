@@ -1,35 +1,27 @@
-/*
-void foo() {
-  return;
-}
-*/
-
 void _start(void) {
   int i;
   int j;
   int k;
 
-  k++;
+  /*
+  for (i = 0; i < 10; i++) {
+
+	  k++;
+	if (i == 5) break;
+	  k++;
+  }
+  for (j = 0; j < 10 ; j++){
+    k--;
+  }
+  */
+  /*
+  if (k ) { k++; } else { k--; }
+  if (k ) { k++; } else { k--; }
+
+  */
 
   for (i = 0; i < 10; i++) {
-      if (k > 5){
-        k--;
-      }
-      else{
-        k++;
-      }
+	  if (i == 5) k++;
   }
-  k++;
 
-  // return k;
-
-  // int y;
-
-  // if (y > 0) {
-  //   y++;
-  //   return;
-  // } else {
-  //   y--;
-  // }
-//  foo();
 }

@@ -879,21 +879,21 @@ CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 			else
 				ncd = start;
 
+			// On ajoute à la suite le bloc dominé
+			if (c->toBNode()){
+				BasicBlock *bb =  c->toBNode()->getBlock();
+				ch.insert(ch.begin(), new CFTreeLeaf(bb));
+			}
+
 			CFTreeAlt *br = new CFTreeAlt();
 
 			// On construit le CFTreeAlt
-
 			for (auto pred = c->predIter(); pred != c->predEnd(); pred++){
 
 				br->addAlt(toCFT (dag, ncd, *pred, 0));
 			}
+			ch.insert(ch.begin(), br);
 
-			// On ajoute à la suite le bloc dominé
-			ch.push_back(br);
-			if (c->toBNode()){
-				BasicBlock *bb =  c->toBNode()->getBlock();
-				ch.push_back(new CFTreeLeaf(bb));
-			}
 
 		}
 
@@ -909,11 +909,11 @@ CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 			else if ( c->toHNode()){
 				DAGHNode *lh = c->toHNode();
 				DAG * sub_dag = lh->getDag();
-				CFTree *bd = toCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getNext(), 0);
+				CFTree *bd = toCFT(lh->getDag(), sub_dag->getStart(), sub_dag->getNext(), 1);
 				std::vector <CFTree *> ex;
 
 				for (auto it = sub_dag->iter_e(); it != sub_dag->end_e(); it++) {
-					CFTree *ex_suc = toCFT(lh->getDag(), sub_dag->getStart(), *it, 0);
+					CFTree *ex_suc = toCFT(lh->getDag(), sub_dag->getStart(), *it, 1);
 					ex.push_back(ex_suc);
 				}
 
@@ -925,7 +925,8 @@ CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 		}
 	}
 
-	if ( (start-> getPred().size() == 0) && all){
+	ASSERT(!all || (start-> getPred().size() == 0));
+	if (all) {
 		BasicBlock *bb =  start->toBNode()->getBlock();
 		ch.insert(ch.begin(), new CFTreeLeaf(bb));
 	}
