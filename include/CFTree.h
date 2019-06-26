@@ -7,11 +7,14 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <functional>
 
 #include <otawa/cfg.h>
 #include <otawa/cfg/features.h>
 #include <otawa/proc/ProcessorPlugin.h>
 #include <otawa/cfg/Dominance.h>
+#include <otawa/dfa/BitSet.h>
+#include <otawa/cfg/PostDominance.h>
 #include <otawa/otawa.h>
 
 namespace otawa { namespace cftree {
@@ -70,12 +73,13 @@ namespace otawa { namespace cftree {
 			virtual CFTreeLoop *toLoop() = 0;/* abstract */
 			virtual CFTreeSeq *toSeq() = 0;/* abstract */
 			void exportToDot(const elm::string &);
+			void exportToC(io::Output&);
 	};
 
 	class CFTreeLeaf : public CFTree
 	{
 
-			BasicBlock *block;
+			Block *block;
 
 		public:
 			// implements abstrat
@@ -84,8 +88,8 @@ namespace otawa { namespace cftree {
 			CFTreeLoop *toLoop();
 			CFTreeSeq *toSeq();
 
-			CFTreeLeaf(BasicBlock *b);
-			BasicBlock *getBlock();
+			CFTreeLeaf(Block *b);
+			Block *getBlock();
 			int getBlockId() const;
 
 	};
@@ -100,11 +104,13 @@ namespace otawa { namespace cftree {
 			CFTreeAlt *toAlt();
 			CFTreeLoop *toLoop();
 			CFTreeSeq *toSeq();
-
+			
+			CFTreeAlt(std::vector<CFTree*> new_alts);
 			void addAlt(CFTree *s);
 			std::vector<CFTree *>::const_iterator childIter();
 			std::vector<CFTree *>::const_iterator childEnd();
-			CFTree* getI(int ind);
+			CFTree* getI(size_t ind);
+			size_t size() { return alts.size(); }
 
 	};
 
@@ -123,15 +129,16 @@ namespace otawa { namespace cftree {
 			void addChild(CFTree *s);
 			std::vector<CFTree *>::const_iterator childIter();
 			std::vector<CFTree *>::const_iterator childEnd();
-			CFTree* getI(int ind);
+			CFTree* getI(size_t ind);
+			size_t size() { return childs.size(); }
 	};
 
 	class CFTreeLoop : public CFTree{
 
 			BasicBlock *header;
 			CFTree* bd; // body
+			CFTree* ex; // exit
 			int n;
-			std::vector<CFTree *> ex; // exit
 
 		public:
 			// implements abstrat
@@ -140,19 +147,14 @@ namespace otawa { namespace cftree {
 			CFTreeLoop *toLoop();
 			CFTreeSeq *toSeq();
 
-			CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, std::vector<CFTree *> n_ex);
+			CFTreeLoop(BasicBlock *h, int bound, CFTree* n_bd, CFTree* n_ex);
 
 			BasicBlock *getHeader();
 			int getHeaderId() const;
 			CFTree *getBody();
-			CFTree *getiExit(int ind);
-			void addT1(CFTree *t);
-			void addT2(CFTree *t);
+			CFTree *getExit();
 			void changeBound(int bound);
 
-			// Iterator for nodes with an exit edge
-			std::vector<CFTree *>::const_iterator iter_e();
-			std::vector<CFTree *>::const_iterator end_e();
 	};
 
 	class DAGNode
@@ -166,6 +168,7 @@ namespace otawa { namespace cftree {
 			virtual DAGVNode *toVNode() = 0;
 			virtual DAGHNode *toHNode() = 0;
 			virtual DAGBNode *toBNode() = 0;
+			virtual ~DAGNode() { };
 
 			// Add directed edge between two nodes
 			void addSucc(DAGNode *s);
@@ -192,6 +195,7 @@ namespace otawa { namespace cftree {
 			DAG* sub_dag;
 
 		public:
+			virtual ~DAGHNode() { };
 
 			// implements abstrat
 			DAGHNode *toHNode();
@@ -217,6 +221,7 @@ namespace otawa { namespace cftree {
 
 		public:
 			// implements abstrat
+			virtual ~DAGVNode() { };
 			DAGHNode *toHNode();
 			DAGVNode *toVNode();
 			DAGBNode *toBNode();
@@ -227,16 +232,22 @@ namespace otawa { namespace cftree {
 
 	class DAGBNode : public DAGNode {
 		private:
-			BasicBlock *block;
+			Block *block;
+			CFG *callee;
+			bool _synth;
 
 	  public:
 			// implements abstrat
+			virtual ~DAGBNode() { };
 			DAGHNode *toHNode();
 			DAGVNode *toVNode();
 			DAGBNode *toBNode();
 
-			DAGBNode(BasicBlock *b);
-			BasicBlock *getBlock();
+			bool isSynth();
+
+			DAGBNode(Block *b);
+			Block *getBlock();
+			CFG *getCallee();
 			int getBlockId() const;
 	};
 
@@ -261,29 +272,36 @@ namespace otawa { namespace cftree {
 			// Virtual node next
 			DAGNode *n_next;
 
+			DAGNode *n_virt_next;
+			DAGNode *n_virt_exit;
+
 		public:
 			// Iterator for nodes in DAG
 			std::vector<DAGNode*>::const_iterator iter();
 			std::vector<DAGNode*>::const_iterator end();
 
+			void visit(std::function<void(DAGNode*)>&, bool recursive=false);
+
 			// Getter and setter nodes
 			void addNode(DAGNode *s);
-			void setStar(DAGNode *s);
-			void addEnd(DAGNode *s);
+			void setStart(DAGNode *s);
 			void setNext(DAGNode *s);
 
 			// Getter for particulars nodes
 			DAGNode *getStart();
-			DAGNode *getNext();
-			DAGNode *getElement(unsigned i);
-			DAGNode *getiEnd(int i);
+			DAGNode *getElement(size_t i);
+
+			DAGNode *getVirtNext();
+			DAGNode *getVirtExit();
+			void setVirtNext(DAGNode *s);
+			void setVirtExit(DAGNode *s);
+
 
 			// Iterator for nodes with an exit edge
 			std::vector<DAGNode*>::const_iterator iter_e();
 			std::vector<DAGNode*>::const_iterator end_e();
 
 			// Check if a node "elem" is in the DAG or not
-			bool find_node(DAGNode *elem);
 			~DAG();
 	};
 
@@ -323,7 +341,6 @@ extern Identifier<DAGHNode*> DAG_HNODE;
 extern Identifier<DAGBNode*> DAG_BNODE;
 
 
-// TODO : declarer ici les classes pour manipuler le CFTree
 
 } }
 

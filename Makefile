@@ -2,35 +2,38 @@ CXXFLAGS=`otawa-config otawa/display --cflags`
 LDLIBS=`otawa-config otawa/display --libs`
 LDLIBS2=`otawa-config otawa/display otawa/cftree --libs`
 
-CXXFLAGS += -std=c++11 -O0 -g
+CXXFLAGS += -std=c++11 -O0 -g -Wall
+ARMCC=arm-eabi-gcc
 
-all: clean demo binaire cftree.so install
+all: dumpcft binaire
 
-test: demo binaire
-	./demo
+test: dumpcft binaire
+	./dumpcft ./binaire
 
-demo: demo.o
-	$(CXX) -o demo demo.o $(LDLIBS2)
+dumpcft: dumpcft.o $(HOME)/.otawa/proc/otawa/cftree.so
+	$(CXX) -o dumpcft dumpcft.o $(LDLIBS2)
 
-demo.o: demo.cpp
+dumpcft.o: dumpcft.cpp
 
 cftree.so: CFTree.cpp include/CFTree.h
 	$(CXX) -fPIC -shared $(CXXFLAGS) -o cftree.so CFTree.cpp $(LDLIBS)
 
 binaire: binaire.c
-	arm-eabi-gcc -nostdlib -nostdinc -static -o binaire binaire.c
+	$(ARMCC) -nostdlib -nostdinc -static -o binaire binaire.c
 
-graph: demo binaire
-	./demo
-	dot -Tps _start.dot > cfg.ps
+graph: dumpcft binaire
+	./dumpcft
+	rm -f *.ps *.dot
+	ls -1 *.dot |while read A ; do dot -Tps $$A > $$A.ps ; done
 
 clean:
-	rm -f *.o demo binaire *~ *.dot *.ps *.so
+	rm -f *.o dumpcft binaire *~ *.dot *.ps *.so *decomp.c
 
-install: cftree.so
+$(HOME)/.otawa/proc/otawa/cftree.so: cftree.so
 	mkdir -p $(HOME)/.otawa/proc/otawa
 	cp cftree.eld $(HOME)/.otawa/proc/otawa/
 	cp cftree.so $(HOME)/.otawa/proc/otawa/
 
+install: $(HOME)/.otawa/proc/otawa/cftree.so
 
-.PHONY: all test clean graph
+.PHONY: all test clean graph install
