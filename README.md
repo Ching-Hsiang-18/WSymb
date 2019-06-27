@@ -13,7 +13,7 @@ Control Flow Tree extractor plugin for OTAWA v2
 
 * Clement Ballabriga <Clement.Ballabriga@nospamuniv-lille.fr>
 
-License: GPL 2.0
+License: GPL 2.1
 
 Please remove "nospam" from the email addresses.
 
