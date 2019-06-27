@@ -541,7 +541,7 @@ static io::Output& write_code(io::Output&o,CFTreeAlt &n, unsigned int indent){
 			if (has_none || count < (n.size() - 1)) {
 				o << "} else if (...) {\n";
 			} else {
-				o << "} else (...) {\n";
+				o << "} else {\n";
 			}
 		}
 		o = write_code(o, *t, indent + 2);
