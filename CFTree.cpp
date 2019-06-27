@@ -926,20 +926,19 @@ void pouet() {
 Retourne le noeud qui est dominé par tous les autres
 */
 DAGNode* getDominated(std::vector<DAGNode*> fpn){
+	unsigned int i;
 
-	unsigned int i, j;
-	for (i = 0; i < fpn.size(); i++) {
-		bool flag = true;
-		for (j = 0; j < fpn.size(); j++) {
-			if (!DAGNodeDominate(fpn[j],fpn[i])) {
-				flag = false;
-				break;
-			}
-		}
-		if (flag)
-			return fpn[i];
-	}
-	ASSERT(false);
+	ASSERT(fpn.size() > 0);
+
+	DAGNode *last = fpn[0];
+	for (i = 1; i < fpn.size(); i++)
+		if (DAGNodeDominate(last, fpn[i]))
+			last = fpn[i];
+
+	for (i = 0; i < fpn.size(); i++)
+		ASSERT(DAGNodeDominate(fpn[i], last));
+
+	return last;
 }
 
 CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
