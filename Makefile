@@ -22,8 +22,8 @@ binaire: binaire.c
 	$(ARMCC) -nostdlib -nostdinc -static -o binaire binaire.c
 
 graph: dumpcft binaire
-	./dumpcft
 	rm -f *.ps *.dot
+	./dumpcft ./binaire
 	ls -1 *.dot |while read A ; do dot -Tps $$A > $$A.ps ; done
 
 clean:
