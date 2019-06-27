@@ -5,7 +5,7 @@ LDLIBS2=`otawa-config otawa/display otawa/cftree --libs`
 CXXFLAGS += -std=c++11 -O0 -g -Wall
 ARMCC=arm-eabi-gcc
 
-all: dumpcft binaire
+all: dumpcft
 
 test: dumpcft binaire
 	./dumpcft ./binaire
