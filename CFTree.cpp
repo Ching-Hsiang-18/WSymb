@@ -596,7 +596,7 @@ static io::Output& write_code(io::Output&o,CFTree &n, unsigned int indent) {
 	Returns the list of blocks contained in the loop that has b as header
 */
 void getAllBlocksLoop(DAG *dag, std::vector<DAGBNode*> *blocks, std::vector<DAGHNode*> *lh_blocks, CFG *cfg, BasicBlock *l_h) {
-	for (CFG::BlockIter iter(cfg->blocks()); iter; iter++){
+	for (CFG::BlockIter iter(cfg->blocks()); iter(); iter++){
 		Block *bb = *iter; // bloc qu'on veut ajouter
 		Block *bb2 = ENCLOSING_LOOP_HEADER(bb); // pointeur
 		if ((bb2 == l_h) || (bb == l_h)) { // on ajoute les blocs qui sont directement dans la boucle l_h
@@ -616,7 +616,7 @@ void getAllBlocksLoop(DAG *dag, std::vector<DAGBNode*> *blocks, std::vector<DAGH
 						n = new DAGBNode(b);
 						dag->addNode(n);
 					}
-					for (Block::EdgeIter it2(b->outs()); it2; it2++) { // on cherche les successeurs du bloc
+					for (Block::EdgeIter it2(b->outs()); it2(); it2++) { // on cherche les successeurs du bloc
 						Edge *edge = *it2;
 						if (LOOP_EXIT_EDGE(edge) == NULL){
 							if (edge->sink()->isBasic() || edge->sink()->isSynth()) { // si pointe vers un autre bloc basic
@@ -648,10 +648,10 @@ void getAllBlocksLoop(DAG *dag, std::vector<DAGBNode*> *blocks, std::vector<DAGH
 
 */
 void setEntryDAG(CFG *cfg, DAG *dag){
-	for (CFG::BlockIter iter(cfg->blocks()); iter; iter++){
+	for (CFG::BlockIter iter(cfg->blocks()); iter(); iter++){
 			Block *bb = *iter;
 			if (bb->isEntry()){
-				for (Block::EdgeIter it(bb->outs()); it; it++){
+				for (Block::EdgeIter it(bb->outs()); it(); it++){
 					Edge *edge = *it;
 					Block *start = edge->target();
 					BasicBlock *b_start = *start->toBasic();
@@ -667,7 +667,7 @@ void setEntryDAG(CFG *cfg, DAG *dag){
 */
 void addEdgesNext(DAG *dag, DAGBNode *n, BasicBlock *l_h, DAGVNode *next) {
 	Block *bb = n->getBlock();
-	for (Block::EdgeIter it(bb->outs()); it; it++) {
+	for (Block::EdgeIter it(bb->outs()); it(); it++) {
 		Edge *edge = *it;
 		Block *target = edge->target();
 		if (target->isBasic() || target->isSynth()) {
@@ -692,7 +692,7 @@ void addEdgesNext(DAG *dag, DAGBNode *n, BasicBlock *l_h, DAGVNode *next) {
 */
 void addEdgesExit(DAG *dag, DAGBNode *n, BasicBlock *l_h, DAGVNode *exit) {
 	Block *bb = n->getBlock();
-	for (Block::EdgeIter it(bb->outs()); it; it++) {
+	for (Block::EdgeIter it(bb->outs()); it(); it++) {
 		Edge *edge = *it;
 		if (LOOP_EXIT_EDGE(edge) != nullptr) { // si il y a un edge qui sort de la loop
 			n->addSucc(exit);
@@ -771,7 +771,7 @@ DAG* CFTreeExtractor::toDAG(CFG *cfg /* CFG a dag-ifier */ , BasicBlock *l_h /* 
 		std::function<void(DAGNode*)> fn = [d, exit,l_h, next](DAGNode *n) {
 			if (n->toBNode()) {
 				Block *bb = n->toBNode()->getBlock();
-				for (Block::EdgeIter it(bb->outs()); it; it++) {
+				for (Block::EdgeIter it(bb->outs()); it(); it++) {
 					if (l_h == nullptr) {
 						if (it->target()->isExit()) {
 							n->addSucc(next);
@@ -810,7 +810,7 @@ DAG* CFTreeExtractor::toDAG(CFG *cfg /* CFG a dag-ifier */ , BasicBlock *l_h /* 
 		std::function<void(DAGNode*)> fn = [&lh_blocks, i, &blocks, &cfg] (DAGNode *n) {
 			if (n->toBNode()) {
 				Block *bb = n->toBNode()->getBlock();
-				for (Block::EdgeIter it(bb->outs()); it; it++) {
+				for (Block::EdgeIter it(bb->outs()); it(); it++) {
 					Edge *e = *it;
 					Block *target = e->target();
 					// add edges that go to basic blocks
@@ -843,7 +843,7 @@ DAG* CFTreeExtractor::toDAG(CFG *cfg /* CFG a dag-ifier */ , BasicBlock *l_h /* 
 
 		// Add edges that go to lh_blocks[i]
 		BasicBlock *bb = lh_blocks[i]->getHeader(); // edges necessarily go to the header
-		for (BasicBlock::EdgeIter it(bb->ins()); it; it++) {
+		for (BasicBlock::EdgeIter it(bb->ins()); it(); it++) {
 			Edge *e = *it;
 			Block *source= e->source();
 			// Since the CFG contains no irreducible loops, if l_h!=nullptr, then source is contained in l_h
@@ -1048,9 +1048,9 @@ void CFTree::exportToC(io::Output &out) {
 
 CFTree* CFTreeExtractor::processCFG(CFG *cfg) {
 	bool reachable = false;
-	for (CFG::BlockIter iter(cfg->blocks()); !reachable && iter; iter++){
+	for (CFG::BlockIter iter(cfg->blocks()); !reachable && iter(); iter++){
 		if ((*iter)->isExit()) {
-			for (Block::EdgeIter it((*iter)->ins()); !reachable && it; it++)
+			for (Block::EdgeIter it((*iter)->ins()); !reachable && it(); it++)
 				reachable = true;
 		}
 	}
@@ -1073,7 +1073,7 @@ CFTCollection::CFTCollection(std::vector<CFTree*> v){
 
 void CFTreeExtractor::processWorkSpace(WorkSpace *ws) {
 	const CFGCollection *coll = INVOLVED_CFGS(ws);
-	for (CFGCollection::Iter iter(*coll); iter; iter ++) {
+	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
 		CFG *currentCFG = *iter;
 		processCFG(currentCFG);
 	}

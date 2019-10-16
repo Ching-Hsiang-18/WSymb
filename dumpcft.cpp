@@ -9,7 +9,6 @@
 #include <otawa/proc/DynFeature.h>
 
 //includes pour l'affichage du CFG
-#include <otawa/display/CFGDrawer.h>
 #include <otawa/display/CFGOutput.h>
 #include <elm/io/OutFileStream.h>
 
@@ -42,7 +41,7 @@ int main(int argc, char **argv) {
 	elm::io::OutFileStream s(buf.toString());
 	elm::io::Output out(s);
 	
-	for (CFGCollection::Iter iter(*coll); iter; iter ++) {
+	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
 		CFG *currentCFG = *iter;
 		StringBuffer buf;
 		buf << argv[1] << "-" << currentCFG->label() << "-cftree.dot";
