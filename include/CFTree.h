@@ -73,6 +73,7 @@ namespace otawa { namespace cftree {
 			virtual CFTreeLoop *toLoop() = 0;/* abstract */
 			virtual CFTreeSeq *toSeq() = 0;/* abstract */
 			void exportToDot(const elm::string &);
+			void exportToAWCET();
 			void exportToC(io::Output&);
 	};
 
@@ -339,6 +340,8 @@ extern p::feature EXTRACTED_CFTREE_FEATURE;
 extern Identifier<CFTree*> CFTREE;
 extern Identifier<DAGHNode*> DAG_HNODE;
 extern Identifier<DAGBNode*> DAG_BNODE;
+extern Identifier<int> ANN_TIME;
+extern Identifier<int> ANN_COUNT;
 
 
 
