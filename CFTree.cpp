@@ -1030,6 +1030,17 @@ CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 	}
 }
 
+void CFTree::exportToAWCET() {
+	if (toLeaf()) {
+	}
+	if (toAlt()) {
+	}
+	if (toLoop()) {
+	}
+	if (toSeq()) {
+	}
+}
+
 
 void CFTree::exportToDot(const elm::string &str) {
 	std::ofstream myfile;
@@ -1083,5 +1094,7 @@ void CFTreeExtractor::processWorkSpace(WorkSpace *ws) {
 Identifier<DAGHNode*> DAG_HNODE("otawa::cftree:DAG_HNODE");
 Identifier<DAGBNode*> DAG_BNODE("otawa::cftree:DAG_BNODE");
 Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
+Identifier<int> ANN_TIME("otawa::cftree:ANN_TIME");
+Identifier<int> ANN_COUNT("otawa::cftree:ANN_COUNT");
 
 } }

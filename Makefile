@@ -15,7 +15,7 @@ dumpcft: dumpcft.o $(HOME)/.otawa/proc/otawa/cftree.so
 
 dumpcft.o: dumpcft.cpp
 
-cftree.so: CFTree.cpp include/CFTree.h
+cftree.so: CFTree.cpp include/CFTree.h include/PWCET.h
 	$(CXX) -fPIC -shared $(CXXFLAGS) -o cftree.so CFTree.cpp $(LDLIBS)
 
 binaire: binaire.c
