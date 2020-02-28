@@ -1,4 +1,8 @@
 #include "include/CFTree.h"
+#include "include/PWCET.h"
+#include <otawa/ipet.h>
+
+using namespace otawa::pwcet;
 
 namespace otawa { 
 
@@ -1030,15 +1034,64 @@ CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 	}
 }
 
-void CFTree::exportToAWCET() {
-	if (toLeaf()) {
+formula_t *CFTree::exportToAWCET() {
+		formula_t *f = (formula_t*) malloc(sizeof(formula_t));
+	if (CFTreeLeaf *n = toLeaf()) {
+		Block *b = n->getBlock();
+		if (b->isSynth()) {
+			// TODO include callee
+		} else {
+			BasicBlock *bb = b->toBasic();
+			f->kind = KIND_CONST;
+			f->aw.loop_id = -1;
+			f->aw.others = ipet::TIME(bb);
+			if (ANN_COUNT(bb) == 0) {
+				f->aw.eta_count = ANN_COUNT(bb);
+				f->aw.eta = (int*) malloc(sizeof(int) * f->aw.eta_count);
+				for (int i = 0; i < f->aw.eta_count; i++)
+					f->aw.eta[i] = ANN_TIME(bb);
+
+			} else {
+				f->aw.eta_count = 0;
+				f->aw.eta = nullptr;
+			}
+		}
 	}
-	if (toAlt()) {
+	if (CFTreeAlt *n = toAlt()) {
+		f->kind = KIND_ALT;
+		int nchild = 0;
+		for (auto it = n->childIter(); it != n->childEnd(); it++) {
+			nchild ++;
+		}
+		f->opdata.children_count = nchild;
+		f->children = (formula_t*) malloc(sizeof(formula_t) * nchild);
+		int i = 0;
+		for (auto it = n->childIter(); it != n->childEnd(); it++) {
+			CFTree *ch = (*it);
+			formula_t *fc = ch->exportToAWCET();
+			f->children[i] = *fc;
+			i++;
+		}
 	}
-	if (toLoop()) {
+	if (CFTreeLoop *n = toLoop()) {
 	}
-	if (toSeq()) {
+	if (CFTreeSeq *n = toSeq()) {
+		f->kind = KIND_SEQ;
+		int nchild = 0;
+		for (auto it = n->childIter(); it != n->childEnd(); it++) {
+			nchild ++;
+		}
+		f->opdata.children_count = nchild;
+		f->children = (formula_t*) malloc(sizeof(formula_t) * nchild);
+		int i = 0;
+		for (auto it = n->childIter(); it != n->childEnd(); it++) {
+			CFTree *ch = (*it);
+			formula_t *fc = ch->exportToAWCET();
+			f->children[i] = *fc;
+			i++;
+		}
 	}
+	return f;
 }
 
 
@@ -1094,7 +1147,7 @@ void CFTreeExtractor::processWorkSpace(WorkSpace *ws) {
 Identifier<DAGHNode*> DAG_HNODE("otawa::cftree:DAG_HNODE");
 Identifier<DAGBNode*> DAG_BNODE("otawa::cftree:DAG_BNODE");
 Identifier<CFTree*> CFTREE("otawa::cftree:CFTREE");
-Identifier<int> ANN_TIME("otawa::cftree:ANN_TIME");
-Identifier<int> ANN_COUNT("otawa::cftree:ANN_COUNT");
+Identifier<int> ANN_TIME("otawa::cftree:ANN_TIME", 0);
+Identifier<int> ANN_COUNT("otawa::cftree:ANN_COUNT", 0);
 
 } }

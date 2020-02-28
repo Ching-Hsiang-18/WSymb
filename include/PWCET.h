@@ -52,7 +52,7 @@ struct formula_s {
 	int param_id;
 	opdata_t opdata;
 	awcet_t aw;
-	formula_t *children;
+	struct formula_s *children;
 };
 typedef struct formula_s formula_t;
 

@@ -17,6 +17,8 @@
 #include <otawa/cfg/PostDominance.h>
 #include <otawa/otawa.h>
 
+#include "PWCET.h"
+
 namespace otawa { namespace cftree {
 
 	class DAGBNode;
@@ -73,7 +75,7 @@ namespace otawa { namespace cftree {
 			virtual CFTreeLoop *toLoop() = 0;/* abstract */
 			virtual CFTreeSeq *toSeq() = 0;/* abstract */
 			void exportToDot(const elm::string &);
-			void exportToAWCET();
+			otawa::pwcet::formula_t *exportToAWCET();
 			void exportToC(io::Output&);
 	};
 
