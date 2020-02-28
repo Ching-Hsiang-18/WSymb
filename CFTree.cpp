@@ -1034,13 +1034,17 @@ CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 	}
 }
 
-formula_t *CFTree::exportToAWCET() {
-		formula_t *f = (formula_t*) malloc(sizeof(formula_t));
+void CFTree::exportToAWCET(formula_t *f) {
 	if (CFTreeLeaf *n = toLeaf()) {
 		Block *b = n->getBlock();
 		if (b->isSynth()) {
-			// TODO include callee
-		} else {
+			CFG *callee = b->toSynth()->callee();
+			CFTree *ch = CFTREE(callee);
+			cout << "Entering function: " << callee->name() << endl;
+			ch->exportToAWCET(f);
+			cout << "Exiting function: " << callee->name() << endl;
+
+		} else if (b->isBasic()) {
 			BasicBlock *bb = b->toBasic();
 			f->kind = KIND_CONST;
 			f->aw.loop_id = -1;
@@ -1055,6 +1059,8 @@ formula_t *CFTree::exportToAWCET() {
 				f->aw.eta_count = 0;
 				f->aw.eta = nullptr;
 			}
+		} else {
+			cerr << "warning: bb " << b << " is not basic and not synth" << endl;
 		}
 	}
 	if (CFTreeAlt *n = toAlt()) {
@@ -1068,12 +1074,22 @@ formula_t *CFTree::exportToAWCET() {
 		int i = 0;
 		for (auto it = n->childIter(); it != n->childEnd(); it++) {
 			CFTree *ch = (*it);
-			formula_t *fc = ch->exportToAWCET();
-			f->children[i] = *fc;
+			if (ch->toLeaf() && ch->toLeaf()->getBlock() == nullptr)
+				continue;
+			ch->exportToAWCET(f->children + i);
 			i++;
 		}
 	}
 	if (CFTreeLoop *n = toLoop()) {
+		CFTree *b = n->getBody();
+		CFTree *e = n->getExit();
+		f->kind = KIND_SEQ;
+		f->children = (formula_t*) malloc(sizeof(formula_t)*2);
+		f->children[0].kind = KIND_LOOP;
+		f->children[0].opdata.loop_id = n->getHeaderId();
+		f->children[0].children = (formula_t*) malloc(sizeof(formula_t));
+		b->exportToAWCET(f->children[0].children);
+		e->exportToAWCET(f->children + 1);
 	}
 	if (CFTreeSeq *n = toSeq()) {
 		f->kind = KIND_SEQ;
@@ -1086,12 +1102,10 @@ formula_t *CFTree::exportToAWCET() {
 		int i = 0;
 		for (auto it = n->childIter(); it != n->childEnd(); it++) {
 			CFTree *ch = (*it);
-			formula_t *fc = ch->exportToAWCET();
-			f->children[i] = *fc;
+			ch->exportToAWCET(f->children + i);
 			i++;
 		}
 	}
-	return f;
 }
 
 
