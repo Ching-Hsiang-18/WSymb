@@ -55,15 +55,16 @@ int main(int argc, char **argv) {
 	WorkSpace *ws = NULL;
 	PropList conf;
 	Manager manager;
+	
 	NO_SYSTEM(conf) = true;
 	TASK_ENTRY(conf) = "main";
+	
 	VERBOSE(conf) = true;
 
 	ws = manager.load(argv[1], conf);
 
-
 	ws->require(otawa::VIRTUALIZED_CFG_FEATURE, conf);
-
+	
 	ws->require(DynFeature("otawa::cftree::EXTRACTED_CFT_FEATURE"), conf);
  
 	const CFGCollection *coll = INVOLVED_CFGS(ws);
@@ -108,16 +109,8 @@ int main(int argc, char **argv) {
 	CFTREE(entry)->exportToAWCET(&f);
 	cout << "done." << endl;
 	
-	cout << "Computing WCET using CFTree..." << endl;
-	loopinfo_t li;
-	li.bnd = [](int x) {
-		return 10;
-	};
-
-	int wcet = evaluate(&f, &li, nullptr, nullptr);
-	cout << "WCET value using CFTree: " << wcet << endl;
-
-
+	cout << "Exporting AWCET to header file..." << endl;
+	
 	FILE *outfile = fopen(argv[2], "w");
 
 	fprintf(outfile, "int loop_bounds(int loop_id) {\n  switch(loop_id) {\n");

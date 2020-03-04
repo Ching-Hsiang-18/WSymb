@@ -3,7 +3,7 @@ CXXFLAGS+=-g
 LDFLAGS=-g
 LDLIBS=`otawa-config otawa/display --libs`
 LDLIBS2=`otawa-config otawa/display otawa/cftree --libs`
-CFLAGS=-O0 -g
+CFLAGS=-O0 -g -Wall -W -fsanitize=address
 
 CXXFLAGS += -std=c++11 -O0 -g -Wall
 

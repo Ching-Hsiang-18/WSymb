@@ -14,8 +14,8 @@ struct awcet_s {
 #define LOOP_TOP 	-1
 	int loop_id;
 	int eta_count;
-	int *eta;
-	int others;
+	long long *eta;
+	long long others;
 };
 typedef struct awcet_s awcet_t;
 
@@ -71,6 +71,6 @@ typedef union param_value_u param_value_t;
 
 typedef void (param_valuation_t) (int param_id, param_value_t * param_val, void *data);
 
-int evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, void *data);
+long long evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, void *data);
 
 #endif

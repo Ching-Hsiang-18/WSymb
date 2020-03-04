@@ -1,6 +1,7 @@
 ARMCC=arm-unknown-linux-gnueabi-gcc
-
+CFLAGS=-Wall -W -fsanitize=address
 LDLIBS=../pwcet/lib/libpwcet-runtime.a
+LDFLAGS=-fsanitize=address
 
 all: pwcet_instantiator
 
@@ -20,8 +21,12 @@ example.ff: example
 	@echo ""
 	@exit 1
 
-.PHONY: clean
+.PHONY: clean tidy
 
-clean: 
-	rm -f example example.ff example-pwcet.h pwcet_instantiator *.o *~ *decomp*
+tidy: 
+	rm -f example-pwcet.h pwcet_instantiator *.o *~ *decomp*
+	
+clean: tidy
+	rm -f example.ff example
+
 

@@ -72,8 +72,8 @@ void compute_node(evalctx_t * ctx, formula_t * f)
 #ifdef DEBUG
 	printf("compute_node: loop=%d, eta[]={", f->aw.loop_id);
 	for (i = 0; i < f->aw.eta_count; i++)
-		printf("%d, ", f->aw.eta[i]);
-	printf("}, others=%d\n", f->aw.others);
+		printf("%lld, ", f->aw.eta[i]);
+	printf("}, others=%lld\n", f->aw.others);
 
 #endif
 }
@@ -85,8 +85,7 @@ static int loop_inner(loopinfo_t * li, int inner_id, int outer_id)
 		return 0;
 	if (outer_id == -1)
 		return 1;
-abort(); // NYI
-//	return (li->hier) (inner_id, outer_id);
+	return (li->hier) (inner_id, outer_id);
 }
 
 static int loop_bound(loopinfo_t * li, int loop_id)
@@ -111,9 +110,9 @@ void awcet_seq(evalctx_t * ctx, int source_count, formula_t * source,
 	dest->loop_id = inner_loop;
 	memset(dest->eta, 0, sizeof(int) * dest->eta_count);
 	for (j = 0; j < dest->eta_count; j++) {
-		int *plop = &dest->eta[j];
+		long long *ptr = &dest->eta[j];
 		for (i = 0; i < source_count; i++) {
-			*plop +=
+			*ptr +=
 				(source[i].aw.eta_count >
 				 j) ? source[i].aw.eta[j] : source[i].aw.others;
 		}
@@ -124,7 +123,7 @@ void awcet_alt(evalctx_t * ctx, int source_count, formula_t * source,
 			   awcet_t * dest)
 {
 	int i, temp_max_source, dest_idx;
-	int temp_max;
+	long long temp_max;
 	int inner_loop = -1;
 	static int tab[ALT_MAX];
 	dest->others = -1;
@@ -141,6 +140,10 @@ void awcet_alt(evalctx_t * ctx, int source_count, formula_t * source,
 	dest_idx = 0;
 	memset(tab, 0, sizeof(tab));
 
+	if (source_count > ALT_MAX) {
+		fprintf(stderr, "Increase ALT_MAX\n");
+		abort();
+	}
 	/* Loop iteration count bounded by sum[i=1..source_count](source[i].eta_count) */
 	while (1) {
 		temp_max = -1;
@@ -168,13 +171,20 @@ void awcet_loop(evalctx_t * ctx, awcet_t * source, formula_t * dest)
 {
 	int i, j;
 	int bound;
-	int loop_wcet = 0;
+	long long loop_wcet = 0;
 	param_value_t pv;
 	if (dest->param_id != IDENT_NONE) {
 		ctx->param_valuation(dest->param_id, &pv, ctx->pv_data);
 		bound = pv.bound;
 	} else {
 		bound = loop_bound(ctx->li, dest->opdata.loop_id);
+	}
+	if (bound == 0) {
+		dest->aw.loop_id = LOOP_TOP;
+		dest->aw.eta_count = 0;
+		dest->aw.eta = NULL;
+		dest->aw.others = 0;
+		return;
 	}
 	if (source->loop_id == dest->opdata.loop_id) {
 		for (i = 0; (i < bound) && (i < source->eta_count); i++)
@@ -266,7 +276,7 @@ int awcet_is_equal(awcet_t * s1, awcet_t * s2)
 
 }
 
-int evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, void *data)
+long long evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, void *data)
 {
 	evalctx_t ctx;
 	ctx.li = li;
@@ -321,7 +331,7 @@ void writeC(formula_t *f, FILE *out, int indent) {
 	uuid += 1;
 	char eta_str[64] = "NULL";
 	if (f->aw.eta_count > 0) {
-		snprintf(eta_str, sizeof(eta_str), "(int[%d]) {0}", f->aw.eta_count);
+		snprintf(eta_str, sizeof(eta_str), "(long long[%d]) {0}", f->aw.eta_count);
 		eta_str[sizeof(eta_str) - 1] = 0;
 	}
 	switch(f->kind) {
@@ -363,12 +373,12 @@ void writeC(formula_t *f, FILE *out, int indent) {
 				for (int i = 0; i < indent; i++) fprintf(out, " ");
 				fprintf(out, "{KIND_CONST, %d, {0}, {%d, %d, ", f->param_id, f->aw.loop_id, f->aw.eta_count);
 				if (f->aw.eta_count > 0) {
-					fprintf(out, "(int[%d]) {", f->aw.eta_count);
+					fprintf(out, "(long long[%d]) {", f->aw.eta_count);
 					for (int i = 0; i < f->aw.eta_count; i++) {
-						fprintf(out, "%d, ", f->aw.eta[i]);
+						fprintf(out, "%lld, ", f->aw.eta[i]);
 					}
 				} else fprintf(out, "NULL");
-				fprintf(out, ", %d }, NULL}", f->aw.others);
+				fprintf(out, ", %lld }, NULL}", f->aw.others);
 				break;
 			}
 		case KIND_SEQ:

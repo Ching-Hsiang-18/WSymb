@@ -1049,7 +1049,7 @@ void CFTree::exportToAWCET(formula_t *f) {
 			f->aw.others = ipet::TIME(bb);
 			if (ANN_COUNT(bb) == 0) {
 				f->aw.eta_count = ANN_COUNT(bb);
-				f->aw.eta = (int*) malloc(sizeof(int) * f->aw.eta_count);
+				f->aw.eta = (long long*) malloc(sizeof(long long) * f->aw.eta_count);
 				for (int i = 0; i < f->aw.eta_count; i++)
 					f->aw.eta[i] = ANN_TIME(bb);
 
