@@ -1,61 +1,31 @@
 #ifndef PWCET_H
 #define PWCET_H 1
 
-namespace otawa { namespace pwcet {
+#define ANN_INNER 0
+#define ANN_OUTER 1
+#define ANN_CONFLICT_PRIORITY ANN_INNER
+#define ALT_MAX 1024
 
-/* Abstract WCET representation */
-struct awcet_s {
-#define LOOP_TOP 	-1
-	int loop_id;
-	int eta_count;
-	int *eta;
-	int others;
+#include <stdio.h>
+
+#include "../pwcet/include/pwcet-runtime.h"
+struct evalctx_s {
+	loopinfo_t *li;
+	param_valuation_t *param_valuation;
+	void *pv_data;
 };
-typedef struct awcet_s awcet_t;
-
-/* Structure representing a context annotation */
-struct annotation_s {
-	int loop_id;
-	int count;
-};
-typedef struct annotation_s annotation_t;
+typedef struct evalctx_s evalctx_t;
 
 
-/* Operator data (interpretation depends on operator type) */
-union opdata_u {
-	int children_count;			/* Number of children for Alt and Seq operators */
-	int loop_id;				/* Loop bound for Loop operators */
-	annotation_t ann;			/* Annotation for Ann operators */
-};
-typedef union opdata_u opdata_t;
+void awcet_seq(evalctx_t * ctx, int source_count, formula_t * source,
+                           awcet_t * dest);
+void awcet_alt(evalctx_t * ctx, int source_count, formula_t * source,
+                           awcet_t * dest);
+void awcet_loop(evalctx_t * ctx, awcet_t * source, formula_t * dest);
+void awcet_ann(evalctx_t * ctx, awcet_t * source, formula_t * dest);
 
-/* WCET formula operator type */
-#define KIND_ALT 	0
-#define KIND_SEQ 	1
-#define KIND_LOOP 	2
-#define KIND_ANN 	3
-#define KIND_CONST	4
-#define KIND_AWCET  5
 
-#define IDENT_NONE -1
-
-/* WCET formula representation */
-struct formula_s {
-	int kind;
-	/* 
-	 * Identifier for parameters, set to IDENT_NONE if unused.
-	 * If param_id != IDENT_NONE, then the parameter type depends on the kind field:
-	 * - KIND_AWCET: The parameter represents a full abstract WCET
-	 * - KIND_LOOP: The parameter represents a parametric loop bound
-	 * - KIND_ANN: The parameter represents a parametric annotation
-	 */
-	int param_id;
-	opdata_t opdata;
-	awcet_t aw;
-	struct formula_s *children;
-};
-typedef struct formula_s formula_t;
-
-} }
+void writeC(formula_t *f, FILE *out, int indent);
+void compute_eta_count(formula_t *f);
 
 #endif

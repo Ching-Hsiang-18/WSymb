@@ -2,8 +2,6 @@
 #include "include/PWCET.h"
 #include <otawa/ipet.h>
 
-using namespace otawa::pwcet;
-
 namespace otawa { 
 
 namespace cftree {
@@ -1070,7 +1068,7 @@ void CFTree::exportToAWCET(formula_t *f) {
 			nchild ++;
 		}
 		f->opdata.children_count = nchild;
-		f->children = (formula_t*) malloc(sizeof(formula_t) * nchild);
+		f->children = (formula_t*) calloc(sizeof(formula_t), nchild);
 		int i = 0;
 		for (auto it = n->childIter(); it != n->childEnd(); it++) {
 			CFTree *ch = (*it);
@@ -1084,12 +1082,13 @@ void CFTree::exportToAWCET(formula_t *f) {
 		CFTree *b = n->getBody();
 		CFTree *e = n->getExit();
 		f->kind = KIND_SEQ;
-		f->children = (formula_t*) malloc(sizeof(formula_t)*2);
+		f->children = (formula_t*) calloc(sizeof(formula_t), 2);
 		f->children[0].kind = KIND_LOOP;
-		f->children[0].opdata.loop_id = n->getHeaderId();
-		f->children[0].children = (formula_t*) malloc(sizeof(formula_t));
+		f->children[0].opdata.loop_id = n->getHeader()->id();
+		f->children[0].children = (formula_t*) calloc(sizeof(formula_t), 1);
 		b->exportToAWCET(f->children[0].children);
 		e->exportToAWCET(f->children + 1);
+		f->opdata.children_count = 2;
 	}
 	if (CFTreeSeq *n = toSeq()) {
 		f->kind = KIND_SEQ;
@@ -1098,7 +1097,7 @@ void CFTree::exportToAWCET(formula_t *f) {
 			nchild ++;
 		}
 		f->opdata.children_count = nchild;
-		f->children = (formula_t*) malloc(sizeof(formula_t) * nchild);
+		f->children = (formula_t*) calloc(sizeof(formula_t), nchild);
 		int i = 0;
 		for (auto it = n->childIter(); it != n->childEnd(); it++) {
 			CFTree *ch = (*it);
