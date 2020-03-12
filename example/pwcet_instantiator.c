@@ -12,7 +12,7 @@ int has_param = 0;
 
 int param_value(int param_id) {
   has_param = 1;
-  if (param_id == 1) {
+  if (param_id == 0) {
     return b;
   } else abort();
 }
@@ -29,14 +29,15 @@ int param_loop_bound(int loop_id) {
 int main(void) {
     loopinfo_t li = {.hier = loop_hierarchy, .bnd = param_loop_bound };
     
-    if (has_param) {
-      for (int i = 0; i < 20; i++) {
-        b = i;
-        long long wcet = evaluate(&f, &li, NULL, NULL);
+    for (int i = 0; i < 20; i++) {
+      b = i;
+      long long wcet = evaluate(&f, &li, NULL, NULL);
+      if (has_param) {
         printf("for param value %d, wcet: %lld\n", i, wcet);
+      } else {
+        printf("wcet: %lld\n", wcet);
+        break;
       }
-    } else {
-      printf("wcet: %lld\n", evaluate(&f, &li, NULL, NULL));
     }
 
 }

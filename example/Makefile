@@ -1,5 +1,5 @@
 ARMCC=arm-unknown-linux-gnueabi-gcc
-CFLAGS=-Wall -W -fsanitize=address
+CFLAGS=-O0 -g -Wall -W -fsanitize=address
 LDLIBS=../pwcet/lib/libpwcet-runtime.a
 LDFLAGS=-fsanitize=address
 
