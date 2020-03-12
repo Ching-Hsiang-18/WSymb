@@ -63,6 +63,69 @@ CFTree.
 
 The `dumpcft` command is give as an example, to document the plugin usage.
 
+By default, the dumpcft will take 2 or 3 parameters:
+
+```
+./dumpcft <binary file> <output header file> [<optional entry point>]
+```
+
+It will extract the CFTree in .dot format, and also produce the abstract
+WCET formula as a header file. This header file can be used to instantiate
+the parametric WCET at runtime.
+
+## WCET formula instantiation example
+
+An example is given in the example/ subdir.
+
+The CFTreeExtractor plugin should have been compiled and installed first.
+
+Then, compile your target program as an ARM binary (example/example.c) and
+create the flowfact file using mkff. 
+
+Launch dumpcft on the ARM binary to create the header file containing the 
+parametric WCET formula (example-pwcet.h in our case) for the ARM binary.
+
+This formula can be instantiated/evaluated without having to depend on OTAWA. 
+An example is given in example/pwcet_instantiator.c, it must include
+"example-pwcet.h" and "pwcet/include/pwcet-runtime.h", and be linked against 
+"pwcet/libpwcet-runtime.a" (the runtime contains general formula evaluation
+functions, whereas "example-pwcet.h" contains data tied to the specific
+binary under analysis, produced by dumpcft)
+
+## Simple non-parametric usage
+
+To compute the WCET in your instantiator program, you must do:
+
+```
+    loopinfo_t li = {.hier = loop_hierarchy, .bnd = loop_bound };
+    long long wcet = evaluate(&f, &li, NULL, NULL); /* the two last arguments are reserved for future use */
+```
+
+(the loop_hieararchy and loop_bound functions are defined in the header file
+computed by dumpcft)
+
+## Parametric loop bounds
+
+To use parametric loop bounds, you can replace loop_bound by your custom
+handler, so that it returns the loop bound value you want. Example:
+
+```
+#define PARAM_FLAG 0x40000000
+int param_loop_bound(int loop_id) {
+    int bound = loop_bounds(loop_id);
+    if (bound & PARAM_FLAG) {
+        int param_id = bound & ~PARAM_FLAG;
+        /* return here whatever value you want for the loop bound */
+        
+    } else return bound;
+}
+```
+
+And then, edit the flowfact file to put a loop bound of 0x4000000N (where N
+is the parameter id) for each loop bound you want to be made parametric...
+
+An example is given in example/pwcet_instantiator.c.
+
 ----
 ## References
 
