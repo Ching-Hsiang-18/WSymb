@@ -13,7 +13,7 @@ example-pwcet.h: example example.ff
 	../dumpcft ./example example-pwcet.h
 
 example: example.c
-	$(ARMCC) -o example example.c -static
+	$(ARMCC) -g -O0 -o example example.c -static
 
 example.ff: example
 	@echo ""
@@ -24,7 +24,7 @@ example.ff: example
 .PHONY: clean tidy
 
 tidy: 
-	rm -f example-pwcet.h pwcet_instantiator *.o *~ *decomp*
+	rm -f example-pwcet.h pwcet_instantiator *.o *~ *decomp* *.dot
 	
 clean: tidy
 	rm -f example.ff example

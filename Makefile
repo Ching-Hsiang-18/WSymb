@@ -30,6 +30,6 @@ $(HOME)/.otawa/proc/otawa/cftree.so: cftree.so
 	cp cftree.eld $(HOME)/.otawa/proc/otawa/
 	cp cftree.so $(HOME)/.otawa/proc/otawa/
 
-install: $(HOME)/.otawa/proc/otawa/cftree.so
+install: pwcet/lib/libpwcet-runtime.a dumpcft $(HOME)/.otawa/proc/otawa/cftree.so
 
 .PHONY: all test clean graph install
