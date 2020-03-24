@@ -34,7 +34,10 @@ The algorithm to compute the CFTree is presented in [1,2].
 
 This plugin requires [OTAWA v2](http://www.otawa.fr/). Also, the directory
 `<otawa dir>/bin` (where `otawa dir` is the directory where otawa is
-installed) must be in your `$PATH`.
+installed) must be in your `$PATH`. We suggest you follow [these
+installation
+instructions](https://gitlab.cristal.univ-lille.fr/otawa-plugins/otawa-doc),
+and stop at the end of section "Setting the environment".
 
 To compile and install the plugin:
 
@@ -42,6 +45,7 @@ To compile and install the plugin:
 $ make
 $ make install
 ```
+
 JF: after just make, when typing make install I got `nothing to do for "install"`
 
 ----
