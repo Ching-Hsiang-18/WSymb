@@ -22,32 +22,32 @@ Please remove "nospam" from the email addresses.
 ## Introduction
 
 CFTreeExtractor is an OTAWA v2 plugin that produces a Control Flow Tree
-(CFTree) representation from a program. 
+(CFTree) representation from binary a program.
 
-The CFTree is a a tree-representation that looks like the Abstract Syntax
-Tree (AST), but it is extracted from the binary, and does not needs source
-code.
-
-With this plugin, some static analyses that usually require the actual AST
-from the source code, can be adapted to work on the CFTree instead.
+The CFTree is a tree-representation of the binary, it can be considered
+as a (enriched) binary code Abstract Syntax Tree.
 
 The algorithm to compute the CFTree is presented in [1,2].
 
 ----
 ## Installation
 
-To use this plugin, you need to have installed OTAWA v2, and the command
-`otawa-config` must be in your `$PATH`.
+This plugin requires [OTAWA v2](http://www.otawa.fr/). Also, the directory
+`<otawa dir>/bin` (where `otawa dir` is the directory where otawa is
+installed) must be in your `$PATH`.
 
-To compile and install the plugin, type:
+To compile and install the plugin:
 
 ```
 $ make
 $ make install
 ```
+JF: after just make, when typing make install I got `nothing to do for "install"`
 
 ----
 ## Usage
+
+JF: not sure the parts up to dumpcft should be documented here.
 
 Once the plugin is installed, the following command will give the required
 LDLIBS to use it: 
@@ -61,70 +61,79 @@ To extract the CFTree from your program, you need to require the feature
 will have a `CFTREE` property attached, that points to the corresponding
 CFTree.
 
-The `dumpcft` command is give as an example, to document the plugin usage.
-
-By default, the dumpcft will take 2 or 3 parameters:
+The `dumpcft` command is provided as an example, to document the plugin
+usage. Its synopsis of `dumpcft` is as follows:
 
 ```
 ./dumpcft <binary file> <output header file> [<optional entry point>]
 ```
 
-It will extract the CFTree in .dot format, and also produce the abstract
-WCET formula as a header file. This header file can be used to instantiate
-the parametric WCET at runtime.
+*Warning*: `binary file` must be a binary for an instruction set
+supported by Otawa. Typically, an ARM binary. See the `example`
+sub-directory for a `Makefile` example.
 
-## WCET formula instantiation example
+`dumpcft` outputs the CFTree in a `.dot` format, and also produces the
+abstract WCET formula as a header file. This header can be used to
+instantiate the parametric WCET (either before, or during, run-time).
 
-An example is given in the example/ subdir.
+## WCET formula instantiation
 
-The CFTreeExtractor plugin should have been compiled and installed first.
+An example of formula instantiation is provided in the `example/`
+sub-directory. The compilation process, detailed in the `Makefile`,
+involves the following steps:
 
-Then, compile your target program as an ARM binary (example/example.c) and
-create the flowfact file using mkff. 
+1. Compile your C program as an ARM binary: `make example`
+2. Create the flowfact file: first `mkff example > example.ff`. Then,
+   for now, edit `example.ff` and replace the `??` fields by the actual
+   loop bounds (later, we will detail how to use loop bound parameters
+   instead)
+3. Create the header file containing the parametric WCET formula for the
+   ARM binary: `make example-pwcet.h`
+4. Compile the formula instantiator: `make pwcet_instantiator`
+5. Instantiate the formula: `./pwcet_instantiator`
+6. If everything worked correctly, the execution should print the same
+   WCET as the one computed by Otawa at step 3, during the CFT creation.
 
-Launch dumpcft on the ARM binary to create the header file containing the 
-parametric WCET formula (example-pwcet.h in our case) for the ARM binary.
+Note that `pwcet/include/pwcet-runtime.h` contains generic formula
+evaluation functions. On the contrary, `example-pwcet.h`, which is
+produced by `dumpcft`, contains code specifically related to the binary
+under analysis.
 
-This formula can be instantiated/evaluated without having to depend on OTAWA. 
-An example is given in example/pwcet_instantiator.c, it must include
-"example-pwcet.h" and "pwcet/include/pwcet-runtime.h", and be linked against 
-"pwcet/libpwcet-runtime.a" (the runtime contains general formula evaluation
-functions, whereas "example-pwcet.h" contains data tied to the specific
-binary under analysis, produced by dumpcft)
+## Formula instantiation
 
-## Simple non-parametric usage
-
-To compute the WCET in your instantiator program, you must do:
+The file `example/pwcet_instantiator.c` provides an example of WCET
+formula instantiation. The following line provides the information on
+loops hierarchy and loop bounds:
 
 ```
     loopinfo_t li = {.hier = loop_hierarchy, .bnd = loop_bound };
+```
+
+The following line evaluates the formula `f`, using the loops
+information `li`:
+
+```
     long long wcet = evaluate(&f, &li, NULL, NULL); /* the two last arguments are reserved for future use */
 ```
 
-(the loop_hieararchy and loop_bound functions are defined in the header file
-computed by dumpcft)
+### Non-parametric loop bounds
 
-## Parametric loop bounds
+To compute the non-parametric WCET:
 
-To use parametric loop bounds, you can replace loop_bound by your custom
-handler, so that it returns the loop bound value you want. Example:
+1. Specify loop bound values in `example.ff` (in place of `??`);
+2. `make`
+3. `./pwcet_instantiator`
 
-```
-#define PARAM_FLAG 0x40000000
-int param_loop_bound(int loop_id) {
-    int bound = loop_bounds(loop_id);
-    if (bound & PARAM_FLAG) {
-        int param_id = bound & ~PARAM_FLAG;
-        /* return here whatever value you want for the loop bound */
-        
-    } else return bound;
-}
-```
+### Parametric loop bounds
 
-And then, edit the flowfact file to put a loop bound of 0x4000000N (where N
-is the parameter id) for each loop bound you want to be made parametric...
+In the example, procedure `param_loop_bound` relates loop identifiers to
+loop bound. Edit `example.ff` to write `0x4000000N` (where N is the
+parameter identifier) instead of `??` for each loop bound you want to
+turn parametric. The parameter identifier is used in function
+`param_value` to instantiate the parameter (i.e. provide its value).
 
-An example is given in example/pwcet_instantiator.c.
+Note that you can instead replace procedure `param_loop_bound` by your
+custom handler if you wish.
 
 ----
 ## References
