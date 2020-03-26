@@ -43,30 +43,12 @@ To compile and install the plugin:
 
 ```
 $ make
-$ make install
 ```
-
-JF: after just make, when typing make install I got `nothing to do for "install"`
 
 ----
 ## Usage
 
-JF: not sure the parts up to dumpcft should be documented here.
-
-Once the plugin is installed, the following command will give the required
-LDLIBS to use it: 
-
-```
-otawa-config otawa/display otawa/cftree --libs
-```
-
-To extract the CFTree from your program, you need to require the feature
-`otawa::cftree::EXTRACTED_CFT_FEATURE`, afterwards each CFG of the workspace
-will have a `CFTREE` property attached, that points to the corresponding
-CFTree.
-
-The `dumpcft` command is provided as an example, to document the plugin
-usage. Its synopsis of `dumpcft` is as follows:
+You can use the command `dumpcft` to produce the CFT from a binary code:
 
 ```
 ./dumpcft <binary file> <output header file> [<optional entry point>]
