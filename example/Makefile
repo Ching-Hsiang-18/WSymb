@@ -1,4 +1,6 @@
-ARMCC=arm-unknown-linux-gnueabi-gcc
+ARMCC=arm-none-eabi-gcc
+ARMCFLAGS=-nostdlib -nostdinc
+
 CFLAGS=-O0 -g -Wall -W -fsanitize=address
 LDLIBS=../pwcet/lib/libpwcet-runtime.a
 LDFLAGS=-fsanitize=address
@@ -13,11 +15,11 @@ example-pwcet.h: example example.ff
 	../dumpcft ./example example-pwcet.h
 
 example: example.c
-	$(ARMCC) -g -O0 -o example example.c -static
+	$(ARMCC) $(ARMCFLAGS) -g -O0 -o example example.c -static
 
 example.ff: example
 	@echo ""
-	@echo "Please generate example.ff file using the mkff tool, and edit it to set the loop bounds"
+	@echo "Please generate example.ff file using 'mkff example>example.ff', then edit it to set the loop bounds"
 	@echo ""
 	@exit 1
 
@@ -25,7 +27,7 @@ example.ff: example
 
 tidy: 
 	rm -f example-pwcet.h pwcet_instantiator *.o *~ *decomp* *.dot
-	
+
 clean: tidy
 	rm -f example.ff example
 
