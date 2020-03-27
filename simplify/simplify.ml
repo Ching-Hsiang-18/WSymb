@@ -93,8 +93,16 @@ let const f =
   | FConst _ -> internal_error "const" "f should not be const"
   | _ -> 1
 
-let simplify_product f = f       
-       
+let rec simplify_product (k,f) =
+  if k = 0 then
+    FConst bot_wcet
+  else match f with
+       | FConst c ->
+          FConst (prod k c)
+       | FProduct (k',f') ->
+          simplify_product (k*k',f')
+       | _ -> FProduct (k,f)
+  
 (* Assumes that List.length f >= 2 *)       
 let rec simplify_sum_rec fl =
   match fl with
@@ -114,7 +122,7 @@ let rec simplify_sum_rec fl =
        | Some t' -> t'
        | None -> internal_error "simplify_sum_rec" "cannot be none"
      in
-     [simplify_product (FProduct (((const f1)+(const f2)), t))]
+     [simplify_product (((const f1)+(const f2)), t)]
   | [f1; f2] ->
      if less_than_f f2 f1 then
        [f2; f1]
@@ -221,6 +229,8 @@ let rec simplify f =
      simplify_sum fl
   | FUnion fl ->
      simplify_union fl
+  | FProduct (k,f) ->
+     simplify_product (k,f)
   | _ -> f'
            
 (* let simplify f =

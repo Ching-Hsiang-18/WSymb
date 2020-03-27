@@ -21,14 +21,14 @@ let rec pp out_f f =
   | FParam p ->
      pp_param out_f p
   | FPlus fl ->
-     fprintf out_f "@[<hov 2>%a@]"
+     fprintf out_f "@[<hov 2>(%a)@]"
        (fun out_f ->
          pp_print_list
            ~pp_sep:(fun out_f () -> fprintf out_f "@ +@ ")
            pp out_f
        ) fl
   | FUnion fl ->
-     fprintf out_f "@[<hov 2>%a@]"
+     fprintf out_f "@[<hov 2>(%a)@]"
        (fun out_f ->
          pp_print_list
            ~pp_sep:(fun out_f () -> fprintf out_f "@ U@ ")

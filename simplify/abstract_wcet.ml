@@ -102,7 +102,7 @@ let pp_annot out_f (loop, it) =
   fprintf out_f "(%a,%a)" pp_loop loop pp_symb_int it
    
 let pp out_f (loop, (wl,last)) =
-  fprintf out_f "(%a,({%a,%d})" pp_loop loop
+  fprintf out_f "(%a,{%a,%d})" pp_loop loop
     (pp_print_list
        ~pp_sep:(fun out_f () -> pp_print_text out_f ",")
        (fun out_f w -> fprintf out_f "%d" w))
