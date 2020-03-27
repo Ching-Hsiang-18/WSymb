@@ -166,7 +166,7 @@ let rec simplify_union_rec fl =
      merge_unions fl1 fl2
   | [FUnion fl; other] ->
      merge_unions fl [other]
-  | [other; FPlus fl] ->
+  | [other; FUnion fl] ->
      merge_unions [other] fl
   | [FConst w1; FConst w2] ->
      if w1 = bot_wcet then [FConst w2]
