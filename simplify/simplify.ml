@@ -69,7 +69,7 @@ let rec less_than_f f1 f2 =
        k1 < k2
   | (FPower (f1sub1, f1sub2, l1, k1), FPower (f2sub1, f2sub2, l2, k2)) ->
      if (k1 <> k2) then
-       less_than_sint k1 k2
+       k1 < k2
      else
        if (l1 <> l2) then
          less_than_loop l1 l2
@@ -242,7 +242,13 @@ let simplify_annot (f,a) =
      if f = bot_f then bot_f
      else
        FAnnot (f,a)
-          
+
+let simplify_power (f_body, f_exit, l, it) =
+  match f_body, f_exit with
+  | FConst c1, FConst c2 ->
+     FConst (Abstract_wcet.pow c1 c2 l it)
+  | _,_ -> FPower (f_body, f_exit, l, it)
+    
 let fmap fct formula =
   match formula with
   | FConst _ | FParam _ -> formula
@@ -270,5 +276,6 @@ let rec simplify f =
      simplify_product (k,f)
   | FAnnot (f, a) ->
      simplify_annot (f,a)
-  | _ -> f'
+  | FPower (f_body, f_exit, l, it) ->
+     simplify_power (f_body, f_exit, l, it)
            

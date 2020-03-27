@@ -24,8 +24,10 @@ let f15 = FUnion [FPlus [c; p]; FPlus [c2; p]]
 let f16 = FUnion [p2; p; c2; c]
 let f17 = FAnnot (c, (LNamed "l1",2)) 
 let f18 = FPlus [f17; p]
+let f19 = FPower (c, c2, LNamed "l1", 4)
+let f20 = FPower (c, c2, LNamed "l2", 4)        
         
-let formulas = [f3; f4; f5; f6; f7; f8; f9; f10; f11; f12; f13; f14; f15; f16; f17; f18]
+let formulas = [f3; f4; f5; f6; f7; f8; f9; f10; f11; f12; f13; f14; f15; f16; f17; f18; f19; f20]
 
 
 let _ =

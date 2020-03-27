@@ -70,7 +70,31 @@ let rec keep_first n w =
   
 let annot (l, w) (l',it) =
   (upper_bound l l', keep_first it w)
-       
+
+(* Loops *)  
+let rec val_sum_k_first k w =
+  if k=0 then 0
+  else
+    (hd w) + val_sum_k_first (k-1) (tl w)
+
+let wl_sum_k_first k w =
+  ([], val_sum_k_first k w)
+    
+let rec ktl k w =
+  if k = 0 then w
+  else tl (ktl (k-1) w)
+
+let rec pack k w =
+  match w with
+  | ([], last) -> ([], val_sum_k_first k ([],last))
+  | (wl,_) -> insert (val_sum_k_first k w) (pack k (ktl k w))
+
+let pow (h_body,w_body) (h_exit,w_exit) l it =
+  if h_body = l then
+    (h_exit,sum_mwcet (wl_sum_k_first it w_body) w_exit)
+  else
+    (upper_bound h_body h_exit, sum_mwcet (pack it w_body) w_exit)
+  
 open Format
 
 let pp_param out_f p =
