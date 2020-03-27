@@ -21,9 +21,9 @@ let f12 = FProduct (3, FProduct(2, FPlus [c;p]))
 let f13 = FPlus [FProduct (3, p); p]
 let f14 = FPlus [FProduct (3, FUnion [p;c]); FUnion [c;p]]        
 let f15 = FUnion [FPlus [c; p]; FPlus [c2; p]]
-let f16 = FUnion [FPlus [c; p]; FPlus [c; p2]]
+let f16 = FUnion [p2; p; c2; c]
         
-let formulas = [f3; f4; f5; f6; f7; f8; f9; f10; f11; f12; f13; f14; f15]
+let formulas = [f3; f4; f5; f6; f7; f8; f9; f10; f11; f12; f13; f14; f15; f16]
 
 
 let _ =

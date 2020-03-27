@@ -81,16 +81,16 @@ let rec less_than_f f1 f2 =
   | FAnnot _, FParam _ -> true
   | _ -> not(less_than_f f2 f1)
 
-let term f =
+let term_of_prod f =
   match f with
-  | FProduct (k, f) -> Some f
+  | FProduct (_, f') -> Some f'
   | FConst _ -> None
   | _ -> Some f
 
-let const f =
+let const_of_prod f =
   match f with
-  | FProduct (k, f) -> k
-  | FConst _ -> internal_error "const" "f should not be const"
+  | FProduct (k, _) -> k
+  | FConst _ -> internal_error "const_of_prod" "f should not be const"
   | _ -> 1
 
 let rec simplify_product (k,f) =
@@ -102,6 +102,18 @@ let rec simplify_product (k,f) =
        | FProduct (k',f') ->
           simplify_product (k*k',f')
        | _ -> FProduct (k,f)
+
+let term_of_sum f =
+  match f with
+  | FPlus ((FConst _)::rest) -> Some (FPlus rest)
+  | FConst _ -> None
+  | _ -> Some f
+
+let const_of_sum f =
+  match f with
+  | FPlus [FConst c; _] -> FConst c
+  | FConst _ -> internal_error "const_of_sum" "f should not be const"
+  | _ -> FConst bot_wcet
   
 (* Assumes that List.length f >= 2 *)       
 let rec simplify_sum_rec fl =
@@ -117,12 +129,12 @@ let rec simplify_sum_rec fl =
      if w1 = bot_wcet then [FConst w2]
      else if w2 = bot_wcet then [FConst w1]
      else [FConst (Abstract_wcet.sum w1 w2)]
-  | [f1; f2] when (term f1=term f2 && term f1 <> None) ->
-     let t = match term f1 with
+  | [f1; f2] when (term_of_prod f1=term_of_prod f2 && term_of_prod f1 <> None) ->
+     let t = match term_of_prod f1 with
        | Some t' -> t'
        | None -> internal_error "simplify_sum_rec" "cannot be none"
      in
-     [simplify_product (((const f1)+(const f2)), t)]
+     [FProduct (((const_of_prod f1)+(const_of_prod f2)), t)]
   | [f1; f2] ->
      if less_than_f f2 f1 then
        [f2; f1]
@@ -146,8 +158,7 @@ and merge_sums fl1 fl2 =
         hd2::(merge_sums fl1 tl2)       
      | _ -> internal_error "merge_sums" "wrong list size"
           
-(* Simplification functions *)      
-let simplify_sum fl =
+and simplify_sum fl =
   match fl with
   | [] -> internal_error "simplify_sum" "empty list"
   | [f1] -> f1 (* Might happen due to neutral element bot_f *)
@@ -159,7 +170,7 @@ let simplify_sum fl =
      | _ -> FPlus fl'
 
 (* Assumes that List.length f >= 2 *)          
-let rec simplify_union_rec fl =
+and simplify_union_rec fl =
   match fl with
   | [] | [_] -> internal_error "simplify_union_rec" "wrong list size"
   | [FUnion fl1; FUnion fl2] ->
@@ -172,6 +183,13 @@ let rec simplify_union_rec fl =
      if w1 = bot_wcet then [FConst w2]
      else if w2 = bot_wcet then [FConst w1]
      else [FConst (Abstract_wcet.union w1 w2)]
+  | [f1; f2] when (term_of_sum f1=term_of_sum f2 && term_of_sum f1 <> None) ->
+     let t = match term_of_sum f1 with
+       | Some t' -> t'
+       | None -> internal_error "simplify_union_rec" "cannot be none"
+     in
+     let u = FUnion [simplify_union [const_of_sum f1; const_of_sum f2]] in
+     [simplify_sum [u; t]]
   | [f1; f2] ->
      if less_than_f f2 f1 then
        [f2; f1]
@@ -195,7 +213,7 @@ and merge_unions fl1 fl2 =
         hd2::(merge_unions fl1 tl2)       
      | _ -> internal_error "merge_unions" "wrong list size"
           
-let simplify_union fl =
+and simplify_union fl =
   match fl with
   | [] -> internal_error "simplify_union" "empty list"
   | [f1] -> f1 (* Might happen due to neutral element bot_f *)
@@ -233,53 +251,3 @@ let rec simplify f =
      simplify_product (k,f)
   | _ -> f'
            
-(* let simplify f =
- *   (\* Brute force implementation *\)
- *   let simplified = ref true in
- *   let rec aux f =
- *     match f with
- *     (\* Associativity => requires nary plus/union *\)
- *     (\* Commutativity *\)
- *     | FPlus (f1, f2) when (less_than_f f1 f2) ->
- *        simplified := true;
- *        FPlus (aux f2, aux f1)
- *     | FUnion (f1, f2) when (less_than_f f1 f2) ->
- *        simplified := true;
- *        FUnion (aux f2, aux f1)
- *     (\* Distributivity *\)
- *     | FUnion (FPlus (FConst c1, f1), FPlus (FConst c2, f2)) when f1=f2 ->
- *        simplified := true;
- *        FPlus (FUnion (FConst c1, FConst c2), aux f1)
- *     (\* Neutral element *\)
- *     | FPlus (f1, f2) when f2=bot_f ->
- *        simplified := true;
- *        f1
- *     | FUnion (f1, f2) when f2=bot_f ->
- *        simplified := true;
- *        f1
- *     (\* Multiplication *\)
- *     | FProduct ((SInt 0), f) ->
- *        simplified := true;
- *        bot_f
- *     | FPlus ((FProduct ((SInt k), f1)), f2) when f1=f2 ->
- *        simplified := true;
- *        FProduct ((SInt (k+1)), aux f1)
- *     | FPlus ((FProduct ((SInt k), f1)), (FProduct ((SInt k'), f2))) when f1=f2 ->
- *        simplified := true;
- *        FProduct ((SInt (k+k')), aux f1)
- *     (\* Annotations *\)
- *     | FAnnot (f, _) when f=bot_f ->
- *        simplified := true;
- *        bot_f
- *     | FPlus (FAnnot (f1, a1), FAnnot (f2,a2)) when a1=a2 ->
- *        simplified := true;
- *        FAnnot (FPlus (aux f1, aux f2), a1)
- *     (\* Loops? *\)
- *     | _ -> f
- *   in
- *   let simpl_f = ref f in
- *   while !simplified do
- *     simplified := false;
- *     simpl_f := aux !simpl_f
- *   done;
- *   !simpl_f *)
