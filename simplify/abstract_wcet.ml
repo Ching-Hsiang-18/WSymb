@@ -57,7 +57,16 @@ let rec union_mwcet w1 w2 =
          w2,w1
      in
      insert (hd max) (union_mwcet (tl max) min)
+     
+let union (l1,w1) (l2,w2) =
+  (upper_bound l1 l2, union_mwcet w1 w2)
 
+let prod_mwcet k (wl,last) =
+  (List.map (fun w -> w*k) wl, k*last)
+
+let prod k (l,w) =
+  (l, prod_mwcet k w)
+  
 let rec less_than_awcet w1 w2 =
   match (w1,w2) with
     | ([], last1), ([], last2) -> last1 < last2
@@ -93,7 +102,7 @@ let pp_annot out_f (loop, it) =
   fprintf out_f "(%a,%a)" pp_loop loop pp_symb_int it
    
 let pp out_f (loop, (wl,last)) =
-  fprintf out_f "(%a,@ ({%a,%d})" pp_loop loop
+  fprintf out_f "(%a,({%a,%d})" pp_loop loop
     (pp_print_list
        ~pp_sep:(fun out_f () -> pp_print_text out_f ",")
        (fun out_f w -> fprintf out_f "%d" w))

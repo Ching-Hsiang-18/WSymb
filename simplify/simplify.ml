@@ -56,7 +56,7 @@ let rec less_than_f f1 f2 =
      if (f1' <> f2') then
        (less_than_f f1' f2')
      else
-       less_than_sint k1 k2
+       k1 < k2
   | (FPower (f1sub1, f1sub2, l1, k1), FPower (f2sub1, f2sub2, l2, k2)) ->
      if (k1 <> k2) then
        less_than_sint k1 k2
@@ -81,6 +81,20 @@ let rec less_than_f f1 f2 =
   | FAnnot _, FParam _ -> true
   | _ -> not(less_than_f f2 f1)
 
+let term f =
+  match f with
+  | FProduct (k, f) -> Some f
+  | FConst _ -> None
+  | _ -> Some f
+
+let const f =
+  match f with
+  | FProduct (k, f) -> k
+  | FConst _ -> internal_error "const" "f should not be const"
+  | _ -> 1
+
+let simplify_product f = f       
+       
 (* Assumes that List.length f >= 2 *)       
 let rec simplify_sum_rec fl =
   match fl with
@@ -95,6 +109,12 @@ let rec simplify_sum_rec fl =
      if w1 = bot_wcet then [FConst w2]
      else if w2 = bot_wcet then [FConst w1]
      else [FConst (Abstract_wcet.sum w1 w2)]
+  | [f1; f2] when (term f1=term f2 && term f1 <> None) ->
+     let t = match term f1 with
+       | Some t' -> t'
+       | None -> internal_error "simplify_sum_rec" "cannot be none"
+     in
+     [simplify_product (FProduct (((const f1)+(const f2)), t))]
   | [f1; f2] ->
      if less_than_f f2 f1 then
        [f2; f1]
@@ -130,6 +150,54 @@ let simplify_sum fl =
      | [f1] -> f1
      | _ -> FPlus fl'
 
+(* Assumes that List.length f >= 2 *)          
+let rec simplify_union_rec fl =
+  match fl with
+  | [] | [_] -> internal_error "simplify_union_rec" "wrong list size"
+  | [FUnion fl1; FUnion fl2] ->
+     merge_unions fl1 fl2
+  | [FUnion fl; other] ->
+     merge_unions fl [other]
+  | [other; FPlus fl] ->
+     merge_unions [other] fl
+  | [FConst w1; FConst w2] ->
+     if w1 = bot_wcet then [FConst w2]
+     else if w2 = bot_wcet then [FConst w1]
+     else [FConst (Abstract_wcet.union w1 w2)]
+  | [f1; f2] ->
+     if less_than_f f2 f1 then
+       [f2; f1]
+     else [f1; f2]
+  | (FUnion fl)::tl ->
+     merge_unions fl (simplify_union_rec tl)
+  | hd::tl ->
+     merge_unions [hd] (simplify_union_rec tl)
+
+and merge_unions fl1 fl2 =
+  match fl1,fl2 with
+  | [],fl | fl,[] -> fl
+  | hd1::tl1, hd2::tl2 ->
+     let l=simplify_union_rec ([hd1;hd2]) in
+     match l with
+     | [] -> internal_error "merge_unions" "empty list"
+     | [hd] -> hd::(merge_unions tl1 tl2)
+     | [hd1';hd2'] when hd1'=hd1 ->
+        hd1::(merge_unions tl1 fl2)
+     | [hd1';hd2'] when hd1'=hd2 ->
+        hd2::(merge_unions fl1 tl2)       
+     | _ -> internal_error "merge_unions" "wrong list size"
+          
+let simplify_union fl =
+  match fl with
+  | [] -> internal_error "simplify_union" "empty list"
+  | [f1] -> f1 (* Might happen due to neutral element bot_f *)
+  | _ ->
+     let fl' = simplify_union_rec fl in
+     match fl' with
+     | [] -> internal_error  "simplify_union" "empty list"
+     | [f1] -> f1
+     | _ -> FUnion fl'
+          
 let fmap fct formula =
   match formula with
   | FConst _ | FParam _ -> formula
@@ -151,6 +219,8 @@ let rec simplify f =
   | FConst _ | FParam _ -> f'
   | FPlus fl ->
      simplify_sum fl
+  | FUnion fl ->
+     simplify_union fl
   | _ -> f'
            
 (* let simplify f =
