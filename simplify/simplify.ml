@@ -25,10 +25,20 @@ let less_than_sint i1 i2 =
 
 let less_than_annot (l1,k1) (l2,k2) =
   if (k1 <> k2) then
-    less_than_sint k1 k2
+    k1 < k2
   else
     less_than_loop l1 l2
 
+let rec less_than_awcet w1 w2 =
+  match (w1,w2) with
+    | ([], last1), ([], last2) -> last1 < last2
+    | _,_ ->
+       let hd1, hd2= (hd w1), (hd w2) in
+       if (hd w1) <> (hd w2) then
+         hd1 < hd2
+       else
+         less_than_awcet (tl w1) (tl w2)
+  
 let rec less_than_f f1 f2 =
   match (f1, f2) with
   | FConst (l1,w1), FConst (l2,w2) ->
@@ -223,6 +233,15 @@ and simplify_union fl =
      | [] -> internal_error  "simplify_union" "empty list"
      | [f1] -> f1
      | _ -> FUnion fl'
+
+let simplify_annot (f,a) =
+  match f with
+  | FConst c ->
+     FConst (Abstract_wcet.annot c a)
+  | _ ->
+     if f = bot_f then bot_f
+     else
+       FAnnot (f,a)
           
 let fmap fct formula =
   match formula with
@@ -249,5 +268,7 @@ let rec simplify f =
      simplify_union fl
   | FProduct (k,f) ->
      simplify_product (k,f)
+  | FAnnot (f, a) ->
+     simplify_annot (f,a)
   | _ -> f'
            
