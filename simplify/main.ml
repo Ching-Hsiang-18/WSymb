@@ -33,9 +33,14 @@ let usage = "Usage: simplify <source-file>"
              
 let simplify_prog formulas =
   List.iter
-    (fun f -> let f' = simplify f in
-              Format.fprintf Format.std_formatter "%a@[<hov 2> => %a@]@.@."
-                Wcet_formula.pp f Wcet_formula.pp f')
+    (fun f ->
+      let f' = simplify f in
+      if (!Options.debug) then
+        Format.fprintf Format.std_formatter "%a@[<hov 2> => %a@]@.@."
+          Wcet_formula.pp f Wcet_formula.pp f'
+      else
+        Format.fprintf Format.std_formatter "%a@." Wcet_formula.pp f'
+    )
     formulas
 
 let anonymous source_name =
