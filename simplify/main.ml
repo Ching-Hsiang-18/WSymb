@@ -29,11 +29,30 @@ let f20 = FPower (c, c2, LNamed "l2", 4)
         
 let formulas = [f3; f4; f5; f6; f7; f8; f9; f10; f11; f12; f13; f14; f15; f16; f17; f18; f19; f20]
 
-
-let _ =
+let usage = "Usage: simplify <source-file>"
+             
+let simplify_prog formulas =
   List.iter
     (fun f -> let f' = simplify f in
-              Format.fprintf Format.std_formatter "%a@ @[<hov 2>=>@ %a@]@.@."
+              Format.fprintf Format.std_formatter "%a@[<hov 2> => %a@]@.@."
                 Wcet_formula.pp f Wcet_formula.pp f')
     formulas
 
+let anonymous source_name =
+  Location.input_name := source_name;
+  let lexbuf = Lexing.from_channel (open_in source_name) in
+  Location.init lexbuf source_name;
+  let prog =
+    try
+      Parse.prog lexbuf
+    with (Lexer.Error loc) | (Parse.Syntax_err loc) as exc ->
+                              Parse.report_error loc;
+                              raise exc
+  in
+  simplify_prog prog
+  
+let _ =
+  try
+    Arg.parse Options.options anonymous usage
+  with
+  | Parse.Syntax_err _ | Lexer.Error _ -> ()

@@ -103,7 +103,7 @@ let pp_param out_f p =
 let pp_loop out_f l =
   match l with
   | LNamed n ->
-     fprintf out_f "\"%s\"" n
+     fprintf out_f "%s" n
   | LParam p ->
      pp_param out_f p
   | LTop ->
@@ -120,7 +120,7 @@ let pp_annot out_f (loop, it) =
   fprintf out_f "(%a,%d)" pp_loop loop it
    
 let pp out_f (loop, (wl,last)) =
-  fprintf out_f "(%a,{%a,%d})" pp_loop loop
+  fprintf out_f "(%a;{%a,%d})" pp_loop loop
     (pp_print_list
        ~pp_sep:(fun out_f () -> pp_print_text out_f ",")
        (fun out_f w -> fprintf out_f "%d" w))
