@@ -1,4 +1,4 @@
-(** License goes here *)
+open Utils
 
 type param = string
 type symb_int = SInt of int | SParam of param
@@ -13,7 +13,12 @@ let bot_wcet = (LTop, ([],0))
 (* TODO *)             
 let upper_bound l1 l2 =
   l1
-             
+
+let is_symb sint =
+  match sint with
+  | SInt _ -> false
+  | SParam _ -> true
+  
 let hd (wl, last) =
   if wl = [] then last
   else List.hd wl
@@ -90,10 +95,13 @@ let rec pack k w =
   | (wl,_) -> insert (val_sum_k_first k w) (pack k (ktl k w))
 
 let pow (h_body,w_body) (h_exit,w_exit) l it =
-  if h_body = l then
-    (h_exit,sum_mwcet (wl_sum_k_first it w_body) w_exit)
-  else
-    (upper_bound h_body h_exit, sum_mwcet (pack it w_body) w_exit)
+  match it with
+  | SParam _ -> internal_error "pow" "cannot compute pow with param"
+  | SInt it ->
+     if h_body = l then
+       (h_exit,sum_mwcet (wl_sum_k_first it w_body) w_exit)
+     else
+       (upper_bound h_body h_exit, sum_mwcet (pack it w_body) w_exit)
   
 open Format
 

@@ -40,7 +40,7 @@ formula:
   // Can't think of a simple solution to directly parse a full list of operands
   | formula PLUS formula { FPlus [$1; $3] }
   | formula UNION formula { FUnion [$1; $3] }
-  | LPAR formula COMMA formula COMMA loop_id RPAR CIRC INT
+  | LPAR formula COMMA formula COMMA loop_id RPAR CIRC sint
       { FPower ($2, $4, $6, $9) }
   | formula PIPE annot
       { FAnnot ($1, $3)}
@@ -64,3 +64,7 @@ TOP {LTop}
 
 annot:
 LPAR loop_id COMMA INT RPAR { ($2, $4) }
+
+sint:
+INT {SInt $1}
+| IDENT { SParam $1}
