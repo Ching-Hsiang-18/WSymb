@@ -1,5 +1,7 @@
 open Abstract_wcet
 
+type symb_int = SInt of int | SParam of param
+   
 type t =
   FConst of abstract_wcet
   | FParam of param    
@@ -11,9 +13,25 @@ type t =
 
 let bot_f = FConst bot_wcet
 
+let is_symb sint =
+  match sint with
+  | SInt _ -> false
+  | SParam _ -> true
 
+let int_of_symb sint =
+  match sint with
+  | SInt i -> i
+  | SParam _ -> Utils.internal_error "int_of_symb" "cannot be applied to param"
+              
 open Format
-  
+
+let pp_symb_int out_f sint =
+  match sint with
+  | SInt i ->
+     fprintf out_f "%d" i
+  | SParam p ->
+     pp_param out_f p
+   
 let rec pp out_f f =
   match f with
   | FConst w ->

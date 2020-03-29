@@ -246,6 +246,7 @@ let simplify_annot (f,a) =
 let simplify_power (f_body, f_exit, l, it) =
   match f_body, f_exit with
   | (FConst c1, FConst c2) when (not (is_symb it)) ->
+     let it = int_of_symb it in
      FConst (Abstract_wcet.pow c1 c2 l it)
   | _,_ -> FPower (f_body, f_exit, l, it)
     
