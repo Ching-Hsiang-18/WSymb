@@ -69,8 +69,8 @@ bool is_strictly_in(Block *inner, Block *outer) {
 }
 
 int main(int argc, char **argv) {
-	if ((argc < 3) || (argc > 4)) {
-		fprintf(stderr, "usage: %s <ARM binary> <output header file> [<entry fct (by default main)>]\n", argv[0]);
+	if ((argc < 4) || (argc > 5)) {
+		fprintf(stderr, "usage: %s <ARM binary> <output header file> <formula file> [<entry fct (by default main)>]\n", argv[0]);
 		exit(1);
 	}
 	WorkSpace *ws = NULL;
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 	
 	// produce awcet
 	CFG *entry = nullptr;
-	const char *entryname = (argc >= 4) ? argv[3] : "main";
+	const char *entryname = (argc >= 5) ? argv[4] : "main";
 	elm::String entryname_s(entryname);
 	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
 		if (entryname_s == (*iter)->name()) {
@@ -131,6 +131,7 @@ int main(int argc, char **argv) {
 	cout << "done." << endl;
 	
 	cout << "Exporting AWCET to header file..." << endl;
+
 	
 	FILE *outfile = fopen(argv[2], "w");
 
@@ -176,6 +177,10 @@ int main(int argc, char **argv) {
 	compute_eta_count(&f);
 	writeC(&f, outfile, 0);	
 	fprintf(outfile, ";\n");
+	fclose(outfile);
+
+	outfile = fopen(argv[3], "w");
+	writePWF(&f, outfile);
 	fclose(outfile);
 	
 }

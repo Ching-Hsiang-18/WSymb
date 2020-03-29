@@ -347,6 +347,49 @@ void compute_eta_count(formula_t *f) {
 	}
 }
 
+void writePWF(formula_t *f, FILE *out) {
+	switch (f->kind) {
+		case KIND_CONST:
+			fprintf(out, "(l%d;{", f->aw.loop_id < 0 ? 0 : f->aw.loop_id);
+			for (int i = 0; i < f->aw.eta_count; i++) {
+				fprintf(out, "%d", f->aw.eta[i]);
+				fprintf(out, ",");
+			}
+			fprintf(out, "%d", f->aw.others);
+			fprintf(out, "}) ");
+			break;
+		case KIND_SEQ:
+			fprintf(out, "(");
+			for (int i = 0; i < f->opdata.children_count; i++) {
+				if (i > 0) fprintf(out, " + ");
+				writePWF(f->children + i, out);
+				
+			}
+			fprintf(out, ")");
+			break;
+		case KIND_ALT:
+			fprintf(out, "(");
+			for (int i = 0; i < f->opdata.children_count; i++) {
+				if (i > 0) fprintf(out, " U ");
+				writePWF(f->children + i, out);
+				
+			}
+			fprintf(out, ")");
+			break;
+		case KIND_LOOP:
+			fprintf(out, "(");
+			writePWF(f->children, out);
+			fprintf(out, ", (l0;{0}), l%d)^%d", f->opdata.loop_id, 10 /* TODO bound */);
+			break;
+		case KIND_ANN:
+			fprintf(out, "(");
+			writePWF(f->children, out);
+			fprintf(out, "|(l%d,%d))", f->opdata.ann.loop_id, f->opdata.ann.count);
+			break;
+	}
+}
+
+
 void writeC(formula_t *f, FILE *out, int indent) {
 	static unsigned int uuid = 0;
 	uuid += 1;
