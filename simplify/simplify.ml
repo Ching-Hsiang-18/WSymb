@@ -200,7 +200,7 @@ let const_of_sum f =
   | _ -> FConst bot_wcet
           
 (* Assumes that [List.length fl] >= 2 *)          
-and simplify_union_rec fl =
+let rec simplify_union_rec fl =
   match fl with
   | [] | [_] -> internal_error "simplify_union_rec" "wrong list size"
   | [FUnion fl1; FUnion fl2] ->

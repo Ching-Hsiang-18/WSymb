@@ -47,28 +47,31 @@ let upper_bound l1 l2 =
 
 (** Returns the highest WCET of [(wl, last)] *)
 let hd (wl, last) =
-  if wl = [] then last
+  if wl = [] then last (* Because last is repeated indefinitely *)
   else List.hd wl
 
 (** Returns the given multi_wcet without its highest WCET *)  
 let tl (wl, last) =
-  if wl = [] then (wl, last)
+  if wl = [] then ([], last) (* Because last is repeated indefinitely *)
   else (List.tl wl,last)  
 
 (** Inserts [w] in [(wl, last)] keeping the result sorted decreasingly. *)  
 let insert w (wl, last) =
   let cmp = fun x y -> -(compare x y) in
   if w > last then
-    (List.merge cmp wl [w], last)
+    (List.merge cmp wl [w], last) (* Keep wl sorted decreasingly. *)
   else if w = last then
     (wl, last)
-  else (List.merge cmp wl [last], w)
+  else (List.merge cmp wl [last], w) (* w is the new last, ex-last goes into wl *)
 
 (* Sum on multi_wcet *)
 let rec sum_mwcet w1 w2  =
+  (* Basically, a point-by-point addition. *)
   match w1, w2 with
   | ([], last1), ([], last2) -> ([], last1+last2)
   | _,_ ->
+     (* Thanks to the definition of hd, we don't need to worry about
+        (w1, w2) not having the same length. *)
      insert ((hd w1) + (hd w2)) (sum_mwcet (tl w1) (tl w2))
 
 (** Returns the sum of two abstract wcets. *)    
@@ -77,10 +80,12 @@ let sum (l1,w1) (l2,w2) =
 
 (* Union on multi_wcet. *)  
 let rec union_mwcet w1 w2 =
+  (* Basically, a point-by-point max. *)
   match w1, w2 with
   | ([], last1), ([], last2) -> ([], max last1 last2)
   | ([], last), w | w, ([], last) ->
-     if (last >= hd w) then ([], last)
+     if (last >= hd w) then (* last is greater than all of w1 *)
+       ([], last)
      else insert (hd w) (union_mwcet ([], last) (tl w))
   | _,_ ->
      let max, min =
@@ -89,6 +94,7 @@ let rec union_mwcet w1 w2 =
        else
          w2,w1
      in
+     (* Recursion: step to the next element of max, keep min as is. *)
      insert (hd max) (union_mwcet (tl max) min)
 
 (** Returns the union of two abstract wcets. *)     
