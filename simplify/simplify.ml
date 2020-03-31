@@ -26,8 +26,10 @@ open Wcet_formula
 (* Based on the book "Computer Algebra and Symbolic Computation:
      Mathematical Methods", J.S. Cohen, 2002, Section 3.2 *)
    
-(* Ordering functions to decide when to apply the commutativity rule *)      
-          
+(* First, ordering functions to decide when to apply the commutativity
+   rule. This effectively groups like-formulas, enabling factorization
+   through inverse distributivity. *)
+
 let less_than_loop l1 l2 =
   match (l1, l2) with
   | LNamed n1, LNamed n2 -> n1 < n2
@@ -112,41 +114,22 @@ let rec less_than_f f1 f2 =
   | FAnnot _, FParam _ -> true
   | _ -> not(less_than_f f2 f1)
 
+(* Extract the term of a product, for inverse prod-sum distributivity
+   simplification. *)       
 let term_of_prod f =
   match f with
   | FProduct (_, f') -> Some f'
   | FConst _ -> None
   | _ -> Some f
 
+(* Extract the const (factor) of a product, for inverse prod-sum distributivity. *)       
 let const_of_prod f =
   match f with
   | FProduct (k, _) -> k
   | FConst _ -> internal_error "const_of_prod" "f should not be const"
   | _ -> 1
-
-let rec simplify_product (k,f) =
-  if k = 0 then
-    FConst bot_wcet
-  else match f with
-       | FConst c ->
-          FConst (prod k c)
-       | FProduct (k',f') ->
-          simplify_product (k*k',f')
-       | _ -> FProduct (k,f)
-
-let term_of_sum f =
-  match f with
-  | FPlus ((FConst _)::rest) -> Some (FPlus rest)
-  | FConst _ -> None
-  | _ -> Some f
-
-let const_of_sum f =
-  match f with
-  | FPlus [FConst c; _] -> FConst c
-  | FConst _ -> internal_error "const_of_sum" "f should not be const"
-  | _ -> FConst bot_wcet
   
-(* Assumes that List.length f >= 2 *)       
+(* Assumes that [List.length fl] >= 2 *)       
 let rec simplify_sum_rec fl =
   match fl with
   | [] | [_] -> internal_error "simplify_sum_rec" "wrong list size"
@@ -200,7 +183,23 @@ and simplify_sum fl =
      | [f1] -> f1
      | _ -> FPlus fl'
 
-(* Assumes that List.length f >= 2 *)          
+(* Extract the term of a sum, for inverse union-sum distributivity
+   simplification. *)
+let term_of_sum f =
+  match f with
+  | FPlus ((FConst _)::rest) -> Some (FPlus rest)
+  | FConst _ -> None
+  | _ -> Some f
+
+(* Extract the const of a sum, for inverse union-sum distributivity
+   simplification. *)              
+let const_of_sum f =
+  match f with
+  | FPlus [FConst c; _] -> FConst c
+  | FConst _ -> internal_error "const_of_sum" "f should not be const"
+  | _ -> FConst bot_wcet
+          
+(* Assumes that [List.length fl] >= 2 *)          
 and simplify_union_rec fl =
   match fl with
   | [] | [_] -> internal_error "simplify_union_rec" "wrong list size"
@@ -270,7 +269,18 @@ let simplify_power (f_body, f_exit, l, it) =
      let it = int_of_symb it in
      FConst (Abstract_wcet.pow c1 c2 l it)
   | _,_ -> FPower (f_body, f_exit, l, it)
-    
+
+let rec simplify_product (k,f) =
+  if k = 0 then
+    FConst bot_wcet
+  else match f with
+       | FConst c ->
+          FConst (prod k c)
+       | FProduct (k',f') ->
+          simplify_product (k*k',f')
+       | _ -> FProduct (k,f)
+
+(* Applies function [fct] recursively on all sub-terms of [formula]. *)            
 let fmap fct formula =
   match formula with
   | FConst _ | FParam _ -> formula
@@ -285,8 +295,9 @@ let fmap fct formula =
   | FProduct (k, f) ->
      FProduct (k, fct f)
     
-(* Main function *)
+(** Returns the simplification of formula [f]. *)
 let rec simplify f =
+  (* First, simplify sub-terms. *)
   let f' = fmap simplify f in
   match f' with
   | FConst _ | FParam _ -> f'

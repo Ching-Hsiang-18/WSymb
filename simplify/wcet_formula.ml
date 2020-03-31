@@ -21,8 +21,10 @@
 
 open Abstract_wcet
 
+(** Symbolic integer is either a constant or a symbol *)   
 type symb_int = SInt of int | SParam of param
-   
+
+(** The abstract WCET formula type. *)                                      
 type t =
   FConst of abstract_wcet
   | FParam of param    
@@ -34,15 +36,19 @@ type t =
 
 let bot_f = FConst bot_wcet
 
+(* Returns true if sint is a symbol. *)          
 let is_symb sint =
   match sint with
   | SInt _ -> false
   | SParam _ -> true
 
+(* Returns the constant corresponding to [sint]. Fails if [sint] is a symbol. *)
 let int_of_symb sint =
   match sint with
   | SInt i -> i
   | SParam _ -> Utils.internal_error "int_of_symb" "cannot be applied to param"
+
+(* Pretty printing *)
               
 open Format
 

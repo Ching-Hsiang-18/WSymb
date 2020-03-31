@@ -1,6 +1,9 @@
 # simplify
 
-Abstract WCET formula simplification.
+Abstract WCET formula simplification. For more documentation, see:
+
+C. Ballabriga, J. Forget, G. Lipari. Symbolic WCET Computation. ACM
+Transactions on Embedded Computing Systems (TECS), ACM, 2017
 
 ----
 ## Authors

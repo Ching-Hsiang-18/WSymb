@@ -3,7 +3,8 @@ open Wcet_formula
 open Simplify   
 
 let usage = "Usage: simplify <source-file>"
-             
+
+(* Simplify a list of formulas and pretty-print the results. *)          
 let simplify_prog formulas =
   List.iter
     (fun f ->
@@ -16,6 +17,7 @@ let simplify_prog formulas =
     )
     formulas
 
+(* Process file named [source_name]. Results is printed on standard output. *)  
 let anonymous source_name =
   Location.input_name := source_name;
   let lexbuf = Lexing.from_channel (open_in source_name) in
@@ -28,7 +30,8 @@ let anonymous source_name =
                               raise exc
   in
   simplify_prog prog
-  
+
+(* Do the job. *)  
 let _ =
   try
     Arg.parse Options.options anonymous usage
