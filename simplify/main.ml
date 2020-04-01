@@ -9,11 +9,9 @@ let simplify_prog formulas =
   List.iter
     (fun (f,loops) ->
       let f' = simplify loops f in
-      if (!Options.debug) then
-        Format.fprintf Format.std_formatter "%a@[<hov 2> => %a@]@.@."
-          Wcet_formula.pp f Wcet_formula.pp f'
-      else
-        Format.fprintf Format.std_formatter "%a@." Wcet_formula.pp f'
+      Format.fprintf Format.std_formatter "%a %a@."
+        Wcet_formula.pp f'
+        Loops.pp_hier loops
     )
     formulas
 

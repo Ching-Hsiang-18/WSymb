@@ -9,6 +9,9 @@ for f in `ls test`; do
 
         $TOOL $IN > $OUT
         diff $OUT $EXPECT
+        if [ $? -eq 1 ]; then
+            echo Diff non-empty for \"$IN\"
+        fi
     fi
 done
 
