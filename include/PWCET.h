@@ -47,7 +47,7 @@ void awcet_ann(evalctx_t * ctx, awcet_t * source, formula_t * dest);
 
 
 void writeC(formula_t *f, FILE *out, int indent);
-void writePWF(formula_t *f, FILE *out);
+void writePWF(formula_t *f, FILE *out, long long *bounds);
 void compute_eta_count(formula_t *f);
 
 #endif

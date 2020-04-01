@@ -56,7 +56,7 @@ void fix_virtualized_loopinfo(CFG *entryCFG, Block *loop = nullptr) {
 	}
 }
 
-bool is_strictly_in(Block *inner, Block *outer) {
+static bool is_strictly_in(Block *inner, Block *outer) {
 	ASSERT(LOOP_HEADER(inner));
 	ASSERT(LOOP_HEADER(outer));
 
@@ -135,11 +135,15 @@ int main(int argc, char **argv) {
 	
 	FILE *outfile = fopen(argv[2], "w");
 
+	int max_loop_id = 0;
 	fprintf(outfile, "int loop_bounds(int loop_id) {\n  switch(loop_id) {\n");
 	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
 		cout << "managing loop bounds for "<< (*iter)->label() << endl;
 		for (CFG::BlockIter iter2((*iter)->blocks()); iter2(); iter2++) {
 			if (LOOP_HEADER(*iter2)) {
+				if (max_loop_id < (*iter2)->id()) {
+					max_loop_id = (*iter2)->id();
+				}
 				int bound = MAX_ITERATION(*iter2);
 				fprintf(outfile, "    case %d: return %d;\n", (*iter2)->id(), bound);
 			}
@@ -150,11 +154,29 @@ int main(int argc, char **argv) {
 
 
 	fix_virtualized_loopinfo(entry);
-
+	
+	FILE *pwf_file = fopen(argv[3], "w");
+	long long *loop_bounds = (long long*) malloc(sizeof(long long)*max_loop_id + 1);
+	for (int i = 0; i <= max_loop_id; i++)
+		loop_bounds[i] = -1;
+		
+		
+	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
+		for (CFG::BlockIter iter2((*iter)->blocks()); iter2(); iter2++) {
+			if (LOOP_HEADER(*iter2)) {
+				loop_bounds[(*iter2)->id()] = MAX_ITERATION((*iter2));
+			}
+		}
+	}
+	
+	writePWF(&f, pwf_file, loop_bounds);
+	fprintf(pwf_file, " loops: ");
 	fprintf(outfile, "int loop_hierarchy(int inner, int outer) {\n  switch(inner) {\n");
 	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
 		for (CFG::BlockIter iter2((*iter)->blocks()); iter2(); iter2++) {
 			if (LOOP_HEADER(*iter2)) {
+				loop_bounds[(*iter2)->id()] = MAX_ITERATION((*iter2));
+				printf("bounding loop %d with %d\n", (*iter2)->id(), loop_bounds[(*iter2)->id()]);
 				fprintf(outfile, "    case %d: switch (outer) {\n", (*iter2)->id());
 				
 				for (CFGCollection::Iter iter3(*coll); iter3(); iter3 ++) {
@@ -162,6 +184,7 @@ int main(int argc, char **argv) {
 						if (LOOP_HEADER(*iter4)) {
 							if (is_strictly_in(*iter2, *iter4)) {
 								fprintf(outfile, "      case %d: return 1;\n", (*iter4)->id());    
+								fprintf(pwf_file, "l%u _C l%u; ", (*iter2)->id(), (*iter4)->id());
 							}
 						}
 					}
@@ -172,15 +195,14 @@ int main(int argc, char **argv) {
 	}
 	fprintf(outfile, "    default:    abort();\n");
 	fprintf(outfile, "  }\n}\n");
-
+	fprintf(pwf_file, " endl\n");
 	fprintf(outfile, "formula_t f = ");
 	compute_eta_count(&f);
 	writeC(&f, outfile, 0);	
 	fprintf(outfile, ";\n");
-	fclose(outfile);
+	fclose(pwf_file);
 
-	outfile = fopen(argv[3], "w");
-	writePWF(&f, outfile);
 	fclose(outfile);
+	free(loop_bounds);
 	
 }

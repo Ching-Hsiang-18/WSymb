@@ -5,13 +5,13 @@ CFLAGS=-O0 -g -Wall -W -fsanitize=address
 LDLIBS=../pwcet/lib/libpwcet-runtime.a
 LDFLAGS=-fsanitize=address
 
-all: pwcet_instantiator
+all: pwcet_instantiator example.pwf
 
 pwcet_instantiator: pwcet_instantiator.c example-pwcet.h ../pwcet/include/pwcet-runtime.h ../pwcet/lib/libpwcet-runtime.a
 	cc $(CFLAGS) -c pwcet_instantiator.c
 	cc $(LDFLAGS) -o pwcet_instantiator pwcet_instantiator.c $(LDLIBS)
 
-example-pwcet.h: example example.ff
+example-pwcet.h example.pwf: example example.ff
 	../dumpcft ./example example-pwcet.h example.pwf
 
 example: example.c
