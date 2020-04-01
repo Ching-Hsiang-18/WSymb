@@ -1,0 +1,7 @@
+(l1;{10,6,4}) loops: l2 _C l1; endl
+(l2;{5,5,3,3,2}) loops: l1 _C l2; endl
+(l2;{5,3,0}) loops: l1 _C l2; endl
+(l1;{28,25}) loops: endl
+(l1;{28,25}) loops: l2 _C l1; endl
+(l1;{28,17}) loops: endl
+(l2;{28,17}) loops: l1 _C l2; endl
