@@ -19,6 +19,8 @@
  * USA
  *---------------------------------------------------------------------------- *)
 
+open Utils
+open Loops
 open Abstract_wcet
 
 (** Symbolic integer is either a constant or a symbol *)   

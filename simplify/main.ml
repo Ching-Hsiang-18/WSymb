@@ -7,8 +7,8 @@ let usage = "Usage: simplify <source-file>"
 (* Simplify a list of formulas and pretty-print the results. *)          
 let simplify_prog formulas =
   List.iter
-    (fun f ->
-      let f' = simplify f in
+    (fun (f,loops) ->
+      let f' = simplify loops f in
       if (!Options.debug) then
         Format.fprintf Format.std_formatter "%a@[<hov 2> => %a@]@.@."
           Wcet_formula.pp f Wcet_formula.pp f'

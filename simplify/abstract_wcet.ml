@@ -22,11 +22,8 @@
 (** Abstract WCET definitions and operators. *)
 
 open Utils
-
-type param = string
-
-type loop_id = LNamed of string | LParam of param | LTop
-
+open Loops
+   
 type annot = loop_id * int
 
 (* Might switch to symb_int later *)           
@@ -40,10 +37,6 @@ type multi_wcet = wcet list * wcet
 type abstract_wcet = loop_id * multi_wcet
 
 let bot_wcet = (LTop, ([],0))
-
-(* TODO *)             
-let upper_bound l1 l2 =
-  l1
 
 (** Returns the highest WCET of [(wl, last)] *)
 let hd (wl, last) =
@@ -75,14 +68,14 @@ let rec sum_mwcet w1 w2  =
      insert ((hd w1) + (hd w2)) (sum_mwcet (tl w1) (tl w2))
 
 (** Returns the sum of two abstract wcets. *)    
-let sum (l1,w1) (l2,w2) =
-  (upper_bound l1 l2, sum_mwcet w1 w2)
+let sum loops (l1,w1) (l2,w2) =
+  (Loops.max loops l1 l2, sum_mwcet w1 w2)
 
 (* Union on multi_wcet. *)  
 let rec union_mwcet w1 w2 =
   (* Basically, a point-by-point max. *)
   match w1, w2 with
-  | ([], last1), ([], last2) -> ([], max last1 last2)
+  | ([], last1), ([], last2) -> ([], Pervasives.max last1 last2)
   | ([], last), w | w, ([], last) ->
      if (last >= hd w) then (* last is greater than all of w1 *)
        ([], last)
@@ -98,8 +91,8 @@ let rec union_mwcet w1 w2 =
      insert (hd max) (union_mwcet (tl max) min)
 
 (** Returns the union of two abstract wcets. *)     
-let union (l1,w1) (l2,w2) =
-  (upper_bound l1 l2, union_mwcet w1 w2)
+let union loops (l1,w1) (l2,w2) =
+  (Loops.max loops l1 l2, union_mwcet w1 w2)
 
 (* Multiply [(wl,last)] by [k]. *)  
 let prod_mwcet k (wl,last) =
@@ -117,8 +110,8 @@ let rec keep_first n w =
     insert (hd w) (keep_first (n-1) (tl w))
 
 (** Computes the application of annotation [(l',it)] on abstract wcet [(l, w)] *)
-let annot (l, w) (l',it) =
-  (upper_bound l l', keep_first it w)
+let annot loops (l, w) (l',it) =
+  (Loops.max loops l l', keep_first it w)
 
 (* Several auxilliary operations on loops. *)  
 
@@ -148,11 +141,11 @@ let rec pack k w =
    abstract WCET [(h_body,w_body)], and whose exit node has abstract
    WCET [(h_exit,w_exit)]. The loop is iterated [it] times and has
    header [l]. *)
-let pow (h_body,w_body) (h_exit,w_exit) l it =
+let pow loops (h_body,w_body) (h_exit,w_exit) l it =
   if h_body = l then
     (h_exit,sum_mwcet (wl_sum_k_first it w_body) w_exit)
   else
-    (upper_bound h_body h_exit, sum_mwcet (pack it w_body) w_exit)
+    (Loops.max loops h_body h_exit, sum_mwcet (pack it w_body) w_exit)
 
 (* Pretty printing *)
   
@@ -165,8 +158,6 @@ let pp_loop out_f l =
   match l with
   | LNamed n ->
      fprintf out_f "%s" n
-  | LParam p ->
-     pp_param out_f p
   | LTop ->
      pp_print_text out_f "__top"
 

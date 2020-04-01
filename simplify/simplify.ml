@@ -20,6 +20,7 @@
  *---------------------------------------------------------------------------- *)
 
 open Utils
+open Loops
 open Abstract_wcet
 open Wcet_formula   
 
@@ -33,7 +34,6 @@ open Wcet_formula
 let less_than_loop l1 l2 =
   match (l1, l2) with
   | LNamed n1, LNamed n2 -> n1 < n2
-  | LParam p1, LParam p2 -> p1 < p2
   | _,LTop -> true
   | _,_ -> false
 
@@ -130,19 +130,19 @@ let const_of_prod f =
   | _ -> 1
   
 (* Assumes that [List.length fl] >= 2 *)       
-let rec simplify_sum_rec fl =
+let rec simplify_sum_rec loops fl =
   match fl with
   | [] | [_] -> internal_error "simplify_sum_rec" "wrong list size"
   | [FPlus fl1; FPlus fl2] ->
-     merge_sums fl1 fl2
+     merge_sums loops fl1 fl2
   | [FPlus fl; other] ->
-     merge_sums fl [other]
+     merge_sums loops fl [other]
   | [other; FPlus fl] ->
-     merge_sums [other] fl
+     merge_sums loops [other] fl
   | [FConst w1; FConst w2] ->
      if w1 = bot_wcet then [FConst w2]
      else if w2 = bot_wcet then [FConst w1]
-     else [FConst (Abstract_wcet.sum w1 w2)]
+     else [FConst (Abstract_wcet.sum loops w1 w2)]
   | [f1; f2] when (term_of_prod f1=term_of_prod f2 && term_of_prod f1 <> None) ->
      let t = match term_of_prod f1 with
        | Some t' -> t'
@@ -154,30 +154,30 @@ let rec simplify_sum_rec fl =
        [f2; f1]
      else [f1; f2]
   | (FPlus fl)::tl ->
-     merge_sums fl (simplify_sum_rec tl)
+     merge_sums loops fl (simplify_sum_rec loops tl)
   | hd::tl ->
-     merge_sums [hd] (simplify_sum_rec tl)
+     merge_sums loops [hd] (simplify_sum_rec loops tl)
     
-and merge_sums fl1 fl2 =
+and merge_sums loops fl1 fl2 =
   match fl1,fl2 with
   | [],fl | fl,[] -> fl
   | hd1::tl1, hd2::tl2 ->
-     let l=simplify_sum_rec ([hd1;hd2]) in
+     let l=simplify_sum_rec loops ([hd1;hd2]) in
      match l with
      | [] -> internal_error "merge_sums" "empty list"
-     | [hd] -> hd::(merge_sums tl1 tl2)
+     | [hd] -> hd::(merge_sums loops tl1 tl2)
      | [hd1';hd2'] when hd1'=hd1 ->
-        hd1::(merge_sums tl1 fl2)
+        hd1::(merge_sums loops tl1 fl2)
      | [hd1';hd2'] when hd1'=hd2 ->
-        hd2::(merge_sums fl1 tl2)       
+        hd2::(merge_sums loops fl1 tl2)       
      | _ -> internal_error "merge_sums" "wrong list size"
           
-and simplify_sum fl =
+and simplify_sum loops fl =
   match fl with
   | [] -> internal_error "simplify_sum" "empty list"
   | [f1] -> f1 (* Might happen due to neutral element bot_f *)
   | _ ->
-     let fl' = simplify_sum_rec fl in
+     let fl' = simplify_sum_rec loops fl in
      match fl' with
      | [] -> internal_error  "simplify_sum" "empty list"
      | [f1] -> f1
@@ -200,84 +200,84 @@ let const_of_sum f =
   | _ -> FConst bot_wcet
           
 (* Assumes that [List.length fl] >= 2 *)          
-let rec simplify_union_rec fl =
+let rec simplify_union_rec loops fl =
   match fl with
   | [] | [_] -> internal_error "simplify_union_rec" "wrong list size"
   | [FUnion fl1; FUnion fl2] ->
-     merge_unions fl1 fl2
+     merge_unions loops fl1 fl2
   | [FUnion fl; other] ->
-     merge_unions fl [other]
+     merge_unions loops fl [other]
   | [other; FUnion fl] ->
-     merge_unions [other] fl
+     merge_unions loops [other] fl
   | [FConst w1; FConst w2] ->
      if w1 = bot_wcet then [FConst w2]
      else if w2 = bot_wcet then [FConst w1]
-     else [FConst (Abstract_wcet.union w1 w2)]
+     else [FConst (Abstract_wcet.union loops w1 w2)]
   | [f1; f2] when (term_of_sum f1=term_of_sum f2 && term_of_sum f1 <> None) ->
      let t = match term_of_sum f1 with
        | Some t' -> t'
        | None -> internal_error "simplify_union_rec" "cannot be none"
      in
-     let u = FUnion [simplify_union [const_of_sum f1; const_of_sum f2]] in
-     [simplify_sum [u; t]]
+     let u = FUnion [simplify_union loops [const_of_sum f1; const_of_sum f2]] in
+     [simplify_sum loops [u; t]]
   | [f1; f2] ->
      if less_than_f f2 f1 then
        [f2; f1]
      else [f1; f2]
   | (FUnion fl)::tl ->
-     merge_unions fl (simplify_union_rec tl)
+     merge_unions loops fl (simplify_union_rec loops tl)
   | hd::tl ->
-     merge_unions [hd] (simplify_union_rec tl)
+     merge_unions loops [hd] (simplify_union_rec loops tl)
 
-and merge_unions fl1 fl2 =
+and merge_unions loops fl1 fl2 =
   match fl1,fl2 with
   | [],fl | fl,[] -> fl
   | hd1::tl1, hd2::tl2 ->
-     let l=simplify_union_rec ([hd1;hd2]) in
+     let l=simplify_union_rec loops ([hd1;hd2]) in
      match l with
      | [] -> internal_error "merge_unions" "empty list"
-     | [hd] -> hd::(merge_unions tl1 tl2)
+     | [hd] -> hd::(merge_unions loops tl1 tl2)
      | [hd1';hd2'] when hd1'=hd1 ->
-        hd1::(merge_unions tl1 fl2)
+        hd1::(merge_unions loops tl1 fl2)
      | [hd1';hd2'] when hd1'=hd2 ->
-        hd2::(merge_unions fl1 tl2)       
+        hd2::(merge_unions loops fl1 tl2)       
      | _ -> internal_error "merge_unions" "wrong list size"
           
-and simplify_union fl =
+and simplify_union loops fl =
   match fl with
   | [] -> internal_error "simplify_union" "empty list"
   | [f1] -> f1 (* Might happen due to neutral element bot_f *)
   | _ ->
-     let fl' = simplify_union_rec fl in
+     let fl' = simplify_union_rec loops fl in
      match fl' with
      | [] -> internal_error  "simplify_union" "empty list"
      | [f1] -> f1
      | _ -> FUnion fl'
 
-let simplify_annot (f,a) =
+let simplify_annot loops (f,a) =
   match f with
   | FConst c ->
-     FConst (Abstract_wcet.annot c a)
+     FConst (Abstract_wcet.annot loops c a)
   | _ ->
      if f = bot_f then bot_f
      else
        FAnnot (f,a)
 
-let simplify_power (f_body, f_exit, l, it) =
+let simplify_power loops (f_body, f_exit, l, it) =
   match f_body, f_exit with
   | (FConst c1, FConst c2) when (not (is_symb it)) ->
      let it = int_of_symb it in
-     FConst (Abstract_wcet.pow c1 c2 l it)
+     FConst (Abstract_wcet.pow loops c1 c2 l it)
   | _,_ -> FPower (f_body, f_exit, l, it)
 
-let rec simplify_product (k,f) =
+let rec simplify_product loops (k,f) =
   if k = 0 then
     FConst bot_wcet
   else match f with
        | FConst c ->
           FConst (prod k c)
        | FProduct (k',f') ->
-          simplify_product (k*k',f')
+          simplify_product loops (k*k',f')
        | _ -> FProduct (k,f)
 
 (* Applies function [fct] recursively on all sub-terms of [formula]. *)            
@@ -296,19 +296,19 @@ let fmap fct formula =
      FProduct (k, fct f)
     
 (** Returns the simplification of formula [f]. *)
-let rec simplify f =
+let rec simplify loops f =
   (* First, simplify sub-terms. *)
-  let f' = fmap simplify f in
+  let f' = fmap (simplify loops) f in
   match f' with
   | FConst _ | FParam _ -> f'
   | FPlus fl ->
-     simplify_sum fl
+     simplify_sum loops fl
   | FUnion fl ->
-     simplify_union fl
+     simplify_union loops fl
   | FProduct (k,f) ->
-     simplify_product (k,f)
+     simplify_product loops (k,f)
   | FAnnot (f, a) ->
-     simplify_annot (f,a)
+     simplify_annot loops (f,a)
   | FPower (f_body, f_exit, l, it) ->
-     simplify_power (f_body, f_exit, l, it)
+     simplify_power loops (f_body, f_exit, l, it)
            

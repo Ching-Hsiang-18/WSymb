@@ -52,9 +52,12 @@ rule token = parse
 | '}' {RCURLBRACKET}
 | ',' {COMMA}
 | ';' {SCOL}
+| "_C" {INC}
 | ['0'-'9']+
     {INT (int_of_string (Lexing.lexeme lexbuf)) }
 | "__top" {TOP}
+| "loops:" {LOOPS}
+| "endl" {ENDLH}
 | ['A'-'Z' 'a'-'z'] ['A'-'Z' 'a'-'z' '_' '0'-'9'] * { IDENT (Lexing.lexeme lexbuf) }
 | eof { EOF }
 | _ { raise (Error (Location.curr lexbuf))}

@@ -20,6 +20,7 @@
 /* ---------------------------------------------------------------------------- */
 
 %{
+    open Loops
     open Abstract_wcet
     open Wcet_formula
 %}
@@ -30,12 +31,13 @@
 %token DOT
 %token UNION PLUS
 %token CIRC
-%token LPAR RPAR LCURLBRACKET RCURLBRACKET COMMA SCOL TOP
-
+%token LPAR RPAR LCURLBRACKET RCURLBRACKET COMMA SCOL TOP INC
+%token LOOPS ENDLH
+                                                    
 %token EOF
 
 %start prog
-%type <Wcet_formula.t list> prog
+%type <(Wcet_formula.t * Loops.loop_hierarchy) list> prog
 
 %nonassoc COMMA CIRC SCOL
 
@@ -49,12 +51,33 @@
 %%
                               
 prog:
-  formula_list EOF { List.rev $1}
+  formula_loops_list EOF { List.rev $1 }
 
-formula_list:
-  formula {[$1]}
-| formula_list formula {$2::$1}
+formula_loops_list:
+  formula_loops {[$1]}
+| formula_loops_list formula_loops {$2::$1}
 
+formula_loops:
+  formula loops { ($1,$2) }
+
+loops:
+  LOOPS loop_inc_list ENDLH {$2}
+
+loop_inc_list:
+    {Loops.new_hierarchy ()}
+    | loop_inc_list loop_inc {
+          let inner,outers = $2 in
+          Loops.add_inclusions $1 inner outers;
+          $1
+        }
+
+loop_inc:
+  IDENT INC ident_list SCOL { ($1, $3)}
+
+ident_list:
+  IDENT {[$1]}
+| ident_list IDENT {$2::$1}
+      
 formula:
     const { FConst $1 }
   | IDENT { FParam $1 }
