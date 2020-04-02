@@ -10,28 +10,24 @@ int b = 10;
 
 int has_param = 0;
 
-int param_value(int param_id) {
+
+void param_valuation(int param_id, param_value_t * param_val, void *data) {
+  (void)(data);
   has_param = 1;
-  if (param_id == 0) {
-    return b;
-  } else abort();
+  if (param_id == 1) {
+    param_val->bound = b;
+    return;
+  }
+  abort();
 }
 
-
-int param_loop_bound(int loop_id) {
-    int bound = loop_bounds(loop_id);
-    if (bound & PARAM_FLAG) {
-        return param_value(bound & ~PARAM_FLAG);
-        
-    } else return bound;
-}
 
 int main(void) {
-    loopinfo_t li = {.hier = loop_hierarchy, .bnd = param_loop_bound };
+    loopinfo_t li = {.hier = loop_hierarchy, .bnd = loop_bounds};
     
     for (int i = 0; i < 20; i++) {
       b = i;
-      long long wcet = evaluate(&f, &li, NULL, NULL);
+      long long wcet = evaluate(&f, &li, param_valuation, NULL);
       if (has_param) {
         printf("for param value %d, wcet: %lld\n", i, wcet);
       } else {

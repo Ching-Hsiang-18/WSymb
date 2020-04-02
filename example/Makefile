@@ -3,7 +3,7 @@ ARMCFLAGS=-nostdlib -nostdinc
 
 CFLAGS=-O0 -g -Wall -W -fsanitize=address
 LDLIBS=../pwcet/lib/libpwcet-runtime.a
-LDFLAGS=-fsanitize=address
+LDFLAGS=-g -fsanitize=address
 
 all: pwcet_instantiator example.pwf
 

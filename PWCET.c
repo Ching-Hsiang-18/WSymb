@@ -25,6 +25,7 @@
 #include "include/PWCET.h"
 #include "pwcet/include/pwcet-runtime.h"
 
+
 #include <stdio.h>
 
 void compute_node(evalctx_t * ctx, formula_t * f)
@@ -384,7 +385,11 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 				if (bound < 0) {
 					fprintf(stderr, "warning: loop %d is unbounded\n", f->opdata.loop_id);
 				}
-				fprintf(out, ", (l0;{0}), l%d)^%lld", f->opdata.loop_id, bound);
+				if (f->param_id) {
+					fprintf(out, ", (__top;{0}), l%d)^p%d", f->opdata.loop_id, f->param_id);
+				} else {
+					fprintf(out, ", (__top;{0}), l%d)^%lld", f->opdata.loop_id, bound);
+				}
 			}
 			break;
 			

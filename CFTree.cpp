@@ -22,6 +22,7 @@
 #include "include/CFTree.h"
 #include "include/PWCET.h"
 #include <otawa/ipet.h>
+#include <otawa/flowfact/features.h>
 
 namespace otawa { 
 
@@ -1110,6 +1111,9 @@ void CFTree::exportToAWCET(formula_t *f) {
 		b->exportToAWCET(f->children[0].children);
 		e->exportToAWCET(f->children + 1);
 		f->opdata.children_count = 2;
+		if (MAX_ITERATION(n->getHeader()) & PARAM_FLAG) {
+			f->children[0].param_id = MAX_ITERATION(n->getHeader()) & ~PARAM_FLAG;
+		}
 	}
 	if (CFTreeSeq *n = toSeq()) {
 		f->kind = KIND_SEQ;

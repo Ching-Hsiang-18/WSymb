@@ -21,6 +21,7 @@
 
 #ifndef PWCET_RUNTIME_H
 #define PWCET_RUNTIME_H 1
+#define PARAM_FLAG 0x40000000
 
 typedef int (loophierarchy_t) (int l1, int l2);
 typedef int (loopbounds_t) (int l1);
