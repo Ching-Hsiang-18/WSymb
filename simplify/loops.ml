@@ -41,11 +41,14 @@ let imm_contained hier l1 l2 =
   | LTop, _ -> false
   | LNamed n1, LNamed n2 ->
      Hashtbl.mem hier (n1,n2)
-              
-let max hier l1 l2 =
-  if (imm_contained hier l1 l2) then
+
+let min hier l1 l2 =
+  if (imm_contained hier l2 l1) then
     l2
   else l1
+    
+let glb hier l1 l2 =
+  min hier l1 l2
 
 open Format
 

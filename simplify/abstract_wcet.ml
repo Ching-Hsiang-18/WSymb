@@ -69,7 +69,7 @@ let rec sum_mwcet w1 w2  =
 
 (** Returns the sum of two abstract wcets. *)    
 let sum loops (l1,w1) (l2,w2) =
-  (Loops.max loops l1 l2, sum_mwcet w1 w2)
+  (Loops.glb loops l1 l2, sum_mwcet w1 w2)
 
 (* Union on multi_wcet. *)  
 let rec union_mwcet w1 w2 =
@@ -92,7 +92,7 @@ let rec union_mwcet w1 w2 =
 
 (** Returns the union of two abstract wcets. *)     
 let union loops (l1,w1) (l2,w2) =
-  (Loops.max loops l1 l2, union_mwcet w1 w2)
+  (Loops.glb loops l1 l2, union_mwcet w1 w2)
 
 (* Multiply [(wl,last)] by [k]. *)  
 let prod_mwcet k (wl,last) =
@@ -111,7 +111,7 @@ let rec keep_first n w =
 
 (** Computes the application of annotation [(l',it)] on abstract wcet [(l, w)] *)
 let annot loops (l, w) (l',it) =
-  (Loops.max loops l l', keep_first it w)
+  (Loops.glb loops l l', keep_first it w)
 
 (* Several auxilliary operations on loops. *)  
 
@@ -145,7 +145,7 @@ let pow loops (h_body,w_body) (h_exit,w_exit) l it =
   if h_body = l then
     (h_exit,sum_mwcet (wl_sum_k_first it w_body) w_exit)
   else
-    (Loops.max loops h_body h_exit, sum_mwcet (pack it w_body) w_exit)
+    (Loops.glb loops h_body h_exit, sum_mwcet (pack it w_body) w_exit)
 
 (* Pretty printing *)
   
