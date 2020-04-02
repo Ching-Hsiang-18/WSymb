@@ -31,7 +31,7 @@
 %token DOT
 %token UNION PLUS
 %token CIRC
-%token LPAR RPAR LCURLBRACKET RCURLBRACKET COMMA SCOL TOP INC
+%token LPAR RPAR LCURLBRACKET RCURLBRACKET COMMA SCOL TOP INC PARAM
 %token LOOPS ENDLH
                                                     
 %token EOF
@@ -80,7 +80,7 @@ ident_list:
       
 formula:
     const { FConst $1 }
-  | IDENT { FParam $1 }
+  | param { FParam $1 }
   // Can't think of a simple solution to directly parse a full list of operands
   | formula PLUS formula { FPlus [$1; $3] }
   | formula UNION formula { FUnion [$1; $3] }
@@ -111,4 +111,7 @@ LPAR loop_id COMMA INT RPAR { ($2, $4) }
 
 sint:
 INT {SInt $1}
-| IDENT { SParam $1}
+| param { SParam $1}
+
+param:
+  PARAM INT { string_of_int $2 }

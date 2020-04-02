@@ -152,7 +152,7 @@ let pow loops (h_body,w_body) (h_exit,w_exit) l it =
 open Format
    
 let pp_param out_f p =
-  pp_print_text out_f p
+  fprintf out_f "p:%s" p
    
 let pp_loop out_f l =
   match l with
