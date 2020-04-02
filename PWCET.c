@@ -386,7 +386,7 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 					fprintf(stderr, "warning: loop %d is unbounded\n", f->opdata.loop_id);
 				}
 				if (f->param_id) {
-					fprintf(out, ", (__top;{0}), l%d)^p%d", f->opdata.loop_id, f->param_id);
+					fprintf(out, ", (__top;{0}), l%d)^p:%d", f->opdata.loop_id, f->param_id);
 				} else {
 					fprintf(out, ", (__top;{0}), l%d)^%lld", f->opdata.loop_id, bound);
 				}
