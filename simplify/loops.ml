@@ -46,7 +46,10 @@ let min hier l1 l2 =
   if (imm_contained hier l2 l1) then
     l2
   else l1
-    
+
+(** Greatest lower bound.*)
+(* Actually, returns the min of l1 l2, since it should be the same as
+   the glb due to program structures.*)
 let glb hier l1 l2 =
   min hier l1 l2
 
