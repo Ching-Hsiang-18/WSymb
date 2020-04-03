@@ -1,5 +1,5 @@
 OCB = ocamlbuild
-TARGET = simplify
+TARGET = swymplify
 
 all: native
 	mv main.native $(TARGET)
