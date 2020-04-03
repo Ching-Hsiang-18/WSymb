@@ -1,18 +1,17 @@
 TOOL=./simplify
+EXTENSION=pwf
 
 for f in `ls test`; do
-    BNAME=`basename $f .in`
+    BNAME=`basename $f .$EXTENSION`
     if [ $BNAME != $f ]; then
         IN=test/$f
         OUT=test/$BNAME".out"
         EXPECT=test/$BNAME".expect"
 
+        echo Processing $IN
         $TOOL $IN > $OUT
         diff $OUT $EXPECT
-        if [ $? -eq 1 ]; then
-            echo Diff non-empty for \"$IN\"
-        fi
     fi
 done
 
-echo "All done"
+echo "Done"
