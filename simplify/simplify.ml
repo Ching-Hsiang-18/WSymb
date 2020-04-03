@@ -20,6 +20,7 @@
  *---------------------------------------------------------------------------- *)
 
 open Utils
+open Symbol
 open Loops
 open Abstract_wcet
 open Wcet_formula   

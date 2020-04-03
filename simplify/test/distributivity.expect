@@ -1,8 +1,8 @@
 6.(p:1) loops: endl
-(l1;{30,18,12}) loops: endl
-6.(((l1;{5,3,2}) + p:1)) loops: endl
+(l:1;{30,18,12}) loops: endl
+6.(((l:1;{5,3,2}) + p:1)) loops: endl
 4.(p:1) loops: endl
-4.(((l1;{5,3,2}) U p:1)) loops: endl
-(((l1;{5,4,3,2})) + p:1) loops: endl
-((l1;{5,4,3,2}) U p:1 U p:2) loops: endl
-2.(((l1;{5,5,3,3,2}) U p:1)) loops: endl
+4.(((l:1;{5,3,2}) U p:1)) loops: endl
+(((l:1;{5,4,3,2})) + p:1) loops: endl
+((l:1;{5,4,3,2}) U p:1 U p:2) loops: endl
+2.(((l:1;{5,5,3,3,2}) U p:1)) loops: endl

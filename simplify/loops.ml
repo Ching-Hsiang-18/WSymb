@@ -20,6 +20,7 @@
  *---------------------------------------------------------------------------- *)
 
 open Utils
+open Symbol   
 
 type loop_id = LNamed of string | LTop
 
@@ -29,12 +30,19 @@ type loop_id = LNamed of string | LTop
 type hierarchy = ((string * string), unit) Hashtbl.t
 
 type bounds = (string, symb_int) Hashtbl.t                    
-                    
+
+let lname_from_lid lid =                
+  match lid with
+  | LNamed n -> n
+  | LTop -> internal_error "bounds_from_list" "cannot set an iteration bound on top"
+            
 let new_hierarchy () : hierarchy = Hashtbl.create 42
                                  
 (* Loop [inner] is included into all loops of list [outer]. *)                                      
 let add_inclusions hier inner outers =
-  List.iter (fun outer -> Hashtbl.add hier (inner,outer) ()) outers
+  List.iter (fun outer ->
+      Hashtbl.add hier (lname_from_lid inner,lname_from_lid outer) ())
+    outers
                                       
 (* Returns true if [l1] is immediately contained in [l2]. *)
 let imm_contained hier l1 l2 =
@@ -63,21 +71,24 @@ let add_bound bounds lname bound =
 let bounds_from_list l =
   let bounds = new_bounds () in
   List.iter (fun (lid,bound) ->
-      let lname = match lid with
-        | LNamed n -> n
-        | LTop -> internal_error "bounds_from_list" "cannot set an iteration bound on top"
-      in
+      let lname = lname_from_lid lid in
       Hashtbl.add bounds lname bound) l;
   bounds
   
 open Format
 
-let pp_loop out_f l =
-  pp_print_text out_f l
-   
+let pp_loop_id out_f l =
+  match l with
+  | LNamed n ->
+     fprintf out_f "l:%s" n
+  | LTop ->
+     pp_print_text out_f "__top"
+  
 let pp_hier out_f hier =
   fprintf out_f "@[<hov 2>loops:@ ";
   Hashtbl.iter
-    (fun (n1,n2) _ -> fprintf out_f "@[<hov 2>%a _C %a;@ @]"  pp_loop n1 pp_loop n2)
+    (fun (n1,n2) _ ->
+      fprintf out_f "@[<hov 2>%a _C %a;@ @]"
+        pp_loop_id (LNamed n1) pp_loop_id (LNamed n2))
     hier;
   fprintf out_f "endl@]"

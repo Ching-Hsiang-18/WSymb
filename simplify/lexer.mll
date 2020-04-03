@@ -53,6 +53,7 @@ rule token = parse
 | ',' {COMMA}
 | ';' {SCOL}
 | "p:" {PARAM}
+| "l:" {LOOP_ID}
 | "_C" {INC}
 | ['0'-'9']+
     {INT (int_of_string (Lexing.lexeme lexbuf)) }

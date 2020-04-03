@@ -21,6 +21,7 @@
 
 %{
   open Utils
+  open Symbol    
   open Loops
   open Abstract_wcet
   open Wcet_formula
@@ -32,7 +33,7 @@
 %token DOT
 %token UNION PLUS
 %token CIRC
-%token LPAR RPAR LCURLBRACKET RCURLBRACKET COMMA SCOL TOP INC PARAM
+%token LPAR RPAR LCURLBRACKET RCURLBRACKET COMMA SCOL TOP INC PARAM LOOP_ID
 %token LOOPS ENDLH
                                                     
 %token EOF
@@ -76,11 +77,11 @@ loop_inc_list:
         }
 
 loop_inc:
-  IDENT INC ident_list SCOL { ($1, $3)}
+  loop_id INC loop_id_list SCOL { ($1, $3)}
 
-ident_list:
-  IDENT {[$1]}
-| ident_list IDENT {$2::$1}
+loop_id_list:
+  loop_id {[$1]}
+| loop_id_list loop_id {$2::$1}
 
 // Restrict to binary arity operators.
 // Can't think of a simple solution to directly parse a full list of operands.    
@@ -126,7 +127,7 @@ INT {[$1]}
 
 loop_id:
 TOP {LTop}
-| IDENT { LNamed $1}
+| LOOP_ID INT { LNamed (string_of_int $2)}
 
 annot:
 LPAR loop_id COMMA INT RPAR { ($2, $4) }

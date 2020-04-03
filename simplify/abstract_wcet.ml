@@ -150,22 +150,12 @@ let pow loops (h_body,w_body) (h_exit,w_exit) l it =
 (* Pretty printing *)
   
 open Format
-   
-let pp_param out_f p =
-  fprintf out_f "p:%s" p
-   
-let pp_loop out_f l =
-  match l with
-  | LNamed n ->
-     fprintf out_f "%s" n
-  | LTop ->
-     pp_print_text out_f "__top"
-
+      
 let pp_annot out_f (loop, it) =
-  fprintf out_f "(%a,%d)" pp_loop loop it
+  fprintf out_f "(%a,%d)" pp_loop_id loop it
    
 let pp out_f (loop, (wl,last)) =
-  fprintf out_f "(%a;{%a,%d})" pp_loop loop
+  fprintf out_f "(%a;{%a,%d})" pp_loop_id loop
     (pp_print_list
        ~pp_sep:(fun out_f () -> pp_print_text out_f ",")
        (fun out_f w -> fprintf out_f "%d" w))

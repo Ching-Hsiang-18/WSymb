@@ -18,6 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *---------------------------------------------------------------------------- *)
-           
-let internal_error fun_name err =
-  failwith ("Internal error: "^fun_name^", "^err)
+
+type param = string
+(** Symbolic integer is either a constant or a symbol *)   
+type symb_int = SInt of int | SParam of param
+
+open Format
+
+let pp_param out_f p =
+  fprintf out_f "p:%s" p
+       
+let pp_symb_int out_f sint =
+  match sint with
+  | SInt i ->
+     fprintf out_f "%d" i
+  | SParam p ->
+     pp_param out_f p
+                                          

@@ -20,6 +20,7 @@
  *---------------------------------------------------------------------------- *)
 
 open Utils
+open Symbol
 open Loops
 open Abstract_wcet
 
@@ -50,13 +51,6 @@ let int_of_symb sint =
 (* Pretty printing *)
               
 open Format
-
-let pp_symb_int out_f sint =
-  match sint with
-  | SInt i ->
-     fprintf out_f "%d" i
-  | SParam p ->
-     pp_param out_f p
    
 let rec pp out_f f =
   match f with
@@ -79,7 +73,7 @@ let rec pp out_f f =
            pp out_f
        ) fl
   | FPower (f1, f2, l, it) ->
-     fprintf out_f "@[<hov 2>(%a, %a, %a)^%a@]" pp f1 pp f2 pp_loop l pp_symb_int it
+     fprintf out_f "@[<hov 2>(%a, %a, %a)^%a@]" pp f1 pp f2 pp_loop_id l pp_symb_int it
   | FAnnot (f, a) ->
      fprintf out_f "@[<hov 2>%a|%a@]" pp f pp_annot a
   | FProduct (k, f) ->

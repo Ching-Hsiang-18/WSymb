@@ -1,2 +1,2 @@
-(l1;{5,3,0}) loops: endl
-((l1;{5,3,0}) + p:1) loops: endl
+(l:1;{5,3,0}) loops: endl
+((l:1;{5,3,0}) + p:1) loops: endl
