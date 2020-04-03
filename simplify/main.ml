@@ -1,10 +1,6 @@
 open Abstract_wcet
 open Wcet_formula
 open Simplify   
-
-let usage = "Usage: simplify <source-file>"
-
-let extension = ".pwf"
           
 (* Simplify a list of formulas and pretty-print the results. *)          
 let simplify_prog formulas =
@@ -19,7 +15,7 @@ let simplify_prog formulas =
 
 (* Process file named [source_name]. Results is printed on standard output. *)  
 let anonymous source_name =
-  if Filename.check_suffix source_name extension then
+  if Filename.check_suffix source_name Options.extension then
     begin
       Location.input_name := source_name;
       let lexbuf = Lexing.from_channel (open_in source_name) in
@@ -39,6 +35,6 @@ let anonymous source_name =
 (* Do the job. *)  
 let _ =
   try
-    Arg.parse Options.options anonymous usage
+    Arg.parse Options.options anonymous Options.usage
   with
   | Parse.Syntax_err _ | Lexer.Error _ -> ()

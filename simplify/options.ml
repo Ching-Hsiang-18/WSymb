@@ -19,7 +19,12 @@
  * USA
  *---------------------------------------------------------------------------- *)
 
+let tool_name = "swymplify"
+let usage = "Usage: "^tool_name^" <source-file>"
 let version = "1.0.0"
+          
+let extension = ".pwf"
+
 let debug = ref false
           
 let options = [

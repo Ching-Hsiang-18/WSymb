@@ -1,4 +1,4 @@
-TOOL=./simplify
+TOOL=./swymplify
 EXTENSION=pwf
 
 for f in `ls test`; do
