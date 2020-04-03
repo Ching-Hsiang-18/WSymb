@@ -20,9 +20,10 @@
 /* ---------------------------------------------------------------------------- */
 
 %{
-    open Loops
-    open Abstract_wcet
-    open Wcet_formula
+  open Utils
+  open Loops
+  open Abstract_wcet
+  open Wcet_formula
 %}
 
 %token <string> IDENT
@@ -37,7 +38,7 @@
 %token EOF
 
 %start prog
-%type <(Wcet_formula.t * Loops.loop_hierarchy) list> prog
+%type <Context.t list> prog
 
 %nonassoc COMMA CIRC SCOL
 
@@ -51,16 +52,19 @@
 %%
                               
 prog:
-  formula_loops_list EOF { List.rev $1 }
+  context_list EOF { List.rev $1 }
 
-formula_loops_list:
-  formula_loops {[$1]}
-| formula_loops_list formula_loops {$2::$1}
+context_list:
+  context {[$1]}
+| context_list context {$2::$1}
 
-formula_loops:
-  formula loops { ($1,$2) }
+context:
+formula hierarchy {
+  let f,bl = $1 in
+  Context.new_ctx f $2 (Loops.bounds_from_list bl)
+}
 
-loops:
+hierarchy:
   LOOPS loop_inc_list ENDLH {$2}
 
 loop_inc_list:
@@ -77,19 +81,37 @@ loop_inc:
 ident_list:
   IDENT {[$1]}
 | ident_list IDENT {$2::$1}
-      
+
+// Restrict to binary arity operators.
+// Can't think of a simple solution to directly parse a full list of operands.    
 formula:
-    const { FConst $1 }
-  | param { FParam $1 }
-  // Can't think of a simple solution to directly parse a full list of operands
-  | formula PLUS formula { FPlus [$1; $3] }
-  | formula UNION formula { FUnion [$1; $3] }
+    const { (FConst $1, []) }
+  | param { (FParam $1, []) }
+  | formula PLUS formula
+    {
+      let (f1,bl1),(f2,bl2) = $1,$3 in
+      (FPlus [f1; f2], bl1@bl2)
+    }
+  | formula UNION formula
+    {
+      let (f1,bl1),(f2,bl2) = $1,$3 in
+      (FUnion [f1; f2], bl1@bl2)
+    }
   | LPAR formula COMMA formula COMMA loop_id RPAR CIRC sint
-      { FPower ($2, $4, $6, $9) }
+    {
+      let (f1,bl1),(f2,bl2) = $2,$4 in
+      (FPower (f1, f2, $6, $9), ($6,$9)::bl1@bl2)
+    }
   | formula PIPE annot
-      { FAnnot ($1, $3)}
+    {
+      let f, bl = $1 in
+      (FAnnot (f, $3), bl)
+    }
   | INT DOT formula
-      { FProduct ($1, $3)}
+    {
+      let f, bl = $3 in
+      (FProduct ($1, f), bl)
+    }
   | LPAR formula RPAR {$2}
       
 const:

@@ -26,10 +26,12 @@ type loop_id = LNamed of string | LTop
 (** If [Hashtbl.mem hier (n1, n2)], then loop [n1] is 
    immediately contained in loop [n2]. *) 
 (* Could be optimized, but not sure we need to, for now. *)
-type loop_hierarchy = ((string * string), unit) Hashtbl.t
+type hierarchy = ((string * string), unit) Hashtbl.t
 
-let new_hierarchy () : loop_hierarchy = Hashtbl.create 42
-
+type bounds = (string, symb_int) Hashtbl.t                    
+                    
+let new_hierarchy () : hierarchy = Hashtbl.create 42
+                                 
 (* Loop [inner] is included into all loops of list [outer]. *)                                      
 let add_inclusions hier inner outers =
   List.iter (fun outer -> Hashtbl.add hier (inner,outer) ()) outers
@@ -53,6 +55,21 @@ let min hier l1 l2 =
 let glb hier l1 l2 =
   min hier l1 l2
 
+let new_bounds () : bounds = Hashtbl.create 42
+
+let add_bound bounds lname bound =
+  Hashtbl.add bounds lname bound
+
+let bounds_from_list l =
+  let bounds = new_bounds () in
+  List.iter (fun (lid,bound) ->
+      let lname = match lid with
+        | LNamed n -> n
+        | LTop -> internal_error "bounds_from_list" "cannot set an iteration bound on top"
+      in
+      Hashtbl.add bounds lname bound) l;
+  bounds
+  
 open Format
 
 let pp_loop out_f l =

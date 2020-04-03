@@ -23,9 +23,6 @@ open Utils
 open Loops
 open Abstract_wcet
 
-(** Symbolic integer is either a constant or a symbol *)   
-type symb_int = SInt of int | SParam of param
-
 (** The abstract WCET formula type. *)                                      
 type t =
   FConst of abstract_wcet

@@ -19,10 +19,9 @@
  * USA
  *---------------------------------------------------------------------------- *)
 
-type param = string
-(** Symbolic integer is either a constant or a symbol *)   
-type symb_int = SInt of int | SParam of param
+type t = {formula: Wcet_formula.t;
+          loop_hierarchy: Loops.hierarchy;          
+          loop_bounds: Loops.bounds}
 
-           
-let internal_error fun_name err =
-  failwith ("Internal error: "^fun_name^", "^err)
+let new_ctx f h b =
+  {formula=f; loop_hierarchy=h; loop_bounds=b}

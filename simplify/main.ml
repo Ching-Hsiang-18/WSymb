@@ -1,15 +1,16 @@
 open Abstract_wcet
 open Wcet_formula
-open Simplify   
+open Simplify
+open Context   
           
 (* Simplify a list of formulas and pretty-print the results. *)          
 let simplify_prog formulas =
   List.iter
-    (fun (f,loops) ->
-      let f' = simplify loops f in
+    (fun ctx ->
+      let f' = simplify ctx.loop_hierarchy ctx.formula in
       Format.fprintf Format.std_formatter "%a %a@."
         Wcet_formula.pp f'
-        Loops.pp_hier loops
+        Loops.pp_hier ctx.loop_hierarchy
     )
     formulas
 
