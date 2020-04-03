@@ -351,7 +351,7 @@ void compute_eta_count(formula_t *f) {
 void writePWF(formula_t *f, FILE *out, long long *bounds) {
 	switch (f->kind) {
 		case KIND_CONST:
-			fprintf(out, "(l%d;{", f->aw.loop_id < 0 ? 0 : f->aw.loop_id);
+			fprintf(out, "(l:%d;{", f->aw.loop_id < 0 ? 0 : f->aw.loop_id);
 			for (int i = 0; i < f->aw.eta_count; i++) {
 				fprintf(out, "%lld", f->aw.eta[i]);
 				fprintf(out, ",");
@@ -386,9 +386,9 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 					fprintf(stderr, "warning: loop %d is unbounded\n", f->opdata.loop_id);
 				}
 				if (f->param_id) {
-					fprintf(out, ", (__top;{0}), l%d)^p:%d", f->opdata.loop_id, f->param_id);
+					fprintf(out, ", (__top;{0}), l:%d)^p:%d", f->opdata.loop_id, f->param_id);
 				} else {
-					fprintf(out, ", (__top;{0}), l%d)^%lld", f->opdata.loop_id, bound);
+					fprintf(out, ", (__top;{0}), l:%d)^%lld", f->opdata.loop_id, bound);
 				}
 			}
 			break;
@@ -396,7 +396,7 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 		case KIND_ANN:
 			fprintf(out, "(");
 			writePWF(f->children, out, bounds);
-			fprintf(out, "|(l%d,%d))", f->opdata.ann.loop_id, f->opdata.ann.count);
+			fprintf(out, "|(l:%d,%d))", f->opdata.ann.loop_id, f->opdata.ann.count);
 			break;
 	}
 }
