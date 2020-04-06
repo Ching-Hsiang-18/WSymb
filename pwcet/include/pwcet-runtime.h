@@ -54,6 +54,7 @@ union opdata_u {
 	int children_count;			/* Number of children for Alt and Seq operators */
 	int loop_id;				/* Loop bound for Loop operators */
 	annotation_t ann;			/* Annotation for Ann operators */
+	int coef;				/* Coefficient for Multiply by Integer */
 };
 typedef union opdata_u opdata_t;
 
@@ -63,7 +64,8 @@ typedef union opdata_u opdata_t;
 #define KIND_LOOP 	2
 #define KIND_ANN 	3
 #define KIND_CONST	4
-#define KIND_AWCET  5
+#define KIND_AWCET  	5
+#define KIND_INTMULT	6
 
 #define IDENT_NONE 0
 
