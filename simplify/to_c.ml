@@ -4,12 +4,14 @@ open Wcet_formula
 open Context
 open Format
 
-let c_array pp_elem out_f array =
+let c_array pp_elem ty_string out_f array =
   let length = List.length array in
   if length = 0 then
     pp_print_text out_f "NULL"
   else
-    fprintf out_f "@[<hov 2>{%a}@]"
+    fprintf out_f "@[<hov 2>(%s[%d])@ {%a}@]"
+      ty_string
+      (List.length array)
       (fun out_f ->
         pp_print_list
           ~pp_sep:(fun out_f () -> fprintf out_f ",@ ")
@@ -47,7 +49,7 @@ let c_loopid out_f lid =
   | LTop -> pp_print_string out_f "LOOP_TOP"
   
 let c_wlist out_f (wl, last) =
-  fprintf out_f "%d,@ %a,@ %d" (List.length wl) (c_array pp_print_int) wl last
+  fprintf out_f "%d,@ %a,@ %d" (List.length wl) (c_array pp_print_int "long long") wl last
 
 let c_null_wcet out_f () =
   fprintf out_f "@[<hov 2>{-1,@ 0,@ NULL,@ 0}@]"
@@ -61,9 +63,7 @@ let c_annot out_f (lid, k) =
   fprintf out_f ".ann={%a,%d}" c_loopid lid k
   
 let rec c_formula_operands out_f fl =
-  fprintf out_f "@[<hov 2>(formula_t[%d])@ %a@]"
-    (List.length fl)
-    (c_array c_formula_rec) fl
+  c_array c_formula_rec "formula_t" out_f fl
   
 and c_formula_rec out_f f =
   fprintf out_f "@[<hov 2>{";
