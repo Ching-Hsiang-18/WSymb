@@ -19,7 +19,6 @@
  * USA
  *---------------------------------------------------------------------------- *)
 
-open Utils
 open Symbol   
 
 type loop_id = LNamed of string | LTop
@@ -34,7 +33,7 @@ type bounds = (string, symb_int) Hashtbl.t
 let lname_from_lid lid =                
   match lid with
   | LNamed n -> n
-  | LTop -> internal_error "bounds_from_list" "cannot set an iteration bound on top"
+  | LTop -> Utils.internal_error "bounds_from_list" "cannot set an iteration bound on top"
             
 let new_hierarchy () : hierarchy = Hashtbl.create 42
                                  

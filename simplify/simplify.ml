@@ -19,7 +19,6 @@
  * USA
  *---------------------------------------------------------------------------- *)
 
-open Utils
 open Symbol
 open Loops
 open Abstract_wcet
@@ -127,13 +126,13 @@ let term_of_prod f =
 let const_of_prod f =
   match f with
   | FProduct (k, _) -> k
-  | FConst _ -> internal_error "const_of_prod" "f should not be const"
+  | FConst _ -> Utils.internal_error "const_of_prod" "f should not be const"
   | _ -> 1
   
 (* Assumes that [List.length fl] >= 2 *)       
 let rec simplify_sum_rec loops fl =
   match fl with
-  | [] | [_] -> internal_error "simplify_sum_rec" "wrong list size"
+  | [] | [_] -> Utils.internal_error "simplify_sum_rec" "wrong list size"
   | [FPlus fl1; FPlus fl2] ->
      merge_sums loops fl1 fl2
   | [FPlus fl; other] ->
@@ -147,7 +146,7 @@ let rec simplify_sum_rec loops fl =
   | [f1; f2] when (term_of_prod f1=term_of_prod f2 && term_of_prod f1 <> None) ->
      let t = match term_of_prod f1 with
        | Some t' -> t'
-       | None -> internal_error "simplify_sum_rec" "cannot be none"
+       | None -> Utils.internal_error "simplify_sum_rec" "cannot be none"
      in
      [FProduct (((const_of_prod f1)+(const_of_prod f2)), t)]
   | [f1; f2] ->
@@ -165,22 +164,22 @@ and merge_sums loops fl1 fl2 =
   | hd1::tl1, hd2::tl2 ->
      let l=simplify_sum_rec loops ([hd1;hd2]) in
      match l with
-     | [] -> internal_error "merge_sums" "empty list"
+     | [] -> Utils.internal_error "merge_sums" "empty list"
      | [hd] -> hd::(merge_sums loops tl1 tl2)
      | [hd1';hd2'] when hd1'=hd1 ->
         hd1::(merge_sums loops tl1 fl2)
      | [hd1';hd2'] when hd1'=hd2 ->
         hd2::(merge_sums loops fl1 tl2)       
-     | _ -> internal_error "merge_sums" "wrong list size"
+     | _ -> Utils.internal_error "merge_sums" "wrong list size"
           
 and simplify_sum loops fl =
   match fl with
-  | [] -> internal_error "simplify_sum" "empty list"
+  | [] -> Utils.internal_error "simplify_sum" "empty list"
   | [f1] -> f1 (* Might happen due to neutral element bot_f *)
   | _ ->
      let fl' = simplify_sum_rec loops fl in
      match fl' with
-     | [] -> internal_error  "simplify_sum" "empty list"
+     | [] -> Utils.internal_error  "simplify_sum" "empty list"
      | [f1] -> f1
      | _ -> FPlus fl'
 
@@ -197,13 +196,13 @@ let term_of_sum f =
 let const_of_sum f =
   match f with
   | FPlus [FConst c; _] -> FConst c
-  | FConst _ -> internal_error "const_of_sum" "f should not be const"
+  | FConst _ -> Utils.internal_error "const_of_sum" "f should not be const"
   | _ -> FConst bot_wcet
           
 (* Assumes that [List.length fl] >= 2 *)          
 let rec simplify_union_rec loops fl =
   match fl with
-  | [] | [_] -> internal_error "simplify_union_rec" "wrong list size"
+  | [] | [_] -> Utils.internal_error "simplify_union_rec" "wrong list size"
   | [FUnion fl1; FUnion fl2] ->
      merge_unions loops fl1 fl2
   | [FUnion fl; other] ->
@@ -217,7 +216,7 @@ let rec simplify_union_rec loops fl =
   | [f1; f2] when (term_of_sum f1=term_of_sum f2 && term_of_sum f1 <> None) ->
      let t = match term_of_sum f1 with
        | Some t' -> t'
-       | None -> internal_error "simplify_union_rec" "cannot be none"
+       | None -> Utils.internal_error "simplify_union_rec" "cannot be none"
      in
      let u = FUnion [simplify_union loops [const_of_sum f1; const_of_sum f2]] in
      [simplify_sum loops [u; t]]
@@ -236,22 +235,22 @@ and merge_unions loops fl1 fl2 =
   | hd1::tl1, hd2::tl2 ->
      let l=simplify_union_rec loops ([hd1;hd2]) in
      match l with
-     | [] -> internal_error "merge_unions" "empty list"
+     | [] -> Utils.internal_error "merge_unions" "empty list"
      | [hd] -> hd::(merge_unions loops tl1 tl2)
      | [hd1';hd2'] when hd1'=hd1 ->
         hd1::(merge_unions loops tl1 fl2)
      | [hd1';hd2'] when hd1'=hd2 ->
         hd2::(merge_unions loops fl1 tl2)       
-     | _ -> internal_error "merge_unions" "wrong list size"
+     | _ -> Utils.internal_error "merge_unions" "wrong list size"
           
 and simplify_union loops fl =
   match fl with
-  | [] -> internal_error "simplify_union" "empty list"
+  | [] -> Utils.internal_error "simplify_union" "empty list"
   | [f1] -> f1 (* Might happen due to neutral element bot_f *)
   | _ ->
      let fl' = simplify_union_rec loops fl in
      match fl' with
-     | [] -> internal_error  "simplify_union" "empty list"
+     | [] -> Utils.internal_error  "simplify_union" "empty list"
      | [f1] -> f1
      | _ -> FUnion fl'
 
