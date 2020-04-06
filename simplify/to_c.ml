@@ -9,7 +9,7 @@ let c_array pp_elem out_f array =
   if length = 0 then
     pp_print_text out_f "NULL"
   else
-    fprintf out_f "@[<hov 2>{%a}"
+    fprintf out_f "@[<hov 2>{%a}@]"
       (fun out_f ->
         pp_print_list
           ~pp_sep:(fun out_f () -> fprintf out_f ",@ ")
@@ -58,7 +58,7 @@ let c_awcet out_f (lid, wl) =
     c_wlist wl                          
 
 let c_annot out_f (lid, k) =
-  fprintf out_f "{%a,%d}" c_loopid lid k
+  fprintf out_f ".ann={%a,%d}" c_loopid lid k
   
 let rec c_formula_operands out_f fl =
   fprintf out_f "@[<hov 2>(formula_t[%d])@ %a@]"
@@ -87,7 +87,8 @@ and c_formula_rec out_f f =
        begin
          match it with
          | SInt i ->
-            fprintf out_f "KIND_LOOP,@ 0,@ {%d},@ %a, %a" i c_null_wcet () c_formula_operands [fbody]
+            fprintf out_f "KIND_LOOP,@ 0,@ {%d},@ %a, %a"
+              i c_null_wcet () c_formula_operands [fbody]
          | SParam p ->
             fprintf out_f "KIND_LOOP,@ %d,@ {0},@ %a, %a"
               (int_of_string p)
