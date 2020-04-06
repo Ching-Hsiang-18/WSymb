@@ -26,8 +26,10 @@ let version = "1.0.0"
 let extension = ".pwf"
 
 let debug = ref false
+let to_c = ref false
           
 let options = [
+    "-c", Arg.Set to_c, "Compile a (single) formula to C code";
     "-debug", Arg.Set debug, "Run in debug mode";
     "-version", Arg.Unit (fun () -> print_endline version), "Print version"
   ]

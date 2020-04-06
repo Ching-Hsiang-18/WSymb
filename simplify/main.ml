@@ -3,17 +3,25 @@ open Wcet_formula
 open Simplify
 open Context   
           
-(* Simplify a list of formulas and pretty-print the results. *)          
-let simplify_prog formulas =
-  List.iter
-    (fun ctx ->
+let compile source_name contexts =
+  if !Options.to_c then
+    if List.length contexts <> 1 then
+      raise (Arg.Bad "Compilation to C code applies only to a single formula.")
+    else
+      let ctx = List.hd contexts in
       let f' = simplify ctx.loop_hierarchy ctx.formula in
-      Format.fprintf Format.std_formatter "%a %a@."
-        Wcet_formula.pp f'
-        Loops.pp_hier ctx.loop_hierarchy
-    )
-    formulas
-
+      let ctx' = new_ctx f' ctx.loop_hierarchy ctx.loop_bounds in
+      To_c.c_context source_name ctx'
+  else
+    List.iter
+      (fun ctx ->
+        let f' = simplify ctx.loop_hierarchy ctx.formula in
+        Format.fprintf Format.std_formatter "%a %a@."
+          Wcet_formula.pp f'
+          Loops.pp_hier ctx.loop_hierarchy
+      )
+      contexts
+  
 (* Process file named [source_name]. Results is printed on standard output. *)  
 let anonymous source_name =
   if Filename.check_suffix source_name Options.extension then
@@ -28,7 +36,7 @@ let anonymous source_name =
                                   Parse.report_error loc;
                                   raise exc
       in
-      simplify_prog prog
+      compile source_name prog 
     end
   else
     raise (Arg.Bad ("Can only process *.pwf files"))
@@ -39,3 +47,4 @@ let _ =
     Arg.parse Options.options anonymous Options.usage
   with
   | Parse.Syntax_err _ | Lexer.Error _ -> ()
+  | exc -> raise exc

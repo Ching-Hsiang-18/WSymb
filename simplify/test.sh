@@ -8,9 +8,11 @@ for f in `ls test`; do
         OUT=test/$BNAME".out"
         EXPECT=test/$BNAME".expect"
 
-        echo Processing $IN
-        $TOOL $IN > $OUT
-        diff $OUT $EXPECT
+        if [ -e $EXPECT ]; then
+            echo Processing $IN
+            $TOOL $IN > $OUT
+            diff $OUT $EXPECT
+        fi
     fi
 done
 
