@@ -5,7 +5,7 @@ CFLAGS=-O0 -g -Wall -W -fsanitize=address
 LDLIBS=../pwcet/lib/libpwcet-runtime.a
 LDFLAGS=-g -fsanitize=address
 
-all: pwcet_instantiator example.pwf
+all: pwcet_instantiator
 
 pwcet_instantiator: pwcet_instantiator.c example-pwcet.h ../pwcet/include/pwcet-runtime.h ../pwcet/lib/libpwcet-runtime.a
 	cc $(CFLAGS) -c pwcet_instantiator.c
@@ -29,7 +29,7 @@ example.ff: example
 .PHONY: clean tidy
 
 tidy: 
-	rm -f example-pwcet.h pwcet_instantiator *.o *~ *decomp* *.dot
+	rm -f example-pwcet.h pwcet_instantiator *.o *~ *decomp* *.dot *.pwf
 
 clean: tidy
 	rm -f example.ff example

@@ -1060,9 +1060,9 @@ void CFTree::exportToAWCET(formula_t *f) {
 		if (b->isSynth()) {
 			CFG *callee = b->toSynth()->callee();
 			CFTree *ch = CFTREE(callee);
-			cout << "Entering function: " << callee->name() << endl;
+/*			cout << "Entering function: " << callee->name() << endl; */
 			ch->exportToAWCET(f);
-			cout << "Exiting function: " << callee->name() << endl;
+/*			cout << "Exiting function: " << callee->name() << endl; */
 
 		} else if (b->isBasic()) {
 			BasicBlock *bb = b->toBasic();
@@ -1160,7 +1160,7 @@ CFTree* CFTreeExtractor::processCFG(CFG *cfg) {
 		cout << "Not processing CFG: " << cfg->label() << " because EXIT is not reachable\n";
 		return nullptr;
 	}
-	cout << "Processing CFG: " << cfg->label() << "\n";
+/*	cout << "Processing CFG: " << cfg->label() << "\n"; */
 	DAG *dag = toDAG(cfg, NULL);
 	CFTree *tree = toCFT(dag, dag->getStart(), dag->getVirtExit(), 1);
 

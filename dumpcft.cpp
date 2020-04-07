@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 	NO_SYSTEM(conf) = true;
 	TASK_ENTRY(conf) = "main";
 	
-	VERBOSE(conf) = true;
+	VERBOSE(conf) = false;
 
 	ws = manager.load(argv[1], conf);
 
@@ -120,15 +120,15 @@ int main(int argc, char **argv) {
 		cerr << "entry point " << entryname_s << " not found" << endl;
 		exit(1);
 	}
-	cout << "Computing WCET using IPET..." << endl;
+/*	cout << "Computing WCET using IPET..." << endl; */
 	ws->require(ipet::WCET_FEATURE, conf);
-	cout << "WCET value using IPET: " << ipet::WCET(ws) << endl;
+/*	cout << "WCET value using IPET: " << ipet::WCET(ws) << endl; */
 
-	cout << "Exporting to AWCET...";
+/*	cout << "Exporting to AWCET..."; */
 	formula_t f;
 	memset(&f, 0, sizeof(f));
 	CFTREE(entry)->exportToAWCET(&f);
-	cout << "done." << endl;
+/*	cout << "done." << endl; */
 	
 	int max_loop_id = 0;
 
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
 		for (CFG::BlockIter iter2((*iter)->blocks()); iter2(); iter2++) {
 			if (LOOP_HEADER(*iter2)) {
 				loop_bounds[(*iter2)->id()] = MAX_ITERATION((*iter2));
-				printf("bounding loop %d with %d\n", (*iter2)->id(), loop_bounds[(*iter2)->id()]);
+//				printf("bounding loop %d with %d\n", (*iter2)->id(), loop_bounds[(*iter2)->id()]);
 				
 				for (CFGCollection::Iter iter3(*coll); iter3(); iter3 ++) {
 					for (CFG::BlockIter iter4((*iter3)->blocks()); iter4(); iter4++) {
