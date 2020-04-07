@@ -4,8 +4,6 @@
 #include "../pwcet/include/pwcet-runtime.h"
 #include "example-pwcet.h"
 
-#define PARAM_FLAG 0x40000000
-
 int b = 10;
 
 int has_param = 0;
