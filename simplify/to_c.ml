@@ -98,7 +98,9 @@ and c_formula_rec out_f f =
     | FAnnot (f, a) ->
        fprintf out_f "KIND_ANN,@ 0,@ {%a},@ %a,@ %a"
          c_annot a c_null_wcet () c_formula_operands [f]
-    | FProduct (k, f) -> Utils.internal_error "c_formula_rec" "product not supported yet"
+    | FProduct (k, f) ->
+       fprintf out_f "KIND_INTMULT,@ 0,@ {%d},@ %a,@ %a"
+         k c_null_wcet () c_formula_operands [f]
   end;
   fprintf out_f "}@]"
   
