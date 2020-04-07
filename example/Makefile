@@ -12,7 +12,7 @@ pwcet_instantiator: pwcet_instantiator.c example-pwcet.h ../pwcet/include/pwcet-
 	cc $(LDFLAGS) -o pwcet_instantiator pwcet_instantiator.c $(LDLIBS)
 
 example-pwcet.h: example-pwcet.pwf
-	cd ../simplify; ./swymplify -c ../example/example-pwcet.pwf; cd -
+	../simplify/swymplify -o ../example/example-pwcet.h -c example-pwcet.pwf
 
 example-pwcet.pwf: example example.ff
 	../dumpcft ./example example-pwcet.pwf
