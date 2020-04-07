@@ -268,7 +268,7 @@ let simplify_power loops (f_body, f_exit, l, it) =
   | (FConst c1, FConst c2) when (not (is_symb it)) ->
      let it = int_of_symb it in
      FConst (Abstract_wcet.pow loops c1 c2 l it)
-  | _,_ -> FPower (f_body, f_exit, l, it)
+  | _,_ -> FPlus [f_exit; FPower (f_body, bot_f, l, it)]
 
 let rec simplify_product loops (k,f) =
   if k = 0 then
