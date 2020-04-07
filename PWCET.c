@@ -74,6 +74,16 @@ void compute_node(evalctx_t * ctx, formula_t * f)
 			printf("compute_node: end processing ANN node\n");
 #endif
 			break;
+		case KIND_INTMULT:
+#ifdef DEBUG
+			printf("compute_node: start processing INTMULT node\n");
+#endif
+			compute_node(ctx, &f->children[0]);
+			awcet_intmult(ctx, &f->children->aw, f);
+#ifdef DEBUG
+			printf("compute_node: end processing ANN node\n");
+#endif
+			break;
 		case KIND_AWCET:
 #ifdef DEBUG
 			printf("compute_node: processing AWCET node\n");
@@ -236,6 +246,15 @@ void awcet_loop(evalctx_t * ctx, awcet_t * source, formula_t * dest)
 
 	}
 }
+void awcet_intmult(evalctx_t * ctx, awcet_t * source, formula_t * dest)
+{
+	int i;
+	(void)(ctx);
+	for (i = 0; i < source->eta_count; i++) {
+		dest->aw.eta[i] = source->eta[i] * dest->opdata.coef;
+	}
+	dest->aw.others = source->others * dest->opdata.coef;	
+}
 
 void awcet_ann(evalctx_t * ctx, awcet_t * source, formula_t * dest)
 {
@@ -314,6 +333,10 @@ long long evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, void *dat
 
 void compute_eta_count(formula_t *f) {
 	switch(f->kind) {
+		case KIND_INTMULT:
+			compute_eta_count(f->children);
+			f->aw.eta_count = f->children[0].aw.eta_count;
+			break;
 		case KIND_ANN:
 			compute_eta_count(f->children);
 			f->aw.eta_count = f->opdata.ann.count;

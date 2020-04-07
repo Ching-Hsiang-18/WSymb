@@ -44,6 +44,7 @@ void awcet_alt(evalctx_t * ctx, int source_count, formula_t * source,
                            awcet_t * dest);
 void awcet_loop(evalctx_t * ctx, awcet_t * source, formula_t * dest);
 void awcet_ann(evalctx_t * ctx, awcet_t * source, formula_t * dest);
+void awcet_intmult(evalctx_t * ctx, awcet_t * source, formula_t * dest);
 
 
 void writeC(formula_t *f, FILE *out, int indent);
