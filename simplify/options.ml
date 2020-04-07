@@ -27,9 +27,11 @@ let extension = ".pwf"
 
 let debug = ref false
 let to_c = ref false
-          
+let out_name = ref ""
+         
 let options = [
     "-c", Arg.Set to_c, "Compile a (single) formula to C code";
     "-debug", Arg.Set debug, "Run in debug mode";
+    "-o", Arg.Set_string out_name, "Speficies the output file name";
     "-version", Arg.Unit (fun () -> print_endline version), "Print version"
   ]

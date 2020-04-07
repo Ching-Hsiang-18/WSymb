@@ -109,7 +109,11 @@ let c_formula out_f f =
 
 let c_context source_name ctx =
   let basename = Filename.chop_suffix source_name Options.extension in
-  let outname = basename^".h" in
+  let outname =
+    if (!Options.out_name = "") then
+      basename^".h"
+    else !Options.out_name
+  in
   let out_ch = open_out outname in
   let out_f = formatter_of_out_channel out_ch in
   c_loop_bounds out_f ctx.loop_bounds;

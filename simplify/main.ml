@@ -13,10 +13,18 @@ let compile source_name contexts =
       let ctx' = new_ctx f' ctx.loop_hierarchy ctx.loop_bounds in
       To_c.c_context source_name ctx'
   else
+    let out_f =
+    if (!Options.out_name = "") then
+      Format.std_formatter
+    else
+      let out_ch = open_out !Options.out_name in
+      Format.formatter_of_out_channel out_ch
+    in
+
     List.iter
       (fun ctx ->
         let f' = simplify ctx.loop_hierarchy ctx.formula in
-        Format.fprintf Format.std_formatter "%a %a@."
+        Format.fprintf out_f "%a %a@."
           Wcet_formula.pp f'
           Loops.pp_hier ctx.loop_hierarchy
       )
