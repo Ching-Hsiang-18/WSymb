@@ -69,8 +69,8 @@ static bool is_strictly_in(Block *inner, Block *outer) {
 }
 
 int main(int argc, char **argv) {
-	if ((argc < 4) || (argc > 5)) {
-		fprintf(stderr, "usage: %s <ARM binary> <output header file> <formula file> [<entry fct (by default main)>]\n", argv[0]);
+	if ((argc < 3) || (argc > 4)) {
+		fprintf(stderr, "usage: %s <ARM binary> <formula file> [<entry fct (by default main)>]\n", argv[0]);
 		exit(1);
 	}
 	WorkSpace *ws = NULL;
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 	
 	// produce awcet
 	CFG *entry = nullptr;
-	const char *entryname = (argc >= 5) ? argv[4] : "main";
+	const char *entryname = (argc >= 4) ? argv[3] : "main";
 	elm::String entryname_s(entryname);
 	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
 		if (entryname_s == (*iter)->name()) {
@@ -130,32 +130,11 @@ int main(int argc, char **argv) {
 	CFTREE(entry)->exportToAWCET(&f);
 	cout << "done." << endl;
 	
-	cout << "Exporting AWCET to header file..." << endl;
-
-	
-	FILE *outfile = fopen(argv[2], "w");
-
 	int max_loop_id = 0;
-	fprintf(outfile, "int loop_bounds(int loop_id) {\n  switch(loop_id) {\n");
-	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
-		cout << "managing loop bounds for "<< (*iter)->label() << endl;
-		for (CFG::BlockIter iter2((*iter)->blocks()); iter2(); iter2++) {
-			if (LOOP_HEADER(*iter2)) {
-				if (max_loop_id < (*iter2)->id()) {
-					max_loop_id = (*iter2)->id();
-				}
-				int bound = MAX_ITERATION(*iter2);
-				fprintf(outfile, "    case %d: return %d;\n", (*iter2)->id(), bound);
-			}
-		}
-	}
-	fprintf(outfile, "    default:    abort();\n");
-	fprintf(outfile, "  }\n}\n");
-
 
 	fix_virtualized_loopinfo(entry);
 	
-	FILE *pwf_file = fopen(argv[3], "w");
+	FILE *pwf_file = fopen(argv[2], "w");
 	long long *loop_bounds = (long long*) malloc(sizeof(long long)*max_loop_id + 1);
 	for (int i = 0; i <= max_loop_id; i++)
 		loop_bounds[i] = -1;
@@ -171,38 +150,27 @@ int main(int argc, char **argv) {
 	
 	writePWF(&f, pwf_file, loop_bounds);
 	fprintf(pwf_file, " loops: ");
-	fprintf(outfile, "int loop_hierarchy(int inner, int outer) {\n  switch(inner) {\n");
 	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
 		for (CFG::BlockIter iter2((*iter)->blocks()); iter2(); iter2++) {
 			if (LOOP_HEADER(*iter2)) {
 				loop_bounds[(*iter2)->id()] = MAX_ITERATION((*iter2));
 				printf("bounding loop %d with %d\n", (*iter2)->id(), loop_bounds[(*iter2)->id()]);
-				fprintf(outfile, "    case %d: switch (outer) {\n", (*iter2)->id());
 				
 				for (CFGCollection::Iter iter3(*coll); iter3(); iter3 ++) {
 					for (CFG::BlockIter iter4((*iter3)->blocks()); iter4(); iter4++) {
 						if (LOOP_HEADER(*iter4)) {
 							if (is_strictly_in(*iter2, *iter4)) {
-								fprintf(outfile, "      case %d: return 1;\n", (*iter4)->id());    
-								fprintf(pwf_file, "l%u _C l%u; ", (*iter2)->id(), (*iter4)->id());
+								fprintf(pwf_file, "l:%u _C l:%u; ", (*iter2)->id(), (*iter4)->id());
 							}
 						}
 					}
 				}
-				fprintf(outfile, "      default: return 0;\n    }\n");
 			}
 		}
 	}
-	fprintf(outfile, "    default:    abort();\n");
-	fprintf(outfile, "  }\n}\n");
 	fprintf(pwf_file, " endl\n");
-	fprintf(outfile, "formula_t f = ");
-	compute_eta_count(&f);
-	writeC(&f, outfile, 0);	
-	fprintf(outfile, ";\n");
-	fclose(pwf_file);
 
-	fclose(outfile);
+	fclose(pwf_file);
 	free(loop_bounds);
 	
 }
