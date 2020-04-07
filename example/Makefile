@@ -12,7 +12,7 @@ pwcet_instantiator: pwcet_instantiator.c example-pwcet.h ../pwcet/include/pwcet-
 	cc $(LDFLAGS) -o pwcet_instantiator pwcet_instantiator.c $(LDLIBS)
 
 example-pwcet.h example.pwf: example example.ff
-	../dumpcft ./example example-pwcet.h	
+	../dumpcft ./example example-pwcet.h example.pwf
 
 example: example.c
 	$(ARMCC) $(ARMCFLAGS) -g -O0 -o example example.c -static
