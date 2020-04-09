@@ -83,9 +83,18 @@ and c_formula_rec out_f f =
          (List.length fl)
          c_null_wcet ()
          c_formula_operands fl
-    | FPower (fbody, _, lid, _) ->
-       fprintf out_f "KIND_LOOP,@ 0,@ {%a},@ %a, %a"
-         c_loopid lid c_null_wcet () c_formula_operands [fbody]
+    | FPower (fbody, _, lid, it) ->
+       begin
+         match it with
+         | SInt i ->
+            fprintf out_f "KIND_LOOP,@ 0,@ {%a},@ %a, %a"
+              c_loopid lid c_null_wcet () c_formula_operands [fbody]
+         | SParam p ->
+            fprintf out_f "KIND_LOOP,@ %d,@ {0},@ %a, %a"
+              (int_of_string p)
+              c_null_wcet ()
+              c_formula_operands [fbody]
+       end
     | FAnnot (f, a) ->
        fprintf out_f "KIND_ANN,@ 0,@ {%a},@ %a,@ %a"
          c_annot a c_null_wcet () c_formula_operands [f]
