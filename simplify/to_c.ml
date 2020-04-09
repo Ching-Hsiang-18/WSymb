@@ -90,8 +90,9 @@ and c_formula_rec out_f f =
             fprintf out_f "KIND_LOOP,@ 0,@ {%a},@ %a, %a"
               c_loopid lid c_null_wcet () c_formula_operands [fbody]
          | SParam p ->
-            fprintf out_f "KIND_LOOP,@ %d,@ {0},@ %a, %a"
+            fprintf out_f "KIND_LOOP,@ %d,@ {%a},@ %a, %a"
               (int_of_string p)
+              c_loopid lid
               c_null_wcet ()
               c_formula_operands [fbody]
        end
