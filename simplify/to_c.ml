@@ -17,14 +17,12 @@ let c_array pp_elem ty_string out_f array =
           ~pp_sep:(fun out_f () -> fprintf out_f ",@ ")
           pp_elem out_f)
       array
-   
-let c_symb_int out_f sint =
-  match sint with
-  | SInt  i -> pp_print_int out_f i
-  | SParam p -> pp_print_text out_f p
-   
+      
 let c_loop_bound out_f lname bound =
-  fprintf out_f "case %s: return %a;@ " lname c_symb_int bound
+  match bound with
+  | SInt i ->
+     fprintf out_f "case %s: return %d;@ " lname i
+  | SParam _ -> ()
   
 let c_loop_bounds out_f bounds =
   fprintf out_f "@[<v 2>int loop_bounds(int loop_id) {@ ";

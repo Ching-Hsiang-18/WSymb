@@ -23,6 +23,18 @@ type param = string
 (** Symbolic integer is either a constant or a symbol *)   
 type symb_int = SInt of int | SParam of param
 
+(* Returns true if sint is a symbol. *)          
+let is_symb sint =
+  match sint with
+  | SInt _ -> false
+  | SParam _ -> true
+
+(* Returns the constant corresponding to [sint]. Fails if [sint] is a symbol. *)
+let int_of_symb sint =
+  match sint with
+  | SInt i -> i
+  | SParam _ -> Utils.internal_error "int_of_symb" "cannot be applied to param"
+                                      
 open Format
 
 let pp_param out_f p =
