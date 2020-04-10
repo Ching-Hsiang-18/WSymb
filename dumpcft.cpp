@@ -135,7 +135,15 @@ int main(int argc, char **argv) {
 	fix_virtualized_loopinfo(entry);
 	
 	FILE *pwf_file = fopen(argv[2], "w");
-	long long *loop_bounds = (long long*) malloc(sizeof(long long)*max_loop_id + 1);
+	
+	for (CFGCollection::Iter iter(*coll); iter(); iter ++)
+		for (CFG::BlockIter iter2((*iter)->blocks()); iter2(); iter2++)
+			if (LOOP_HEADER(*iter2))
+				if ((*iter2)->id() > max_loop_id)
+					max_loop_id = (*iter2)->id();
+			
+
+	long long *loop_bounds = (long long*) malloc(sizeof(long long)*(max_loop_id + 1));
 	for (int i = 0; i <= max_loop_id; i++)
 		loop_bounds[i] = -1;
 		
