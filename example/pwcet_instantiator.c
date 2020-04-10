@@ -4,10 +4,8 @@
 #include "../pwcet/include/pwcet-runtime.h"
 #include "example-pwcet.h"
 
-int b = 10;
-
 int has_param = 0;
-
+int b;
 
 void param_valuation(int param_id, param_value_t * param_val, void *data) {
   (void)(data);
