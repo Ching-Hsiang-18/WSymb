@@ -389,6 +389,8 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 				writePWF(f->children + i, out, bounds);
 				
 			}
+			if (f->opdata.children_count == 0)
+				fprintf(out, "__top;{0}");
 			fprintf(out, ")");
 			break;
 		case KIND_ALT:
@@ -396,8 +398,9 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 			for (int i = 0; i < f->opdata.children_count; i++) {
 				if (i > 0) fprintf(out, " U ");
 				writePWF(f->children + i, out, bounds);
-				
 			}
+			if (f->opdata.children_count == 0)
+				fprintf(out, "__top;{0}");
 			fprintf(out, ")");
 			break;
 		case KIND_LOOP: 
