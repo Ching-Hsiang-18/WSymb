@@ -136,8 +136,9 @@ To compute the non-parametric WCET:
 
 (We plan to improve this part in future works).
 
-Edit `example.ff` to write `0x40000001` instead of `??` for each loop
-bound you want to turn parametric.
+Edit `example.ff` to write `0x4000000N`, where N is the *parameter
+identifier* instead of `??` for each loop bound you want to turn
+parametric.
 
 In `pwcet_instantiator.c`, procedure `param_valuation` relates parameter
 identifiers to their values. In this example, the WCET is successively
