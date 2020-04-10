@@ -1,19 +1,17 @@
-# CFTreeExtractor
+# WSymb
 
-Control Flow Tree extractor plugin for OTAWA v2
+WSymb: Symbolic Worst-Case Execution Time (WCET) computation.
 
-* Version 1.0.0 (for OTAWA v2), June 2019
+* Version 1.0.0 (for OTAWA v2), April 2020
 
 ----
 ## Authors
 
+* Clement Ballabriga <Clement.Ballabriga@nospamuniv-lille.fr>
+* Julien Forget <Julien.Forget@nospamuniv-lille.fr>
 * Celestine Sauvage <celestine.sauvage@nospamgmail.com>
 
-## Contributors
-
-* Clement Ballabriga <Clement.Ballabriga@nospamuniv-lille.fr>
-
-License: GPL 2.1
+License: GPL 2.1 or higher.
 
 Please remove "nospam" from the email addresses.
 
@@ -21,21 +19,40 @@ Please remove "nospam" from the email addresses.
 
 ## Introduction
 
-CFTreeExtractor is an OTAWA v2 plugin that produces a Control Flow Tree
-(CFTree) representation from binary a program.
+WSymb is a WCET analysis tool. Its main specificity is that, instead of
+a constant WCET, it computes a *WCET formula*, where symbols (or
+parameters) can correspond to various kind of values unnkown at analysis
+time. The formula can later be *instanciated*, when parameter values are
+known. For more details on the underlying theory, check out the papers
+[1,2].
 
-The CFTree is a tree-representation of the binary, it can be considered
-as a (enriched) binary code Abstract Syntax Tree.
+WSymb consists of several separate parts:
 
-The algorithm to compute the CFTree is presented in [1,2].
+* `dumpcft` is an OTAWA v2 plugin that, starting from a binary program:
+  1. Computes the corresponding Control Flow Tree (CFTree);
+  2. Computes the WCET formula for this CFT;
+  3. Outputs the formula as a `.pwf` file.
+
+* `simplify/swimplify` is a WCET formula simplification tool:
+  1. It simplifies a `.pwf` using various arithmetic properties of WCET
+     formulas (distributivity, commutativity, etc);
+  2. The simplified formula can either be translated into another `.pwf` file,
+     or translated into C code to instanciate the formula.
+
+* The instantiation of the WCET formula relies on an API documented in
+  `pwcet/include/pwcet-tuntime.h`.
+
+A complete example covering all these different parts is provided in
+directory `example`.
 
 ----
-## Installation
 
-This plugin requires [OTAWA v2](http://www.otawa.fr/). Also, the directory
-`<otawa dir>/bin` (where `otawa dir` is the directory where otawa is
-installed) must be in your `$PATH`. We suggest you follow [these
-installation
+## dumpcft
+
+`dumpcft` requires [OTAWA v2](http://www.otawa.fr/). Also, the
+directory `<otawa dir>/bin` (where `otawa dir` is the directory where
+otawa is installed) must be in your `$PATH`. We suggest you follow
+[these installation
 instructions](https://gitlab.cristal.univ-lille.fr/otawa-plugins/otawa-doc),
 and stop at the end of section "Setting the environment".
 
@@ -45,11 +62,7 @@ To compile and install the plugin:
 $ make
 ```
 
-----
-## Usage
-
-You can use the command `dumpcft` to produce the CFT from a binary code:
-
+Usage:
 ```
 ./dumpcft <binary file> <output header file> [<optional entry point>]
 ```
@@ -58,9 +71,20 @@ You can use the command `dumpcft` to produce the CFT from a binary code:
 supported by Otawa. Typically, an ARM binary. See the `example`
 sub-directory for a `Makefile` example.
 
-`dumpcft` outputs the CFTree in a `.dot` format, and also produces the
-abstract WCET formula as a header file. This header can be used to
-instantiate the parametric WCET (either before, or during, run-time).
+`dumpcft` outputs the CFTree in both a `.dot` and a `.pwf` format.
+
+----
+
+## swymplify
+
+* Dependencies: the following packages are required to compile this tool: `ocaml`,
+`ocamlbuild`, `make`.
+
+* Compilation: go to directory `simplify` and type `make`.
+
+* Execution: `./swymplify -help`
+
+----
 
 ## WCET formula instantiation
 
@@ -84,8 +108,6 @@ Note that `pwcet/include/pwcet-runtime.h` contains generic formula
 evaluation functions. On the contrary, `example-pwcet.h`, which is
 produced by `dumpcft`, contains code specifically related to the binary
 under analysis.
-
-## Formula instantiation
 
 The file `example/pwcet_instantiator.c` provides an example of WCET
 formula instantiation. The following line provides the information on
@@ -112,14 +134,15 @@ To compute the non-parametric WCET:
 
 ### Parametric loop bounds
 
-In the example, procedure `param_loop_bound` relates loop identifiers to
-loop bound. Edit `example.ff` to write `0x4000000N` (where N is the
-parameter identifier) instead of `??` for each loop bound you want to
-turn parametric. The parameter identifier is used in function
-`param_value` to instantiate the parameter (i.e. provide its value).
+(We plan to improve this part in future works).
 
-Note that you can instead replace procedure `param_loop_bound` by your
-custom handler if you wish.
+Edit `example.ff` to write `0x40000001` instead of `??` for each loop
+bound you want to turn parametric.
+
+In `pwcet_instantiator.c`, procedure `param_valuation` relates parameter
+identifiers to their values. In this example, the WCET is successively
+instantiated with values ranges from 0 to 20 for parameter 1. Parameter
+identifiers are visible in the `.pwf` file.
 
 ----
 ## References
@@ -128,8 +151,4 @@ custom handler if you wish.
 ISO 690	
 
 [2] https://arxiv.org/abs/1709.09369
-
-
-
-
 
