@@ -9,10 +9,10 @@ int b;
 
 void param_valuation(int param_id, param_value_t * param_val, void *data) {
   (void)(data);
-  has_param = 1;
   
   /* parametric bound */
   if (param_id == 1) {
+    has_param = 1;
     param_val->bound = b;
     return;
   }
