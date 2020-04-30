@@ -37,6 +37,10 @@ struct evalctx_s {
 };
 typedef struct evalctx_s evalctx_t;
 
+struct param_func {
+	char *funcname;
+	int param_id;
+};
 
 void awcet_seq(evalctx_t * ctx, int source_count, formula_t * source,
                            awcet_t * dest);

@@ -14,7 +14,7 @@ pwcet_instantiator: pwcet_instantiator.c example-pwcet.h ../pwcet/include/pwcet-
 example-pwcet.h: example-pwcet.pwf
 	../simplify/swymplify -o ../example/example-pwcet.h -c example-pwcet.pwf
 
-example-pwcet.pwf: example example.ff
+example-pwcet.pwf: example example.ff example.pfl
 	../dumpcft ./example example-pwcet.pwf
 
 example: example.c

@@ -68,11 +68,43 @@ static bool is_strictly_in(Block *inner, Block *outer) {
 	return false;
 }
 
+struct param_func *read_pfl(char *binary) {
+	char filename[256];
+	strncpy(filename, binary, sizeof(filename) - 4);
+	filename[sizeof(filename) - 5] = 0;
+	strcat(filename, ".pfl");
+	FILE *f = fopen(filename, "r");
+	if (f != nullptr) {
+		printf("Found PFL file, reading it\n");
+		char *str;
+		int param_id;
+		int paramcount = 0;
+		while (fscanf(f, "%ms %d", &str, &param_id) == 2)
+	       		paramcount ++;
+		rewind(f);
+
+		struct param_func *res = (struct param_func*) malloc(sizeof(struct param_func)*(paramcount + 1));
+		int i = 0;
+		while (fscanf(f, "%ms %d", &str, &param_id) == 2) {
+			if (i >= paramcount) abort(); // parano
+			res[i].funcname = str;
+			res[i].param_id = param_id;
+			i++;
+		}
+		res[i].funcname = nullptr;
+		printf("End of PFL file processing\n");
+		fclose(f);
+		return res;
+	} else return NULL;
+}
+
 int main(int argc, char **argv) {
 	if ((argc < 3) || (argc > 4)) {
 		fprintf(stderr, "usage: %s <ARM binary> <formula file> [<entry fct (by default main)>]\n", argv[0]);
 		exit(1);
 	}
+	struct param_func *pfl = read_pfl(argv[1]);
+
 	WorkSpace *ws = NULL;
 	PropList conf;
 	Manager manager;
@@ -127,7 +159,7 @@ int main(int argc, char **argv) {
 /*	cout << "Exporting to AWCET..."; */
 	formula_t f;
 	memset(&f, 0, sizeof(f));
-	CFTREE(entry)->exportToAWCET(&f);
+	CFTREE(entry)->exportToAWCET(&f, pfl);
 /*	cout << "done." << endl; */
 	
 	int max_loop_id = 0;

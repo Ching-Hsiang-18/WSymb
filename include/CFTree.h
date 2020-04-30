@@ -96,7 +96,7 @@ namespace otawa { namespace cftree {
 			virtual CFTreeLoop *toLoop() = 0;/* abstract */
 			virtual CFTreeSeq *toSeq() = 0;/* abstract */
 			void exportToDot(const elm::string &);
-			void exportToAWCET(formula_t*);
+			void exportToAWCET(formula_t*, struct param_func *);
 			void exportToC(io::Output&);
 	};
 

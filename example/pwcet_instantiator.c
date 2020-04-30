@@ -10,8 +10,17 @@ int b;
 void param_valuation(int param_id, param_value_t * param_val, void *data) {
   (void)(data);
   has_param = 1;
+  
+  /* parametric bound */
   if (param_id == 1) {
     param_val->bound = b;
+    return;
+  }
+  
+  /* parametric awcet for function */
+  if (param_id == 42) {
+    param_val->aw.eta = NULL;
+    param_val->aw.others = 1000; /* actual wcet of function associated with param_id 42 */
     return;
   }
   abort();

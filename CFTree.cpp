@@ -1054,15 +1054,27 @@ CFTree* toCFT(DAG *dag, DAGNode *start, DAGNode *end, int all){
 	}
 }
 
-void CFTree::exportToAWCET(formula_t *f) {
+void CFTree::exportToAWCET(formula_t *f, struct param_func *pfl) {
 	if (CFTreeLeaf *n = toLeaf()) {
 		Block *b = n->getBlock();
 		if (b->isSynth()) {
 			CFG *callee = b->toSynth()->callee();
-			CFTree *ch = CFTREE(callee);
-/*			cout << "Entering function: " << callee->name() << endl; */
-			ch->exportToAWCET(f);
-/*			cout << "Exiting function: " << callee->name() << endl; */
+			/* Test if callee is parametric */
+			int i = 0;
+			bool parametric = false;
+			while (pfl && pfl[i].funcname != nullptr)  {
+				if (!strcmp(pfl[i].funcname, callee->name().toCString())) {
+					parametric = true;
+					f->kind = KIND_AWCET;
+					f->param_id = pfl[i].param_id;
+					break;
+				}
+				i++;
+			}
+			if (!parametric) {
+				CFTree *ch = CFTREE(callee);
+				ch->exportToAWCET(f, pfl);
+			}
 
 		} else if (b->isBasic()) {
 			BasicBlock *bb = b->toBasic();
@@ -1096,7 +1108,7 @@ void CFTree::exportToAWCET(formula_t *f) {
 			CFTree *ch = (*it);
 			if (ch->toLeaf() && ch->toLeaf()->getBlock() == nullptr)
 				continue;
-			ch->exportToAWCET(f->children + i);
+			ch->exportToAWCET(f->children + i, pfl);
 			i++;
 		}
 	}
@@ -1108,8 +1120,8 @@ void CFTree::exportToAWCET(formula_t *f) {
 		f->children[0].kind = KIND_LOOP;
 		f->children[0].opdata.loop_id = n->getHeader()->id();
 		f->children[0].children = (formula_t*) calloc(sizeof(formula_t), 1);
-		b->exportToAWCET(f->children[0].children);
-		e->exportToAWCET(f->children + 1);
+		b->exportToAWCET(f->children[0].children, pfl);
+		e->exportToAWCET(f->children + 1, pfl);
 		f->opdata.children_count = 2;
 		if (MAX_ITERATION(n->getHeader()) & PARAM_FLAG) {
 			f->children[0].param_id = MAX_ITERATION(n->getHeader()) & ~PARAM_FLAG;
@@ -1126,7 +1138,7 @@ void CFTree::exportToAWCET(formula_t *f) {
 		int i = 0;
 		for (auto it = n->childIter(); it != n->childEnd(); it++) {
 			CFTree *ch = (*it);
-			ch->exportToAWCET(f->children + i);
+			ch->exportToAWCET(f->children + i, pfl);
 			i++;
 		}
 	}

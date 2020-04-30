@@ -371,7 +371,7 @@ void compute_eta_count(formula_t *f) {
 	}
 }
 
-void writePWF(formula_t *f, FILE *out, long long *bounds) {
+void writePWF(formula_t *f, FILE *out, long long *bounds) { 
 	switch (f->kind) {
 		case KIND_CONST:
 			fprintf(out, "(l:%d;{", f->aw.loop_id < 0 ? 0 : f->aw.loop_id);
@@ -381,6 +381,9 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 			}
 			fprintf(out, "%lld", f->aw.others);
 			fprintf(out, "}) ");
+			break;
+		case KIND_AWCET:
+			fprintf(out, "p:%d", f->param_id);
 			break;
 		case KIND_SEQ:
 			fprintf(out, "(");
