@@ -21,7 +21,7 @@ Please remove "nospam" from the email addresses.
 
 WSymb is a WCET analysis tool. Its main specificity is that, instead of
 a constant WCET, it computes a *WCET formula*, where symbols (or
-parameters) can correspond to various kind of values unnkown at analysis
+parameters) can correspond to various kinds of values unnkown at analysis
 time. The formula can later be *instanciated*, when parameter values are
 known. For more details on the underlying theory, check out the papers
 [1,2].
@@ -144,6 +144,20 @@ In `pwcet_instantiator.c`, procedure `param_valuation` relates parameter
 identifiers to their values. In this example, the WCET is successively
 instantiated with values ranges from 0 to 20 for parameter 1. Parameter
 identifiers are visible in the `.pwf` file.
+
+### Procedures with a parametric WCET
+
+You can specify a procedure for which the WCET is a parameter (i.e. the
+WCET of the procedure is considered to be unknown by `dumpcft`). To do
+so:
+1. Write a `.pfl` file, where each line consists of a procedure name and
+   a parameter identifier (an integer);
+2. Pass that file as an argument to `dumpcft`. This produces a `.pwf`
+   file, where the WCET of the procedure is replaced by the
+   corresponding parameter idenfitier;
+3. For parameter instanciation, see the example `pwcet_instantiator.c`,
+   where the procedure `param_valuation` relates parameter identifiers
+   to their values (same as for parametric loop bounds).
 
 ----
 ## References
