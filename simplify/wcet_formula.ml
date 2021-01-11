@@ -36,6 +36,31 @@ type t =
 
 let bot_f = FConst bot_wcet
 
+(** Computes an upper bound to the size of the [multi_wcet]
+   corresponding to formula [f] ([last] excluded). *)
+let rec multi_wcet_size_bound f =
+  match f with
+  | FParam _ -> 1
+  | FConst (_,(wl,_)) -> List.length wl
+  | FPlus flist ->
+     List.fold_left (fun mx f -> max mx (multi_wcet_size_bound f)) 1 flist
+  | FUnion flist ->
+     List.fold_left (fun sum f ->  sum+(multi_wcet_size_bound f)) 0 flist
+  | FPower (fbody,fexit,_,it) ->
+     let bound_body = multi_wcet_size_bound fbody in
+     let bound_exit = multi_wcet_size_bound fexit in
+     begin
+       match it with
+       | SInt i ->
+          max (int_of_float (ceil ((float_of_int bound_body) /. (float_of_int bound_exit))))
+            bound_exit
+       | SParam _ -> max bound_body bound_exit
+     end
+  | FAnnot (_,(_,it)) ->
+     it
+  | FProduct (_,f') ->
+     multi_wcet_size_bound f'
+    
 (* Pretty printing *)
               
 open Format

@@ -51,6 +51,13 @@ let c_wlist out_f (wl, last) =
 
 let c_null_wcet out_f () =
   fprintf out_f "@[<hov 2>{-1,@ 0,@ NULL,@ 0}@]"
+
+let c_aw_placeholder out_f f =
+  match f with
+  | FConst _ -> Utils.internal_error "c_aw_placeholder" "f should not be const or param"
+  | _ ->
+     let eta_count = multi_wcet_size_bound f in
+     fprintf out_f "@[<hov 2>{-1,@ %d,@ (long long[%d]){0},@ 0}@]" eta_count eta_count
   
 let c_awcet out_f (lid, wl) =
   fprintf out_f "@[<hov 2>{%a,@ %a}@]"
@@ -70,36 +77,36 @@ and c_formula_rec out_f f =
     | FConst aw ->
        fprintf out_f "KIND_CONST,@ 0,@ {0},@ %a,@ NULL" c_awcet aw
     | FParam p ->
-       fprintf out_f "KIND_AWCET,@ %d,@ {0},@ %a,@ NULL" (int_of_string p) c_null_wcet ()
+       fprintf out_f "KIND_AWCET,@ %d,@ {0},@ %a,@ NULL" (int_of_string p) c_aw_placeholder f
     | FPlus fl ->
        fprintf out_f "KIND_SEQ,@ 0,@ {%d},@ %a, %a"
          (List.length fl)
-         c_null_wcet ()
+         c_aw_placeholder f
          c_formula_operands fl
     | FUnion fl ->
        fprintf out_f "KIND_ALT,@ 0,@ {%d},@ %a, %a"
          (List.length fl)
-         c_null_wcet ()
+         c_aw_placeholder f
          c_formula_operands fl
     | FPower (fbody, _, lid, it) ->
        begin
          match it with
          | SInt i ->
             fprintf out_f "KIND_LOOP,@ 0,@ {%a},@ %a, %a"
-              c_loopid lid c_null_wcet () c_formula_operands [fbody]
+              c_loopid lid c_aw_placeholder f c_formula_operands [fbody]
          | SParam p ->
             fprintf out_f "KIND_LOOP,@ %d,@ {%a},@ %a, %a"
               (int_of_string p)
               c_loopid lid
-              c_null_wcet ()
+              c_aw_placeholder f
               c_formula_operands [fbody]
        end
-    | FAnnot (f, a) ->
+    | FAnnot (f', a) ->
        fprintf out_f "KIND_ANN,@ 0,@ {%a},@ %a,@ %a"
-         c_annot a c_null_wcet () c_formula_operands [f]
-    | FProduct (k, f) ->
+         c_annot a c_aw_placeholder f c_formula_operands [f']
+    | FProduct (k, f') ->
        fprintf out_f "KIND_INTMULT,@ 0,@ {%d},@ %a,@ %a"
-         k c_null_wcet () c_formula_operands [f]
+         k c_aw_placeholder f c_formula_operands [f']
   end;
   fprintf out_f "}@]"
   
