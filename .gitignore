@@ -1,0 +1,7 @@
+**/.vscode
+**/*.o
+**/*.so
+**/dumpcft
+**/libpwcet-runtime.a
+**/_build
+**/swymplify
