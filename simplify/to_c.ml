@@ -56,7 +56,7 @@ let c_aw_placeholder out_f f =
   match f with
   | FConst _ -> Utils.internal_error "c_aw_placeholder" "f should not be const or param"
   | _ ->
-     let eta_count = multi_wcet_size_bound f in
+     let eta_count = if multi_wcet_size_bound f > 0 then multi_wcet_size_bound f else 1 in
      fprintf out_f "@[<hov 2>{-1,@ %d,@ (long long[%d]){0},@ 0}@]" eta_count eta_count
   
 let c_awcet out_f (lid, wl) =
