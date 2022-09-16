@@ -53,8 +53,6 @@ let insert w (wl, last) =
   let cmp = fun x y -> -(compare x y) in
   if w > last then
     (List.merge cmp wl [w], last) (* Keep wl sorted decreasingly. *)
-  else if w = last then
-    (wl, last)
   else (List.merge cmp wl [last], w) (* w is the new last, ex-last goes into wl *)
 
 (* Sum on multi_wcet *)
@@ -75,7 +73,7 @@ let sum loops (l1,w1) (l2,w2) =
 let rec union_mwcet w1 w2 =
   (* Basically, a point-by-point max. *)
   match w1, w2 with
-  | ([], last1), ([], last2) -> ([], Pervasives.max last1 last2)
+  | ([], last1), ([], last2) -> ([], Stdlib.max last1 last2)
   | ([], last), w | w, ([], last) ->
      if (last >= hd w) then (* last is greater than all of w1 *)
        ([], last)
