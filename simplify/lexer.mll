@@ -43,8 +43,13 @@ rule token = parse
 | blank + { token lexbuf }
 | 'U' {UNION}            
 | '+' {PLUS}
+| '-' {BMINUS}
 | '|' {PIPE}
 | '.' {DOT}
+| '*' {BMULT}
+| '=' {EQUALS}
+| "\u{2264}" {LEQUALS}
+| '&' {AND}
 | '^' {CIRC}
 | '(' {LPAR}
 | ')' {RPAR}
@@ -52,8 +57,11 @@ rule token = parse
 | '}' {RCURLBRACKET}
 | ',' {COMMA}
 | ';' {SCOL}
+| "b:" {BPARAM}
 | "p:" {PARAM}
 | "l:" {LOOP_ID}
+| "true" {TRUE}
+| "false" {FALSE}
 | "_C" {INC}
 | ['0'-'9']+
     {INT (int_of_string (Lexing.lexeme lexbuf)) }

@@ -66,8 +66,35 @@ typedef union opdata_u opdata_t;
 #define KIND_CONST	4
 #define KIND_AWCET  	5
 #define KIND_INTMULT	6
+#define KIND_BOOLMULT	7
+#define KIND_STR	8
+#define KIND_PARAM_LOOP 15
+
+/* Boolean operator type */
+#define BOOL_CONST 9
+#define BOOL_PARAM 10
+#define BOOL_CONDITIONS 11
+#define BOOL_LEQ 12
+#define BOOL_EQ 13
+#define BOOL_BOUND 14
 
 #define IDENT_NONE 0
+
+struct term_s {
+	int kind;
+	int coef;
+	int value;
+};
+typedef struct term_s term_t;
+
+/* Condition representation */
+struct condition_s {
+	int kind;
+	int int_value; // parameter id or constant
+	int terms_number; // the number of terms
+	term_t *terms; // terms for leq / eq
+};
+typedef struct condition_s condition_t;
 
 /* WCET formula representation */
 struct formula_s {
@@ -81,8 +108,10 @@ struct formula_s {
 	 */
 	int param_id;
 	opdata_t opdata;
-	awcet_t aw;
+	awcet_t aw;	
 	struct formula_s *children;
+	struct condition_s *condition;
+	char bool_expr[1000];
 };
 typedef struct formula_s formula_t;
 union param_value_u {
@@ -94,7 +123,9 @@ typedef union param_value_u param_value_t;
 
 
 typedef void (param_valuation_t) (int param_id, param_value_t * param_val, void *data);
+typedef int bparam_value_t;
+typedef bparam_value_t (bparam_valuation_t) (int bparam_id);
 
-long long evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, void *data);
+long long evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, bparam_valuation_t bpv, void *data);
 
 #endif

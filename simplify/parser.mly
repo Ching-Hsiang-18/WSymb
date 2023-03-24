@@ -30,10 +30,14 @@
 %token <string> IDENT
 %token <int> INT
 %token PIPE
+%token BMULT
 %token DOT
-%token UNION PLUS
+%token UNION PLUS BMINUS
 %token CIRC
-%token LPAR RPAR LCURLBRACKET RCURLBRACKET COMMA SCOL TOP INC PARAM LOOP_ID
+%token AND
+%token EQUALS LEQUALS
+%token TRUE FALSE
+%token LPAR RPAR LCURLBRACKET RCURLBRACKET COMMA SCOL TOP INC PARAM BPARAM LOOP_ID
 %token LOOPS ENDLH
                                                     
 %token EOF
@@ -103,6 +107,11 @@ formula:
       let (f1,bl1),(f2,bl2) = $2,$4 in
       (FPower (f1, f2, $6, $9), ($6,$9)::bl1@bl2)
     }
+  | LPAR formula COMMA formula COMMA loop_id RPAR CIRC LPAR lexpression RPAR
+    {
+      let (f1,bl1),(f2,bl2) = $2,$4 in
+      (FPowerParam (f1, f2, $6, $10), bl1@bl2)
+    }
   | formula PIPE annot
     {
       let f, bl = $1 in
@@ -112,6 +121,11 @@ formula:
     {
       let f, bl = $3 in
       (FProduct ($1, f), bl)
+    }
+  | LPAR bexpressionlist RPAR BMULT formula
+    {
+      let f,bl = $5 in
+      (FBProduct ($2,f), bl)
     }
   | LPAR formula RPAR {$2}
       
@@ -138,3 +152,121 @@ INT {SInt $1}
 
 param:
   PARAM INT { string_of_int $2 }
+
+bexpressionlist:
+  bexpression AND bexpressionlist
+    {
+      $1 :: $3
+    }
+  | bexpression
+    {
+      [$1]
+    }
+
+bexpression:
+  INT LEQUALS lexpression
+    {
+      BLeq ($1,$3)
+    }
+  | INT EQUALS lexpression
+    {
+      BEq ($1,$3)
+    }
+  | TRUE
+    {
+      BBool true
+    }
+  | FALSE
+    {
+      BBool false
+    }
+
+lexpression:
+  term PLUS lexpression
+    {
+       $1 :: $3
+    }
+  | term BMINUS lexpression
+    {
+      match $3 with
+      | [] -> []
+      | h :: t -> $1 :: ({coef = -h.coef; value = h.value} :: t)
+    }
+  | BMINUS term PLUS lexpression
+    {
+      let t = $2 in
+      {coef = -t.coef; value = t.value} :: $4
+    }
+  | BMINUS term BMINUS lexpression
+    {
+      let t = $2 in
+      match $4 with
+      | [] -> {coef = -t.coef; value = t.value} :: $4
+      | h :: hs -> {coef = -t.coef; value = t.value} :: ({coef = -h.coef; value = h.value} :: hs)
+    }
+  | BMINUS term
+    {
+      let t = $2 in
+      [{coef = -t.coef; value = t.value}]
+    }
+  | term
+    {
+      [$1]
+    } 
+
+// represent a term
+term:
+  INT BMULT bparam
+    {
+      {coef = $1; value = (BParam $3)}
+    }
+  | INT
+    {
+      {coef = 1; value = (BConst $1)}
+    }
+  | bparam
+    {
+      {coef = 1; value = (BParam $1)}
+    }
+
+// complete boolean expression
+//bexpression:
+//  bexpression AND bexpression
+//    {
+//      BAnd [$1;$3]
+//    }
+//  | INT LEQUALS lexpression
+//    {
+//      BLeq ($1,$3)
+//    }
+//  | INT EQUALS lexpression
+//    {
+//      BEq ($1,$3)
+//    }
+//
+//// right part of a boolean expression : the linear expression
+//lexpression:
+//  INT
+//    {
+//      BConst $1
+//    }
+//  | bparam
+//    {
+//      BParam $1
+//    }
+//  | lexpression PLUS lexpression
+//    {
+//      BPlus [$1;$3]
+//    }
+//  | lexpression BMINUS lexpression
+//    {
+//      BMinus [$1;$3]
+//    }
+//  | BMINUS lexpression
+//    {
+//      BMinus [BConst 0;$2]
+//    } 
+
+// definition of a function parameter
+bparam:
+  BPARAM INT { string_of_int $2 }

@@ -75,7 +75,7 @@ let sum loops (l1,w1) (l2,w2) =
 let rec union_mwcet w1 w2 =
   (* Basically, a point-by-point max. *)
   match w1, w2 with
-  | ([], last1), ([], last2) -> ([], Pervasives.max last1 last2)
+  | ([], last1), ([], last2) -> ([], Stdlib.max last1 last2)
   | ([], last), w | w, ([], last) ->
      if (last >= hd w) then (* last is greater than all of w1 *)
        ([], last)
@@ -133,9 +133,16 @@ let rec ktl k w =
 
 (* Each value of the result is the sum of [k] successive values of [w]. *)  
 let rec pack k w =
-  match w with
-  | ([], last) -> ([], val_sum_k_first k ([],last))
-  | (wl,_) -> insert (val_sum_k_first k w) (pack k (ktl k w))
+  (*
+   * FIX for instruction cache effect modeling, which crashes in case of loops with 0 iteration
+   * when k = 0 (iteration number = 0), thus the WCET of the loop can be and should be 0, remove the next three lines to revert
+   *)
+  if k = 0 then
+    ([], 0)
+  else
+    match w with
+    | ([], last) -> ([], val_sum_k_first k ([],last))
+    | (wl,_) -> insert (val_sum_k_first k w) (pack k (ktl k w))
 
 (** Returns the abstract wcet corresponding to a loop whose body has
    abstract WCET [(h_body,w_body)], and whose exit node has abstract

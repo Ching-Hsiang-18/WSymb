@@ -33,6 +33,7 @@
 struct evalctx_s {
 	loopinfo_t *li;
 	param_valuation_t *param_valuation;
+	bparam_valuation_t *bparam_valuation;
 	void *pv_data;
 };
 typedef struct evalctx_s evalctx_t;
@@ -49,7 +50,11 @@ void awcet_alt(evalctx_t * ctx, int source_count, formula_t * source,
 void awcet_loop(evalctx_t * ctx, awcet_t * source, formula_t * dest);
 void awcet_ann(evalctx_t * ctx, awcet_t * source, formula_t * dest);
 void awcet_intmult(evalctx_t * ctx, awcet_t * source, formula_t * dest);
+void awcet_boolmult(evalctx_t* ctx, formula_t* source, awcet_t* dest);
+void awcet_paramloop(evalctx_t* ctx, awcet_t* source, formula_t* dest);
 
+int check_condition(evalctx_t* ctx, condition_t* cdts, int condition_size);
+int compute_loop_bound(evalctx_t* ctx, condition_t* cdt);
 
 void writeC(formula_t *f, FILE *out, int indent);
 void writePWF(formula_t *f, FILE *out, long long *bounds);

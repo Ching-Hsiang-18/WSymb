@@ -2,7 +2,8 @@ open Abstract_wcet
 open Wcet_formula
 open Simplify
 open Context   
-          
+open Max_size
+
 let compile source_name contexts =
   if !Options.to_c then
     if List.length contexts <> 1 then
@@ -11,7 +12,20 @@ let compile source_name contexts =
       let ctx = List.hd contexts in
       let f' = simplify ctx.loop_hierarchy ctx.formula in
       let ctx' = new_ctx f' ctx.loop_hierarchy ctx.loop_bounds in
-      To_c.c_context source_name ctx'
+      (*let _ = Printf.printf "Max WCET size: %d\n" (compute_size f') in*)
+      if !Options.to_it then
+      	To_it.c_context source_name ctx'
+      else
+	if !Options.to_py then
+	  let out_f = if !Options.out_name = "" then
+	    Format.std_formatter
+	  else
+	    let out_ch = open_out !Options.out_name in
+            Format.formatter_of_out_channel out_ch
+	  in
+	    To_py.py_context out_f f'
+	else
+	  To_c.c_context source_name ctx'
   else
     let out_f =
     if (!Options.out_name = "") then
@@ -24,7 +38,8 @@ let compile source_name contexts =
     List.iter
       (fun ctx ->
         let f' = simplify ctx.loop_hierarchy ctx.formula in
-        Format.fprintf out_f "%a %a@."
+        (*let _ = Printf.printf "Max WCET size: %d\n" (compute_size f') in*)
+	Format.fprintf out_f "%a %a@."
           Wcet_formula.pp f'
           Loops.pp_hier ctx.loop_hierarchy
       )

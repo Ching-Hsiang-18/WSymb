@@ -1,13 +1,14 @@
-CXXFLAGS=`otawa-config otawa/display --cflags`
-CXXFLAGS+=-g
+CXXFLAGS=`otawa-config otawa/etime otawa/display --cflags`
+CXXFLAGS+=-g -Ofast -march=native
 LDFLAGS=-g
-LDLIBS=`otawa-config otawa/display --libs`
-LDLIBS2=`otawa-config otawa/display otawa/cftree --libs`
-CFLAGS=-O0 -g -Wall -W -fsanitize=address
+LDLIBS=`otawa-config otawa/etime otawa/display --libs`
+LDLIBS2=`otawa-config otawa/icat3 otawa/etime otawa/display otawa/cftree --libs`
+CFLAGS=-Ofast -march=native -g -Wall -W -fsanitize=address
 
-CXXFLAGS += -std=c++11 -O0 -g -Wall
+CXXFLAGS += -std=c++11 -g -Wall
 
-all: dumpcft pwcet/lib/libpwcet-runtime.a
+default: dumpcft pwcet/lib/libpwcet-runtime.a
+all: clean uninstall dumpcft pwcet/lib/libpwcet-runtime.a
 
 dumpcft: dumpcft.o $(HOME)/.otawa/proc/otawa/cftree.so
 	$(CXX) $(LDFLAGS) -o dumpcft dumpcft.o $(LDLIBS2)
@@ -31,5 +32,9 @@ $(HOME)/.otawa/proc/otawa/cftree.so: cftree.so
 	cp cftree.so $(HOME)/.otawa/proc/otawa/
 
 install: pwcet/lib/libpwcet-runtime.a dumpcft $(HOME)/.otawa/proc/otawa/cftree.so
+
+uninstall:
+	rm -f $(HOME)/.otawa/proc/otawa/cftree.eld
+	rm -f $(HOME)/.otawa/proc/otawa/cftree.so
 
 .PHONY: all test clean graph install

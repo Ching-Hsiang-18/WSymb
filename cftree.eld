@@ -1,4 +1,4 @@
 [elm-plugin]
 name = cftree
-author = Celestine SAUVAGE <Celestive.Sauvage.etu@univ-lille.fr>
+author = Sandro Grebant <sandro.grebant@univ-lille.fr>
 description = Control Flow Tree extractor

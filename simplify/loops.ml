@@ -71,7 +71,7 @@ let bounds_from_list l =
   let bounds = new_bounds () in
   List.iter (fun (lid,bound) ->
       let lname = lname_from_lid lid in
-      Hashtbl.add bounds lname bound) l;
+      Hashtbl.replace bounds lname bound) l;
   bounds
   
 open Format

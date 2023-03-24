@@ -20,6 +20,7 @@
  *---------------------------------------------------------------------------- *)
 
 type param = string
+type bparam = string
 (** Symbolic integer is either a constant or a symbol *)   
 type symb_int = SInt of int | SParam of param
 
