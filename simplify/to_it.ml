@@ -16,7 +16,7 @@ let wid_p = ref (-1)
 let lbid_p = ref (-1)
 
 (* A C function to measure the execution time with high precision *)
-let c_time out_f =
+(*let c_time out_f =
 	let _ = fprintf out_f "#include <time.h>\n\n"
 	and _ = fprintf out_f "enum { NS_PER_SECOND = 1000000000 };\n"
 	and _ = fprintf out_f "void sub_timespec(struct timespec t1, struct timespec t2, struct timespec *td){\n"
@@ -28,25 +28,44 @@ let c_time out_f =
 	and _ = fprintf out_f "\t}\n\telse if (td->tv_sec < 0 && td->tv_nsec > 0) {\n"
 	and _ = fprintf out_f "\t\ttd->tv_nsec -= NS_PER_SECOND;\n"
 	and _ = fprintf out_f "\t\ttd->tv_sec++;\n"
-	in fprintf out_f "\t}\n}\n\n"
+	in fprintf out_f "\t}\n}\n\n"*)
 
 (* Simple header print *)
-let c_header out_f = fprintf out_f "loopinfo_t li = {loop_hierarchy,0};\n\nlong long wcet(%s b0, %s b1, %s b2, %s b3){\n" p_type p_type p_type p_type
+let c_header out_f =
+	(* Documentation generation *)
+	fprintf out_f "/*\n";
+	fprintf out_f " * A structure needed to tell to the library which loop in inside which other loop\n";
+	fprintf out_f " */\n";
+	fprintf out_f "loopinfo_t li = {loop_hierarchy,0};";
+	(* Documentation generation *)
+	fprintf out_f "\n\n/*\n";
+	fprintf out_f " * This function computes the WCET of the procedure\n";
+	fprintf out_f " * @param b0 the first procedure argument value\n";
+	fprintf out_f " * @param b1 the second procedure argument value\n";
+	fprintf out_f " * @param b2 the third procedure argument value\n";
+	fprintf out_f " * @param b3 the fourth procedure argument value\n";
+	fprintf out_f " * @return the WCET of the procedure depending on its argument values\n";
+	fprintf out_f " */\n";
+	fprintf out_f "long long wcet(%s b0, %s b1, %s b2, %s b3){\n" p_type p_type p_type p_type
 
 (* Simple footer print *)
 let c_footer out_f =
 	let _ = fprintf out_f "\treturn w0->eta_count == 0 ? w0->others : w0->eta[0];\n}\n\n"
+	(* Documentation generation *)
+	and _ = fprintf out_f "/*\n"
+	and _ = fprintf out_f " * The main function, which calls the instantiator\n"
+	and _ = fprintf out_f " */\n"
 	and _ = fprintf out_f "int main(int argc, char** argv){\n"
-	(*and _ = fprintf out_f "\tint b0 = atoi(argv[1]);\n"
+	and _ = fprintf out_f "\tint b0 = atoi(argv[1]);\n"
 	and _ = fprintf out_f "\tint b1 = atoi(argv[2]);\n"
 	and _ = fprintf out_f "\tint b2 = atoi(argv[3]);\n"
 	and _ = fprintf out_f "\tint b3 = atoi(argv[4]);\n"
-	and _ = fprintf out_f "\tstruct timespec start, finish, delta;\n"*)
-	and _ = fprintf out_f "\t long long w;\n"
+	(*and _ = fprintf out_f "\tstruct timespec start, finish, delta;\n"*)
+	and _ = fprintf out_f "\tlong long w;\n"
 	(*and _ = fprintf out_f "\tclock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);\n"*)
 	(* Comment next line if not measuring (remove the system call duration impact) *)
 	(*and _ = fprintf out_f "\tfor(int i=0;i<1000;i++)"*)
-	(*and _ =*)in fprintf out_f "\t\tw = wcet(0, 1, 2, 3);\n}"
+	(*and _ =*)in fprintf out_f "\tw = wcet(b0, b1, b2, b3);\n\tprintf(\"WCET = %s\\n\", w);\n}" "%lld"
 	(*and _ = fprintf out_f "\tclock_gettime(CLOCK_THREAD_CPUTIME_ID, &finish);\n"
 	and _ = fprintf out_f "\tsub_timespec(start, finish, &delta);\n"
 	in fprintf out_f "\tprintf(\"WCET = %s (computed in %ss)\\n\", w, (int) delta.tv_sec, delta.tv_nsec);\n\treturn 0;\n}" "%lld" "%d.%.9ld"*)
@@ -239,6 +258,15 @@ let c_loop_inclusion out_f l1 l2 =
 
 
 let c_loop_hierarchy out_f hier =
+	(* Documentation generation *)
+	fprintf out_f "\n/*\n";
+	fprintf out_f " * This function indicates the loop hierarchy\n";
+	fprintf out_f " * For two loop indentifiers, it tells if *inner* is nested into *outer*\n";
+	fprintf out_f " * @param inner the loop that is inside outer\n";
+	fprintf out_f " * @param outer the loop that is enclosing inner\n";
+	fprintf out_f " * @return 1 if outer encloses inner, 0 otherwise\n";
+	fprintf out_f " */\n";
+	(* Code *)
 	fprintf out_f "int loop_hierarchy(int inner, int outer) {\n";
 	Hashtbl.iter (fun (l1,l2) _ -> c_loop_inclusion out_f l1 l2) hier;
 	fprintf out_f "\treturn 0;\n}\n"
@@ -252,8 +280,8 @@ let c_context source_name ctx =
   	in
   	let out_ch = open_out outname in
 	let out_f = formatter_of_out_channel out_ch in
-	fprintf out_f "#include <pwcet.h>\n";
-	c_time out_f;
+	fprintf out_f "#include <pwcet.h>\n#include <stdio.h>\n#include <stdlib.h>\n";
+	(*c_time out_f;*)
 	c_loop_hierarchy out_f ctx.loop_hierarchy;
 	fprintf out_f "@.";
 	c_formula out_f ctx.formula;
