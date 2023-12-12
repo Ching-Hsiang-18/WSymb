@@ -131,6 +131,7 @@ let const_of_prod f =
   
 (* Assumes that [List.length fl] >= 2 *)       
 let rec simplify_sum_rec loops fl =
+  (* Simplification rule on plus/annot is missing here (unsure why) *)
   match fl with
   | [] | [_] -> Utils.internal_error "simplify_sum_rec" "wrong list size"
   | [FPlus fl1; FPlus fl2] ->
