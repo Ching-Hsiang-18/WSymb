@@ -2,15 +2,16 @@
 
 WSymb: Symbolic Worst-Case Execution Time (WCET) computation.
 
-* Version 1.0.0 (for OTAWA v2), April 2020
+* Version 1.1 (for OTAWA v2), December 2023
 
 ----
 ## Authors
 
 * Clement Ballabriga <Clement.Ballabriga@nospamuniv-lille.fr>
 * Julien Forget <Julien.Forget@nospamuniv-lille.fr>
-* Celestine Sauvage <celestine.sauvage@nospamgmail.com>
 * Sandro Grebant <sandro.grebant@nospamuniv-lille.fr>
+* Giuseppe Lipari <giuseppe.lipari@nospamuniv-lille.fr>
+* Celestine Sauvage <celestine.sauvage@nospamgmail.com>
 
 License: GPL 2.1 or higher.
 
@@ -20,12 +21,12 @@ Please remove "nospam" from the email addresses.
 
 ## Introduction
 
-WSymb is a WCET analysis tool. Its main specificity is that, instead of
-a constant WCET, it computes a *WCET formula*, where symbols (or
-parameters) can correspond to various kinds of values unnkown at analysis
-time. The formula can later be *instanciated*, when parameter values are
-known. For more details on the underlying theory, check out the papers
-[1,2].
+WSymb is a WCET analysis tool. Its main specificity is that, instead
+of a constant WCET, it computes a *WCET formula*, where symbols (or
+parameters) can correspond to various kinds of values unnkown at
+analysis time. The formula can later be *instanciated*, when parameter
+values are known. For more details on the underlying theory, check out
+the papers [1,2].
 
 WSymb consists of several separate parts:
 
@@ -42,6 +43,12 @@ WSymb consists of several separate parts:
 
 * The instantiation of the WCET formula relies on an API documented in
   `pwcet/include/pwcet-tuntime.h`.
+
+* `WCET-procedure-arguments-as-parameters.md`: this file describes an
+  extension to the original analysis, which analyzes the binary code
+  of a procedure to produce a WCET formula that represents the WCET of
+  the procedure as a function of its arguments. It implements the
+  approach presented in [2].
 
 A complete example covering all these different parts is provided in
 directory `example`.
@@ -163,8 +170,11 @@ so:
 ----
 ## References
 
-[1] Ballabriga, C., Forget, J., & Lipari, G. (2018). Symbolic WCET computation. ACM Transactions on Embedded Computing Systems (TECS), 17(2), 39.
-ISO 690	
+[1] Ballabriga, C., Forget, J., Lipari, G. (2018). Symbolic WCET
+computation. ACM Transactions on Embedded Computing Systems (TECS),
+17(2), 39. https://hal.science/hal-01665076
 
-[2] https://arxiv.org/abs/1709.09369
-
+[2] Grebant S, Ballabriga C, Forget J, Lipari G. WCET analysis with
+procedure arguments as parameters. InProceedings of the 31st
+International Conference on Real-Time Networks and Systems 2023 Jun 7
+(pp. 11-22). https://hal.science/hal-04118213

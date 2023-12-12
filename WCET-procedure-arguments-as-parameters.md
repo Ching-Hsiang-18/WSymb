@@ -1,7 +1,5 @@
 # WCET analysis with procedure arguments as parameters
 
-* Version 1.0.0, November 2023
-
 ----
 
 ## Authors
@@ -27,12 +25,10 @@ arguments. It implements the approach presented in [1].
 
 Required packages:
 - WSymb, cloned from its
-  [git](https://gitlab.cristal.univ-lille.fr/otawa-plugins/polymalys)
-  branch ``input conditionals``;
+  [git](https://gitlab.cristal.univ-lille.fr/otawa-plugins/polymalys);
 - Otawa for WSymb (see instructions in the README.md of WSymb);
 - Polymalys, cloned from its
-  [git](https://gitlab.cristal.univ-lille.fr/otawa-plugins/WSymb),
-  branch ``input conditionals``;
+  [git](https://gitlab.cristal.univ-lille.fr/otawa-plugins/WSymb);
 - Otawa for Polymalys (see instructions in the README.md of Polymalys);
 - Basic compilation tools (make, gcc, g++, as well as the arm
   versions).
@@ -71,12 +67,10 @@ In the following, the required version is specified when necessary.
 
 ### Polymalys
 
-
-
 Compile Polymalys (using Otawa for Polymalys):
 
 ```shell
-./do_in.sh polymalys cd <polymalys>; make install cd tests; make poly
+./do_in.sh polymalys make -C <polymalys> install; make -C <polymalys>/tests poly
 ```
 
 ### WSymb
@@ -84,7 +78,7 @@ Compile Polymalys (using Otawa for Polymalys):
 Compile and install WSymb (using Otawa for WSymb):
 
 ```shell
-./do_in.sh wsymb cd <wsymb>; make install; cd simplify; make; cd libpwcet; make
+./do_in.sh wsymb make -C <wsymb> install; make -C <wsymb>/simplify; make -C <wsymb>/libpwcet
 ```
 
 ----
@@ -106,7 +100,7 @@ file wih Otawa (any of the two Otawa versions should produce the same
 result):
 
 ```shell
-./do_in.sh wsymb <otawa-wsymb>/bin/mkff <programme>.elf [function] > programme.elf
+./do_in.sh wsymb <otawa-wsymb>/bin/mkff <programme>.elf [function] > <programme>.ff
 ```
 
 Specifying the function is optional. If the function is not specified,
