@@ -1,4 +1,3 @@
 Authors
 --
-Julien Forget (Université de Lille)
 Sandro Grebant (Université de Lille)

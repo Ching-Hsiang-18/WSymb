@@ -37,12 +37,17 @@
 #include <otawa/flowfact/features.h>
 
 #include "include/CFTree.h"
+#include <otawa/hard/features.h>
+#include <otawa/hard/CacheConfiguration.h>
+#include <otawa/cache/cat2/features.h>
+#include <otawa/etime/features.h>
+#include <otawa/hard/Processor.h>
 
 using namespace otawa; //comme import
 using namespace otawa::cftree;
 
-
-
+#define CONDITIONS_FILE "constraints.csv"
+#define LOOP_BOUNDS_FILE "loop_bounds.csv"
 
 void fix_virtualized_loopinfo(CFG *entryCFG, Block *loop = nullptr) {
 	for (CFG::BlockIter iter(entryCFG->blocks()); iter(); iter++) {
@@ -73,6 +78,7 @@ struct param_func *read_pfl(char *binary) {
 	strncpy(filename, binary, sizeof(filename) - 4);
 	filename[sizeof(filename) - 5] = 0;
 	strcat(filename, ".pfl");
+	cout << "pfl file = " << filename << endl;
 	FILE *f = fopen(filename, "r");
 	if (f != nullptr) {
 		printf("Found PFL file, reading it\n");
@@ -94,11 +100,50 @@ struct param_func *read_pfl(char *binary) {
 		res[i].funcname = nullptr;
 		printf("End of PFL file processing\n");
 		fclose(f);
+		PFL = res;
 		return res;
 	} else return NULL;
 }
 
+void strreplace(char *string, const char *find, const char *replaceWith){
+    if(strstr(string, replaceWith) != NULL){
+        char *temporaryString = (char*) malloc(strlen(strstr(string, find) + strlen(find)) + 1);
+        strcpy(temporaryString, strstr(string, find) + strlen(find));    //Create a string with what's after the replaced part
+        *strstr(string, find) = '\0';    //Take away the part to replace and the part after it in the initial string
+        strcat(string, replaceWith);    //Concat the first part of the string with the part to replace with
+        strcat(string, temporaryString);    //Concat the first part of the string with the part after the replaced part
+        free(temporaryString);    //Free the memory to avoid memory leaks
+    }
+}
+
+// =================================================
+// Manage the timing measurements
+// =================================================
+enum { NS_PER_SECOND = 1000000000 };
+void sub_timespec(struct timespec t1, struct timespec t2, struct timespec *td)
+{
+    td->tv_nsec = t2.tv_nsec - t1.tv_nsec;
+    td->tv_sec  = t2.tv_sec - t1.tv_sec;
+    if (td->tv_sec > 0 && td->tv_nsec < 0)
+    {
+        td->tv_nsec += NS_PER_SECOND;
+        td->tv_sec--;
+    }
+    else if (td->tv_sec < 0 && td->tv_nsec > 0)
+    {
+        td->tv_nsec -= NS_PER_SECOND;
+        td->tv_sec++;
+    }
+}
+
 int main(int argc, char **argv) {
+
+	// start measurements
+	struct timespec start, finish, delta;
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+
+	try{
+
 	if ((argc < 3) || (argc > 4)) {
 		fprintf(stderr, "usage: %s <ARM binary> <formula file> [<entry fct (by default main)>]\n", argv[0]);
 		exit(1);
@@ -110,17 +155,81 @@ int main(int argc, char **argv) {
 	Manager manager;
 	
 	NO_SYSTEM(conf) = true;
-	TASK_ENTRY(conf) = "main";
-	
-	VERBOSE(conf) = false;
+	//TASK_ENTRY(conf) = "main";
+	TASK_ENTRY(conf) = (argc >= 4) ? argv[3] : "main";
+
+	// add the processor model
+#ifdef PIPELINE
+	char proc[4096];
+	strcpy(proc, argv[0]);
+	strcat(proc, "/hw/processor.xml");
+	strreplace(proc, "dumpcft", "");
+	PROCESSOR_PATH(conf) = proc; // relative path to the processor file
+	//PROCESSOR(conf) = hard::Processor::load(proc);
+#endif
+#ifdef ICACHE
+	// add a default cache (will not be used into the app, but the plugin needs it in order to manage LBlocks, or a required features will make the program crash)	
+	char result[4096];
+	strcpy(result, argv[0]);
+	strcat(result, "/hw/cache.xml");
+	strreplace(result, "dumpcft", "");
+	CACHE_CONFIG_PATH(conf) = result; // relative path to the cache file
+#endif
+	//VERBOSE(conf) = true;
 
 	ws = manager.load(argv[1], conf);
 
 	ws->require(otawa::VIRTUALIZED_CFG_FEATURE, conf);
-	
-	ws->require(DynFeature("otawa::cftree::EXTRACTED_CFT_FEATURE"), conf);
- 
+
 	const CFGCollection *coll = INVOLVED_CFGS(ws);
+
+	// set the entry of the task
+	CFG *entry = nullptr;
+	const char *entryname = (argc >= 4) ? argv[3] : "main";
+	elm::String entryname_s(entryname);
+	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
+		if (entryname_s == (*iter)->name()) {
+			entry = (*iter);
+			break;
+		}
+	}
+	if (entry == nullptr) {
+		cerr << "entry point " << entryname_s << " not found" << endl;
+		exit(1);
+	}
+
+	// push conditions on the CFG to make it easier to know if we generate ALT or CONDITIONAL_ALT
+	ConditionParser parser;
+	std::map<otawa::address_t, std::vector<std::map<bool, otawa::cftree::BranchCondition *> *> *> conditionsMap = parser.readFromFile(CONDITIONS_FILE);
+	
+	// adon to support loop headers
+	LoopBoundParser lbp;
+	std::map<int,LoopBound> lbs = lbp.readFromFile(LOOP_BOUNDS_FILE);
+
+	// needed before running CFT
+	ws->require(LOOP_HEADERS_FEATURE, conf);
+	parser.pushConditionsOnCFGs(entry, &conditionsMap, &lbs);
+	
+#ifdef ICACHE
+	ws->require(COLLECTED_LBLOCKS_FEATURE, conf);  // cache implement : retrieve L-Blocks
+	ws->require(ICACHE_CATEGORY2_FEATURE, conf);   // cache implement : retrieve Block cache type
+	ws->require(ICACHE_CONSTRAINT2_FEATURE, conf); // cache implement : retrieve miss penalty
+#endif
+	ws->require(DynFeature("otawa::cftree::EXTRACTED_CFT_FEATURE"), conf);
+
+#ifdef ICACHE
+	// set the penalty of the cache
+	int icacheMissPenalty = hard::CACHE_CONFIGURATION_FEATURE.get(ws)->instCache()->missPenalty();
+
+	// DISPLAY CACHE INFOS
+	// cout << endl << "CACHE INFORMATIONS:" << endl;
+	// cout << "\tSize: " << hard::CACHE_CONFIGURATION_FEATURE.get(ws)->instCache()->cacheSize() << endl;
+	// cout << "\tWays: " << hard::CACHE_CONFIGURATION_FEATURE.get(ws)->instCache()->wayCount() << endl << endl;
+
+	//cout << "Miss penalty of the current cache : " << icacheMissPenalty << endl;
+	BasicCacheBlock::setPenalty(icacheMissPenalty);
+#endif
+
 	StringBuffer buf;
 	buf << argv[1] << "-decomp.c";
 	elm::io::OutFileStream s(buf.toString());
@@ -139,28 +248,35 @@ int main(int argc, char **argv) {
 	}
 	
 	// produce awcet
-	CFG *entry = nullptr;
-	const char *entryname = (argc >= 4) ? argv[3] : "main";
-	elm::String entryname_s(entryname);
-	for (CFGCollection::Iter iter(*coll); iter(); iter ++) {
-		if (entryname_s == (*iter)->name()) {
-			entry = (*iter);
-			break;
-		}
-	}
-	if (entry == nullptr) {
-		cerr << "entry point " << entryname_s << " not found" << endl;
-		exit(1);
-	}
 /*	cout << "Computing WCET using IPET..." << endl; */
-	ws->require(ipet::WCET_FEATURE, conf);
-/*	cout << "WCET value using IPET: " << ipet::WCET(ws) << endl; */
-
+#ifdef PIPELINE
+	etime::RECORD_TIME(conf) = true;
+	ws->require(etime::EDGE_TIME_FEATURE, conf);
+#endif
+	// This requires to solve ILP, and thus it is not optimal, that's why we use another require
+	//ws->require(ipet::WCET_FEATURE, conf);
+	//cout << "WCET value using IPET: " << ipet::WCET(ws) << endl;
+	
+	// Instead of WCET feature, we use:
+	// LOOP_HEADERS_FEATURE so as to get the LOOP_HEADER boolean value
+	// FLOW_FACTS_FEATURE in order to get the loop bounds
+	// BB_TIME_FEATURE to get the WCET of basic blocks
+	ws->require(ipet::FLOW_FACTS_FEATURE, conf);
+	ws->require(ipet::BB_TIME_FEATURE, conf);
 /*	cout << "Exporting to AWCET..."; */
 	formula_t f;
 	memset(&f, 0, sizeof(f));
+	/* infeasible paths implement */
 	CFTREE(entry)->exportToAWCET(&f, pfl);
 /*	cout << "done." << endl; */
+
+#ifdef IP
+	if(allConstraints.size() > 0){
+		cout << "Some constraints could not be attached to a node: " ;
+		printPseudoPaths(allConstraints);
+		throw InvalidConstraintException("Error : could not attach all constraints to tree nodes");
+	}
+#endif
 	
 	int max_loop_id = 0;
 
@@ -212,5 +328,19 @@ int main(int argc, char **argv) {
 
 	fclose(pwf_file);
 	free(loop_bounds);
+
+	// avoid double free of pointers
+	finder.empty();
+
+	} catch (otawa::Exception &ex){
+		cout << "An error occured : " << ex.message() << endl;
+		cerr << "An error occured : " << ex.message() << endl;
+	}
+
+	// stop measurements
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &finish);
+	// compute analysis time
+	sub_timespec(start, finish, &delta);
+	printf("dumpcft time: %d.%.9ld\n", (int)delta.tv_sec, delta.tv_nsec);
 	
 }

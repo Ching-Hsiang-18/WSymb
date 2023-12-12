@@ -95,11 +95,24 @@ void compute_node(evalctx_t * ctx, formula_t * f)
 			printf("compute_node: processing CONST node\n");
 #endif
 			break;
+		case KIND_BOOLMULT:
 #ifdef DEBUG
+			printf("compute_node: processing BOOLMULT node\n");
+#endif
+			awcet_boolmult(ctx, f, &f->aw);
+			break;
+		case KIND_PARAM_LOOP:
+#ifdef DEBUG
+			printf("compute_node: processing PARAM_LOOP node\n");
+#endif
+			compute_node(ctx, &f->children[0]);
+			awcet_paramloop(ctx, &f->children->aw, f);
+			break;
+//#ifdef DEBUG
 		default:
 			printf("compute_node: unknown node type %d\n", f->kind);
-			abort();
-#endif
+			exit(1);;
+//#endif
 	}
 #ifdef DEBUG
 	printf("compute_node: loop=%d, eta[]={", f->aw.loop_id);
@@ -246,6 +259,55 @@ void awcet_loop(evalctx_t * ctx, awcet_t * source, formula_t * dest)
 
 	}
 }
+
+void awcet_paramloop(evalctx_t * ctx, awcet_t * source, formula_t * dest)
+{
+	int i, j;
+	int bound = compute_loop_bound(ctx, dest->condition);
+	long long loop_wcet = 0;
+
+#ifdef DEBUG
+	printf("Computed loop bound: %d\n", bound);
+#endif
+
+	// same as a regular loop
+	if (bound == 0) {
+		dest->aw.loop_id = LOOP_TOP;
+		dest->aw.eta_count = 0;
+		dest->aw.eta = NULL;
+		dest->aw.others = 0;
+		return;
+	}
+	if (source->loop_id == dest->opdata.loop_id) {
+		for (i = 0; (i < bound) && (i < source->eta_count); i++)
+			loop_wcet += source->eta[i];
+		if (i < bound)
+			loop_wcet += (bound - i) * source->others;
+		dest->aw.others = loop_wcet;
+		dest->aw.eta_count = 0;
+		dest->aw.loop_id = LOOP_TOP;
+	} else {
+		dest->aw.loop_id = source->loop_id;
+		dest->aw.eta_count = source->eta_count / bound;
+		dest->aw.others = source->others * bound;
+		if (source->eta_count % bound)
+			dest->aw.eta_count++;
+		// should correct problem crash when eta_count > 0
+		dest->aw.eta = (long long int*) malloc(dest->aw.eta_count * sizeof(long long));
+		for (i = 0; i < dest->aw.eta_count; i++) {
+			loop_wcet = 0;
+			for (j = 0; j < bound; j++) {
+				if ((j + i * bound) < source->eta_count) {
+					loop_wcet += source->eta[j + i * bound];
+				} else
+					loop_wcet += source->others;
+			}
+			dest->aw.eta[i] = loop_wcet;
+		}
+
+	}
+}
+
 void awcet_intmult(evalctx_t * ctx, awcet_t * source, formula_t * dest)
 {
 	int i;
@@ -254,6 +316,104 @@ void awcet_intmult(evalctx_t * ctx, awcet_t * source, formula_t * dest)
 		dest->aw.eta[i] = source->eta[i] * dest->opdata.coef;
 	}
 	dest->aw.others = source->others * dest->opdata.coef;	
+}
+
+/**
+ * Check the condition to execute the tree
+ * @param cdt the condition list
+ * @param condition_size the number of conditions to check
+ */
+int check_condition(evalctx_t* ctx, condition_t* cdts, int condition_size){
+	for(int i = 0; i < condition_size; i++){
+		condition_t* cdt = cdts+i;
+		const int left = cdt->int_value;
+		int right = 0;
+		const int terms_size = cdt->terms_number;
+		term_t* terms = cdt->terms;
+		for(int j = 0; j < terms_size; j++){
+			term_t* term = terms+j;
+			int value = term->value;
+			int coef = term->coef;
+			// if parameter we get the parameter value
+			if(term->kind == BOOL_PARAM){
+				value = ctx->bparam_valuation(term->value);
+			}
+			right += coef*value;
+		}
+		// compare right and left values
+		switch(cdt->kind){
+			case BOOL_LEQ:
+#ifdef DEBUG
+				printf("Checking that %d <= %d\n", left, right);
+#endif
+				if(!(left <= right))
+					return 0;
+				break;
+			case BOOL_EQ:
+#ifdef DEBUG
+				printf("Checking that %d == %d\n", left, right);
+#endif
+				if(!(left == right))
+					return 0;
+				break;
+			default:
+				printf("Error, unrecognized bool condition type: %d", cdt->kind);
+				exit(1);
+		}
+	} 
+	// all conditionals are checked as true
+	return 1;
+}
+
+int compute_loop_bound(evalctx_t* ctx, condition_t* cdt){
+	// Should only be called in the case of a parametric loop bound
+	if(cdt->kind != BOOL_BOUND){
+		printf("Error, compute_loop_bound called without BOOL_BOUND kind");
+		exit(1);
+	}
+	// compute the bound
+	int bound = 0;
+	for(int i=0;i<cdt->terms_number;i++){
+		term_t* term = cdt->terms + i;
+		int value = term->value;
+		int coef = term->coef;
+		if(term->kind == BOOL_PARAM)
+			value = ctx->bparam_valuation(value);
+		bound += coef * value;
+	}
+	bound = bound < 0 ? 0 : bound; // a loop bound cannot be < 0, but the evaluation of the expression can
+	return bound;
+}
+
+void awcet_boolmult(evalctx_t* ctx, formula_t* source, awcet_t* dest){
+	// source = boolmult formula
+	// dest = WCET
+	// processing condition, [0] always represent the condition and [1] the WCET formula
+	if(source->children[0].kind != BOOL_CONDITIONS){
+		printf("Error : Boolmult first child not a boolean condition but of type: %d", source->children[0].kind);
+		exit(1);
+	}
+	condition_t* cdts = source->children[0].condition;
+	int condition_size = source->children[0].opdata.children_count;
+	int result = check_condition(ctx, cdts, condition_size);
+	// if condition is true then WCET of formula
+	if(result == 1){
+		formula_t fchild = source->children[1];
+		compute_node(ctx, &fchild);
+		// copy child formula WCET
+		dest->eta_count = fchild.aw.eta_count;
+		dest->eta = fchild.aw.eta;
+		dest->others = fchild.aw.others;
+		dest->loop_id = fchild.aw.loop_id;
+	}
+	// else theta
+	else{
+		// bot WCET == {0}
+		dest->eta_count = 0;
+		dest->eta = NULL;
+		dest->others = 0;
+		dest->loop_id = LOOP_TOP;
+	}
 }
 
 void awcet_ann(evalctx_t * ctx, awcet_t * source, formula_t * dest)
@@ -317,11 +477,12 @@ int awcet_is_equal(awcet_t * s1, awcet_t * s2)
 
 }
 
-long long evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, void *data)
+long long evaluate(formula_t *f, loopinfo_t *li, param_valuation_t pv, bparam_valuation_t bpv, void *data)
 {
 	evalctx_t ctx;
 	ctx.li = li;
 	ctx.param_valuation = pv;
+	ctx.bparam_valuation = bpv;
 	ctx.pv_data = data;
 	compute_node(&ctx, f);
 	if (f->aw.eta_count == 0) {
@@ -368,6 +529,8 @@ void compute_eta_count(formula_t *f) {
 			break;
 		case KIND_CONST:
 			break;
+		default:
+			printf("error : unrecognized formula kind (compute_eta_count) : %d\n", f->kind);
 	}
 }
 
@@ -406,7 +569,7 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 				fprintf(out, "__top;{0}");
 			fprintf(out, ")");
 			break;
-		case KIND_LOOP: 
+		case KIND_LOOP:
 			{
 				fprintf(out, "(");
 				writePWF(f->children, out, bounds);
@@ -414,10 +577,16 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 				if (bound < 0) {
 					fprintf(stderr, "warning: loop %d is unbounded\n", f->opdata.loop_id);
 				}
-				if (f->param_id) {
-					fprintf(out, ", (__top;{0}), l:%d)^p:%d", f->opdata.loop_id, f->param_id);
-				} else {
-					fprintf(out, ", (__top;{0}), l:%d)^%lld", f->opdata.loop_id, bound);
+
+				if(strcmp(f->bool_expr, "-1") != 0){ // parametric loop
+					fprintf(out, ", (__top;{0}), l:%d)^(%s)", f->opdata.loop_id, f->bool_expr);
+				}
+				else { // non parametric
+					if (f->param_id) {
+						fprintf(out, ", (__top;{0}), l:%d)^p:%d", f->opdata.loop_id, f->param_id);
+					} else {
+						fprintf(out, ", (__top;{0}), l:%d)^%lld", f->opdata.loop_id, bound);
+					}
 				}
 			}
 			break;
@@ -427,6 +596,19 @@ void writePWF(formula_t *f, FILE *out, long long *bounds) {
 			writePWF(f->children, out, bounds);
 			fprintf(out, "|(l:%d,%d))", f->opdata.ann.loop_id, f->opdata.ann.count);
 			break;
+
+		case KIND_BOOLMULT:
+			fprintf(out, "(");
+			writePWF(f->children, out, bounds);
+			fprintf(out, " * ");
+			writePWF(f->children+1, out, bounds);
+			fprintf(out, ")");
+			break;
+		case KIND_STR:
+			fprintf(out, "(%s)",f->bool_expr);
+			break;
+		default:
+			printf("error : unrecognized formula kind (writePWF) : %d\n", f->kind);
 	}
 }
 

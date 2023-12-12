@@ -2,6 +2,8 @@
 **/*.o
 **/*.so
 **/dumpcft
-**/libpwcet-runtime.a
+**/*.a
 **/_build
 **/swymplify
+**/*.out
+libpwcet/test

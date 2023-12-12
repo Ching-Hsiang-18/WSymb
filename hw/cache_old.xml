@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE processor SYSTEM "/home/casse/otawa/otawa/data/dtd/cache.dtd">
+<cache-config>
+	<icache>
+		<block_bits>4</block_bits>
+		<row_bits>1</row_bits>
+		<way_bits>2</way_bits>
+		<replace>LRU</replace>
+	</icache>
+</cache-config>

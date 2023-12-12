@@ -131,9 +131,16 @@ let rec ktl k w =
 
 (* Each value of the result is the sum of [k] successive values of [w]. *)  
 let rec pack k w =
-  match w with
-  | ([], last) -> ([], val_sum_k_first k ([],last))
-  | (wl,_) -> insert (val_sum_k_first k w) (pack k (ktl k w))
+  (*
+   * FIX for instruction cache effect modeling, which crashes in case of loops with 0 iteration
+   * when k = 0 (iteration number = 0), thus the WCET of the loop can be and should be 0, remove the next three lines to revert
+   *)
+  if k = 0 then
+    ([], 0)
+  else
+    match w with
+    | ([], last) -> ([], val_sum_k_first k ([],last))
+    | (wl,_) -> insert (val_sum_k_first k w) (pack k (ktl k w))
 
 (** Returns the abstract wcet corresponding to a loop whose body has
    abstract WCET [(h_body,w_body)], and whose exit node has abstract

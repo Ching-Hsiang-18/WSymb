@@ -10,6 +10,7 @@ WSymb: Symbolic Worst-Case Execution Time (WCET) computation.
 * Clement Ballabriga <Clement.Ballabriga@nospamuniv-lille.fr>
 * Julien Forget <Julien.Forget@nospamuniv-lille.fr>
 * Celestine Sauvage <celestine.sauvage@nospamgmail.com>
+* Sandro Grebant <sandro.grebant@nospamuniv-lille.fr>
 
 License: GPL 2.1 or higher.
 
